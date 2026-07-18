@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# playwright / mcp scratch
+/.playwright-mcp/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -39,3 +42,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Fuentes originales del hero (Nano Banana): pesadas; se versionan los .webp derivados
+/public/images/hero/_src/*
+!/public/images/hero/_src/.gitkeep
