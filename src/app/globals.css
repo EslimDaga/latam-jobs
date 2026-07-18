@@ -1,26 +1,371 @@
 @import "tailwindcss";
 
+/* ── LATAM Sans — official LATAM Airlines brand typeface (self-hosted) ─────── */
+@font-face {
+  font-family: "Latam Sans";
+  src: url("/fonts/latam_sans_light-webfont.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Latam Sans";
+  src: url("/fonts/latam_sans_regular-webfont.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Latam Sans";
+  src: url("/fonts/latam_sans_bold-webfont.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Latam Sans";
+  src: url("/fonts/latam_sans_bold_italic-webfont.woff") format("woff");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #12103a;
+
+  /* Paleta LATAM — hex oficiales de marca (índigo #10004f, rojo #e8114b). Las
+     variantes se derivan de esos dos para sombras y estados hover. */
+  --latam-indigo: #10004f;
+  --latam-indigo-deep: #0a0033;
+  --latam-indigo-soft: #1c0a6b;
+  --latam-red: #e8114b;
+  --latam-red-deep: #c50d3f;
+  --latam-pink: #e6007e;
+
+  /* Escala neutra de la UI de formularios: gris puro, sin tinte de marca, para
+     que el índigo LATAM quede reservado a lo que de verdad es acción. */
+  --neutral-900: #1f2124;
+  --neutral-600: #616a75;
+  --neutral-500: #87909b;
+  --neutral-400: #abb1ba;
+  --neutral-200: #dde0e4;
+  --neutral-100: #ebecef;
+  --neutral-50: #f7f7f7;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-indigo-latam: var(--latam-indigo);
+  --color-indigo-latam-deep: var(--latam-indigo-deep);
+  --color-indigo-latam-soft: var(--latam-indigo-soft);
+  --color-red-latam: var(--latam-red);
+  --color-red-latam-deep: var(--latam-red-deep);
+  --color-pink-latam: var(--latam-pink);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-ink: var(--neutral-900);
+  --color-ink-soft: var(--neutral-600);
+  --color-ink-muted: var(--neutral-500);
+  --color-ink-faint: var(--neutral-400);
+  --color-line: var(--neutral-100);
+  --color-line-strong: var(--neutral-200);
+  --color-surface: var(--neutral-50);
+
+  /* Curvas compartidas: `enter` para entradas y hover con transform, `move`
+     para desplazamientos. Nada de ease-in, que arrastra en UI. */
+  --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-move: cubic-bezier(0.25, 1, 0.5, 1);
+
+  --font-sans: "Latam Sans", var(--font-manrope), "Segoe UI", sans-serif;
+  --font-mono: var(--font-martian);
+  --font-display: var(--font-bricolage), "Latam Sans", sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Latam Sans", var(--font-manrope), "Segoe UI", sans-serif;
+}
+
+/* ── Parallax ───────────────────────────────────────────────────────────────
+   `--scroll-p` (0 → 1) lo escribe useScrollProgress dentro del rAF de Lenis. */
+
+.parallax-back {
+  transform: translate3d(0, calc(var(--scroll-p, 0) * 30vh), 0)
+    scale(calc(1 + var(--scroll-p, 0) * 0.14));
+  will-change: transform;
+}
+
+/* El hero queda anclado, así que el contenido no huye: sólo retrocede un poco
+   mientras el panel de vacantes lo va tapando. */
+.parallax-front {
+  transform: scale(calc(1 - var(--scroll-p, 0) * 0.07));
+  opacity: calc(1 - var(--scroll-p, 0) * 0.55);
+  will-change: transform, opacity;
+}
+
+/* ── Popovers ───────────────────────────────────────────────────────────────
+   `@starting-style` anima la entrada del propio montaje en el DOM, sin estado
+   extra en React. El origen va arriba para que el panel brote del disparador
+   y no del centro de la nada. La salida no se anima: el panel se desmonta al
+   instante, que es lo que se espera al cerrar. */
+.ui-popover {
+  transform-origin: top center;
+  transition:
+    opacity 180ms var(--ease-enter),
+    transform 180ms var(--ease-enter);
+  opacity: 1;
+  transform: scale(1);
+}
+
+@starting-style {
+  .ui-popover {
+    opacity: 0;
+    transform: scale(0.96) translateY(-0.25rem);
+  }
+}
+
+/* ── Entrada escalonada de listas ───────────────────────────────────────────
+   El retardo se topa a los 6 primeros elementos para que el barrido total no
+   pase de ~240ms por muchas tarjetas que haya. Va dentro de `no-preference`
+   a propósito: con motion reducido la duración cae a 0.01ms pero el retardo
+   seguiría, y `both` dejaría las tarjetas invisibles hasta que le tocara a
+   cada una. */
+@media (prefers-reduced-motion: no-preference) {
+  .list-enter {
+    animation: list-enter 260ms var(--ease-enter) both;
+    animation-delay: calc(min(var(--i, 0), 6) * 40ms);
+  }
+}
+
+@keyframes list-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+/* ── Split-flap display ─────────────────────────────────────────────────────
+   Cada celda es una hoja partida: dos mitades estáticas (el carácter que
+   llega arriba, el que se va abajo) y dos mitades en vuelo que caen sobre
+   ellas. Al terminar, `animation-fill-mode: both` deja la hoja entrante
+   posada sobre la saliente, así que el estado final ya es el correcto. */
+
+/* El ancho de celda se deriva del número de columnas: n celdas + (n-1) huecos
+   + padding suman ~(1.13n + 0.52) anchos, así que el tablero ocupa ~90vw sea
+   cual sea el texto, y nunca desborda. El tope evita que se desmadre en
+   pantallas anchas. */
+.sf-board {
+  --sf-w: min(calc(90vw / (var(--sf-cols, 21) * 1.13 + 0.52)), 3.2rem);
+  --sf-gap: calc(var(--sf-w) * 0.13);
+  --sf-h: calc(var(--sf-w) * 1.62);
+  --sf-stack: calc(var(--sf-h) * 0.13);
+  --sf-fh: calc(var(--sf-h) - var(--sf-stack));
+  --sf-flip: 26ms;
+}
+
+/* Ancho natural y centrado por margen: así el `display` de .sf-board queda
+   libre para las utilidades hidden/lg:block que alternan las dos versiones. */
+.sf-panel {
+  display: flex;
+  width: fit-content;
+  margin-inline: auto;
+  flex-direction: column;
+  gap: var(--sf-gap);
+  padding: calc(var(--sf-gap) * 2.5);
+  border-radius: calc(var(--sf-w) * 0.3);
+  background: #ffffff;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 2.5rem 5rem -1.5rem rgba(4, 0, 30, 0.6);
+}
+
+.sf-row {
+  display: flex;
+  gap: var(--sf-gap);
+}
+
+.sf-cell {
+  position: relative;
+  width: var(--sf-w);
+  height: var(--sf-h);
+  flex: none;
+  border-radius: calc(var(--sf-w) * 0.14);
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-weight: 400;
+  font-size: calc(var(--sf-fh) * 0.56);
+  color: var(--latam-indigo);
+  overflow: hidden;
+}
+
+/* Tablero y celdas son el mismo blanco puro: la rejilla la dibuja este filete,
+   no un cambio de color. Va por encima de las hojas porque, si no, las caras
+   (también blancas) lo taparían y la celda perdería su contorno. */
+.sf-cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+}
+
+/* Pila de hojas en reposo, visible por debajo de la que está en uso. */
+.sf-cell::after {
+  content: "";
+  position: absolute;
+  inset: auto 12% 8% 12%;
+  height: calc(var(--sf-stack) * 0.55);
+  background: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 2px);
+  border-radius: 1px;
+}
+
+.sf-cell--blank::after {
+  content: none;
+}
+
+/* Las esquinas barren un gradiente ancho desplazando su background-position:
+   una sola animación interpola limpiamente entre cuatro colores. Dura lo mismo
+   que el tablero en asentarse (`--sf-settle`), así que van del rojo en pleno
+   vuelo al verde justo cuando cae la última hoja, como un tablero real. */
+/* `step-end` hace que el color salte de un valor plano al siguiente en vez de
+   interpolar: cuatro colores fijos, sin degradado. El ciclo dura lo que tarda
+   el tablero en asentarse, así que aterriza en verde con la última hoja. */
+.sf-cell--accent {
+  background-image: linear-gradient(
+    180deg,
+    transparent calc(50% - 1px),
+    rgba(0, 0, 0, 0.35) calc(50% - 1px),
+    rgba(0, 0, 0, 0.35) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+  animation: sf-accent-steps var(--sf-settle, 3s) step-end both;
+}
+
+@keyframes sf-accent-steps {
+  0% {
+    background-color: var(--latam-red);
+  }
+  25% {
+    background-color: var(--latam-pink);
+  }
+  50% {
+    background-color: #f59e0b;
+  }
+  75% {
+    background-color: #0ea5e9;
+  }
+  100% {
+    background-color: #22c55e;
+  }
+}
+
+.sf-row--marker .sf-cell {
+  height: calc(var(--sf-h) * 0.5);
+}
+
+.sf-flap {
+  position: absolute;
+  inset: 0 0 var(--sf-stack) 0;
+  perspective: calc(var(--sf-h) * 4);
+}
+
+/* Bisagra: la línea que parte la hoja por la mitad. */
+.sf-flap::after {
+  content: "";
+  position: absolute;
+  inset: calc(50% - 1px) 0 auto 0;
+  height: 2px;
+  background: rgba(0, 0, 0, 0.16);
+  z-index: 6;
+}
+
+.sf-face {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  backface-visibility: hidden;
+  border-radius: calc(var(--sf-w) * 0.13);
+}
+
+.sf-face > span {
+  display: block;
+  height: var(--sf-fh);
+  line-height: var(--sf-fh);
+}
+
+.sf-face--top {
+  top: 0;
+  z-index: 1;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background: #ffffff;
+}
+
+.sf-face--bottom {
+  bottom: 0;
+  z-index: 2;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  background: #ffffff;
+}
+
+.sf-face--bottom > span {
+  margin-top: calc(var(--sf-fh) / -2);
+}
+
+/* Hoja blanca cayendo sobre fondo blanco: sin esta sombra el pliegue no se
+   vería, sólo el glifo saltando. */
+.sf-face--fold-out {
+  z-index: 5;
+  transform-origin: 50% 100%;
+  box-shadow: 0 0.12em 0.35em rgba(0, 0, 0, 0.22);
+  animation: sf-fold-out var(--sf-flip) cubic-bezier(0.4, 0, 0.9, 0.5) both;
+}
+
+.sf-face--fold-in {
+  z-index: 4;
+  transform-origin: 50% 0%;
+  animation: sf-fold-in var(--sf-flip) cubic-bezier(0.1, 0.5, 0.4, 1) var(--sf-flip) both;
+}
+
+@keyframes sf-fold-out {
+  from {
+    transform: rotateX(0deg);
+  }
+  to {
+    transform: rotateX(-90deg);
+  }
+}
+
+@keyframes sf-fold-in {
+  from {
+    transform: rotateX(90deg);
+  }
+  to {
+    transform: rotateX(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .parallax-back,
+  .parallax-front {
+    transform: none;
+    opacity: 1;
+  }
 }
