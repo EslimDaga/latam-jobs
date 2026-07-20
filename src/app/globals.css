@@ -157,7 +157,7 @@ body {
    cual sea el texto, y nunca desborda. El tope evita que se desmadre en
    pantallas anchas. */
 .sf-board {
-  --sf-w: min(calc(90vw / (var(--sf-cols, 21) * 1.13 + 0.52)), 3.2rem);
+  --sf-w: min(calc(95vw / (var(--sf-cols, 21) * 1.13 + 0.52)), 4.6rem);
   --sf-gap: calc(var(--sf-w) * 0.13);
   --sf-h: calc(var(--sf-w) * 1.62);
   --sf-stack: calc(var(--sf-h) * 0.13);
@@ -175,10 +175,13 @@ body {
   gap: var(--sf-gap);
   padding: calc(var(--sf-gap) * 2.5);
   border-radius: calc(var(--sf-w) * 0.3);
-  background: #ffffff;
+  /* Carcasa del tablero: negro de aeropuerto, no blanco, para clavar el look
+     Solari/Vestaboard de Image #1. Doble filete (luz arriba, sombra dentro). */
+  background: linear-gradient(180deg, #16161b 0%, #0c0c10 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.06),
-    0 2.5rem 5rem -1.5rem rgba(4, 0, 30, 0.6);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 2.5rem 5rem -1.5rem rgba(0, 0, 0, 0.8);
 }
 
 .sf-row {
@@ -192,12 +195,12 @@ body {
   height: var(--sf-h);
   flex: none;
   border-radius: calc(var(--sf-w) * 0.14);
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+  background: #1b1b21;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
   font-family: var(--font-martian), ui-monospace, monospace;
   font-weight: 400;
   font-size: calc(var(--sf-fh) * 0.56);
-  color: var(--latam-indigo);
+  color: #f4f4f5;
   overflow: hidden;
 }
 
@@ -210,7 +213,7 @@ body {
   inset: 0;
   z-index: 7;
   border-radius: inherit;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
   pointer-events: none;
 }
 
@@ -220,7 +223,7 @@ body {
   position: absolute;
   inset: auto 12% 8% 12%;
   height: calc(var(--sf-stack) * 0.55);
-  background: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 2px);
+  background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0 1px, transparent 1px 2px);
   border-radius: 1px;
 }
 
@@ -280,7 +283,7 @@ body {
   position: absolute;
   inset: calc(50% - 1px) 0 auto 0;
   height: 2px;
-  background: rgba(0, 0, 0, 0.16);
+  background: rgba(0, 0, 0, 0.55);
   z-index: 6;
 }
 
@@ -307,7 +310,7 @@ body {
   z-index: 1;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  background: #ffffff;
+  background: #1b1b21;
 }
 
 .sf-face--bottom {
@@ -315,7 +318,7 @@ body {
   z-index: 2;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
-  background: #ffffff;
+  background: #1b1b21;
 }
 
 .sf-face--bottom > span {
@@ -327,7 +330,7 @@ body {
 .sf-face--fold-out {
   z-index: 5;
   transform-origin: 50% 100%;
-  box-shadow: 0 0.12em 0.35em rgba(0, 0, 0, 0.22);
+  box-shadow: 0 0.14em 0.4em rgba(0, 0, 0, 0.55);
   animation: sf-fold-out var(--sf-flip) cubic-bezier(0.4, 0, 0.9, 0.5) both;
 }
 
@@ -368,4 +371,41 @@ body {
     transform: none;
     opacity: 1;
   }
+}
+
+/* ── Infinite Marquee loop animations for FramerLoopGallery ── */
+@keyframes marquee-up {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+@keyframes marquee-down {
+  0% { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes marquee-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.animate-marquee-up {
+  animation: marquee-up 35s linear infinite;
+}
+
+.animate-marquee-down {
+  animation: marquee-down 35s linear infinite;
+}
+
+.animate-marquee-left {
+  animation: marquee-left 45s linear infinite;
+}
+
+.animate-marquee-right {
+  animation: marquee-right 45s linear infinite;
 }

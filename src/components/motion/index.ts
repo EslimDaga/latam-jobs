@@ -10,6 +10,8 @@ export { MagneticButton } from "./MagneticButton";
 export { HoverLink, type HoverLinkProps } from "./HoverLink";
 export { StickyCta, type StickyCtaProps } from "./StickyCta";
 export { Preloader, type PreloaderProps } from "./Preloader";
+export { CurtainLoader } from "./CurtainLoader";
+export { type CurtainLoaderProps } from "./CurtainLoader.types";
 
 export {
   EASE_ENTER,

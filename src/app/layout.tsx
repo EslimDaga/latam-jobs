@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Manrope, Martian_Mono } from "next/font/google";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
+import { CurtainLoader } from "@/components/motion/CurtainLoader";
 import "lenis/dist/lenis.css";
 import "./globals.css";
 
@@ -38,7 +39,10 @@ export default function RootLayout({
   return (
     <html lang="es-PE" className={`${manrope.variable} ${martianMono.variable} ${bricolage.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
-        <SmoothScroll>{children}</SmoothScroll>
+        <SmoothScroll>
+          <CurtainLoader />
+          {children}
+        </SmoothScroll>
       </body>
     </html>
   );

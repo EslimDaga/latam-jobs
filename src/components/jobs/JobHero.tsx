@@ -1,15 +1,25 @@
 "use client";
 
-import { AirplaneTiltIcon, CaretDownIcon } from "@phosphor-icons/react";
+import {
+  AirplaneTiltIcon,
+  CaretDoubleDownIcon,
+  MagnifyingGlass,
+  MapPin,
+  Briefcase,
+  CaretDown,
+  PaperPlaneTilt,
+  List,
+  Globe,
+} from "@phosphor-icons/react";
 import {
   motion,
+  type MotionValue,
   useMotionValue,
   useReducedMotion,
   useTransform,
-  type MotionValue,
 } from "framer-motion";
 import { useLenis } from "lenis/react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { HoverLink } from "@/components/motion/HoverLink";
 import { RevealText } from "@/components/motion/RevealText";
 
@@ -17,6 +27,9 @@ import { RevealText } from "@/components/motion/RevealText";
  * Types
  * ──────────────────────────────────────────────────────────────────────────── */
 
+interface JobHeroProps {
+  totalJobs?: number;
+}
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Constants
@@ -24,162 +37,57 @@ import { RevealText } from "@/components/motion/RevealText";
 
 const NAV_LINKS = [
   { label: "Vacantes", href: "#vacantes" },
-  { label: "Beneficios", href: "#descubre" },
+  { label: "Beneficios", href: "#beneficios" },
   { label: "Cultura", href: "#cultura" },
   { label: "Nosotros", href: "#nosotros" },
 ] as const;
 
-/* Shared entrance easing (see ui-animation: "Enter" curve). */
-const ENTER = [0.22, 1, 0.36, 1] as const;
+/* ── "Nuestro propósito" — scroll-linked word reveal (gray → color) ──────── */
+const PROPOSITO_LINES: readonly { words: readonly string[]; color: string }[] = [
+  { words: ["Volar", "es", "solo", "el", "comienzo."], color: "#10004f" },
+  { words: ["Tu", "talento", "conecta", "personas,", "mueve", "negocios", "y"], color: "#10004f" },
+  { words: ["eleva", "el", "futuro", "de", "la", "región."], color: "#8a8a99" },
+];
+const PROPOSITO_TOTAL = PROPOSITO_LINES.reduce((n, l) => n + l.words.length, 0);
+const REVEAL_START = 0.58;
+const REVEAL_END = 0.96;
+const REVEAL_DUR = 0.13;
+const REVEAL_STEP = (REVEAL_END - REVEAL_START - REVEAL_DUR) / (PROPOSITO_TOTAL - 1);
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Scroll-down control — clickable, and its ring fills with scroll progress.
- * ──────────────────────────────────────────────────────────────────────────── */
-
-const RING_R = 21;
-const RING_C = 2 * Math.PI * RING_R;
-
-function ScrollProgressButton({
+/** One word of the purpose statement, its color/opacity driven by scroll. */
+function ScrollWord({
   progress,
-  reduced,
-  onClick,
-}: {
-  progress: MotionValue<number>;
-  reduced: boolean | null;
-  onClick: () => void;
-}): React.JSX.Element {
-  // Ring fills as the hero scroll progresses (0 → 1).
-  const dashOffset = useTransform(progress, (p) => RING_C * (1 - p));
-  // Colour glides from white (cabin phase) to deep indigo (over the clouds),
-  // so it stays legible on both backgrounds without ever darkening the sky.
-  const stroke = "#ffffff";
-  const track = "rgba(255, 255, 255, 0.4)";
-  // Fade the cue out as we reach the end, so it never collides with the white
-  // section rising over the clouds.
-  const fadeOut = useTransform(progress, [0.88, 0.98], [1, 0]);
-
-  return (
-    <motion.div
-      className="pointer-events-none absolute bottom-14 left-1/2 z-20 hidden -translate-x-1/2 sm:block"
-      style={{ opacity: fadeOut }}
-    >
-      <motion.button
-        type="button"
-        onClick={onClick}
-        aria-label="Ir a la siguiente sección"
-        className="pointer-events-auto flex cursor-pointer flex-col items-center gap-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-red-latam"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.6, ease: ENTER }}
-        whileHover={reduced ? undefined : { y: -2 }}
-      >
-        <span className="relative grid h-12 w-12 place-items-center">
-          <svg viewBox="0 0 48 48" className="h-12 w-12 -rotate-90">
-            <motion.circle
-              cx="24"
-              cy="24"
-              r={RING_R}
-              fill="none"
-              strokeWidth="2.5"
-              style={{ stroke: track }}
-            />
-            <motion.circle
-              cx="24"
-              cy="24"
-              r={RING_R}
-              fill="none"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeDasharray={RING_C}
-              style={{ stroke, strokeDashoffset: dashOffset }}
-            />
-          </svg>
-          <motion.span
-            className="absolute"
-            style={{ color: stroke }}
-            animate={reduced ? undefined : { y: [0, 4, 0] }}
-            transition={{ duration: 1.6, ease: "easeInOut", repeat: Infinity }}
-          >
-            <CaretDownIcon weight="bold" className="h-4 w-4" />
-          </motion.span>
-        </span>
-      </motion.button>
-    </motion.div>
-  );
-}
-
-/* ────────────────────────────────────────────────────────────────────────────
- * Scroll-linked word reveal — each word fills from faint to solid indigo as
- * the hero is scrolled, left to right (the "color reveal on scroll" effect).
- * ──────────────────────────────────────────────────────────────────────────── */
-
-const WORD_DIM = "rgba(255, 255, 255, 0.28)";
-const WORD_LIT = "rgba(255, 255, 255, 1)";
-
-function RevealWord({
-  progress,
-  word,
   start,
-  end,
+  to,
+  reduced,
+  children,
 }: {
   progress: MotionValue<number>;
-  word: string;
   start: number;
-  end: number;
+  to: string;
+  reduced: boolean;
+  children: React.ReactNode;
 }): React.JSX.Element {
-  const color = useTransform(progress, [start, end], [WORD_DIM, WORD_LIT]);
-  const opacity = useTransform(progress, [start, end], [0.55, 1]);
+  const end = Math.min(start + REVEAL_DUR, 0.99);
+  const color = useTransform(progress, [start, end], ["#cbd0dc", to]);
+  const opacity = useTransform(progress, [start, end], [0.35, 1]);
+  if (reduced) return <span style={{ color: to }}>{children} </span>;
   return (
-    <motion.span
-      aria-hidden
-      className="mr-[0.25em] inline-block"
-      style={{ color, opacity }}
-    >
-      {word}
+    <motion.span style={{ color, opacity }} className="inline">
+      {children}{" "}
     </motion.span>
   );
 }
 
-function ScrollWordReveal({
-  progress,
-  text,
-  start,
-  end,
-  className,
-}: {
-  progress: MotionValue<number>;
-  text: string;
-  start: number;
-  end: number;
-  className?: string;
-}): React.JSX.Element {
-  const words = text.split(" ");
-  const span = end - start;
-  const step = span / words.length;
-  return (
-    <h2 className={className} aria-label={text}>
-      {words.map((w, i) => {
-        const a = start + i * step;
-        const b = Math.min(end, a + step * 2.4); // overlap → smoother sweep
-        return (
-          <RevealWord key={`${w}-${i}`} progress={progress} word={w} start={a} end={b} />
-        );
-      })}
-    </h2>
-  );
-}
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Hero
- * ──────────────────────────────────────────────────────────────────────────── */
-
-export function JobHero(): React.JSX.Element {
+export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
+  const [menuOpen, setMenuOpen] = useState(false);
   const reduced = useReducedMotion();
   const trackRef = useRef<HTMLElement>(null);
   const progress = useMotionValue(0);
 
   /* ── Scroll Progress via Lenis ────────────────────────────────────────── */
-  const lenis = useLenis(() => {
+  useLenis(() => {
     if (reduced) return;
     const el = trackRef.current;
     if (el === null) return;
@@ -189,240 +97,433 @@ export function JobHero(): React.JSX.Element {
     progress.set(p);
   });
 
-  const goToNext = (): void => {
-    const target = document.getElementById("descubre");
-    if (lenis && target) {
-      lenis.scrollTo(target, { duration: 1.2 });
-    } else {
-      target?.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  /* ── Text Content Animation (0% → 16% - starts immediately) ───────────── */
+  const textOpacity = useTransform(progress, [0, 0.16], [1, 0]);
+  const textY = useTransform(progress, [0, 0.16], [0, -50]);
 
-  /* ── Initial hero text (0% → 22%) ─────────────────────────────────────── */
-  const textOpacity = useTransform(progress, [0, 0.08, 0.16], [1, 1, 0]);
-  const textY = useTransform(progress, [0, 0.08, 0.16], [0, 0, -40]);
+  /* ── Cabin overlay transparent window zoom (Starts at 0% scroll progress!) ── */
+  const cabinScale = useTransform(progress, [0, 0.5], [1, 5.0]);
+  const cabinOpacity = useTransform(progress, [0, 0.35, 0.48], [1, 1, 0]);
 
-  /* ── Cabin overlay: zoom through the transparent window (1x → 5x) —
-     starts on the very first scroll (no initial hold). ──────────────────── */
-  const cabinScale = useTransform(progress, [0, 0.6], [1, 5]);
-  const cabinOpacity = useTransform(progress, [0, 0.45, 0.6], [1, 1, 0]);
+  /* ── Sky Panorama (scale 1.05x → 1.2x, always visible behind window) ── */
+  const skyScale = useTransform(progress, [0, 0.5], [1.05, 1.2]);
+  const skyOpacity = useTransform(progress, [0, 0.35], [1, 1]);
 
-  /* ── Sky panorama (gentle push-in, never dimmed) ──────────────────────── */
-  const skyScale = useTransform(progress, [0, 0.6], [1.05, 1.2]);
+  /* ── White Bloom transition helper (30% → 52%) ── */
+  const bloomOpacity = useTransform(
+    progress,
+    [0, 0.3, 0.42, 0.52],
+    [0, 0, 0.4, 0],
+  );
 
-  /* ── White bloom flash at the moment we break through (45% → 62%) ─────── */
-  const bloomOpacity = useTransform(progress, [0, 0.4, 0.52, 0.62], [0, 0, 0.35, 0]);
+  /* ── Center sky text container settles in before the per-word reveal, then slides up slightly ────── */
+  const skyTextOpacity = useTransform(progress, [0.5, 0.58], [0, 1]);
+  const skyTextScale = useTransform(progress, [0.5, 0.58], [0.98, 1]);
+  const skyTextY = useTransform(progress, [0.5, 0.58, 0.78, 0.98], [24, 0, 0, -110]);
 
-  /* ── Sky content: appears right as we break through the window ─────────
-     (much earlier than before — no more empty-cloud dead zone). The heading
-     itself fills in word-by-word with the scroll (REVEAL_START → REVEAL_END). */
-  const skyContentOpacity = useTransform(progress, [0.46, 0.54], [0, 1]);
-  const skyBadgeY = useTransform(progress, [0.46, 0.58], [22, 0]);
-  const skySubOpacity = useTransform(progress, [0.66, 0.76], [0, 1]);
-  const skySubY = useTransform(progress, [0.66, 0.76], [18, 0]);
+  /* ── White backdrop overlay on top of sky (ready before words reveal) ──── */
+  const whiteOverlayOpacity = useTransform(progress, [0.46, 0.6], [0, 1]);
 
-  /* ── Sky darkens progressively as you scroll (night falls) — a black veil
-     over the clouds so the white heading reads with more drama. ─────────── */
-  const skyDarken = useTransform(progress, [0.48, 0.95], [0, 0.62]);
+  /* ── Header element color interpolation (white to deep indigo: 55% → 68%) ── */
+  const headerTextColor = useTransform(
+    progress,
+    [0.55, 0.68],
+    ["rgba(255, 255, 255, 1)", "rgba(16, 0, 79, 1)"]
+  );
+  const headerBorderColor = useTransform(
+    progress,
+    [0.55, 0.68],
+    ["rgba(255, 255, 255, 0.2)", "rgba(16, 0, 79, 0.15)"]
+  );
+  const headerBgColor = useTransform(
+    progress,
+    [0.55, 0.68],
+    ["rgba(255, 255, 255, 0.05)", "rgba(16, 0, 79, 0.05)"]
+  );
+
+  /* ── Logo opacity fade (white logo vs dark logo cross-fade: 55% → 68%) ── */
+  const whiteLogoOpacity = useTransform(progress, [0.55, 0.68], [1, 0]);
+  const darkLogoOpacity = useTransform(progress, [0.55, 0.68], [0, 1]);
 
   return (
     <section
       ref={trackRef}
       id="hero"
       aria-label="Trabaja con nosotros"
-      className="relative h-[260vh] bg-[#0a0e1a] text-white"
+      className="relative h-[250vh] bg-[#0a0e1a] text-white"
     >
       {/* ── Sticky Viewport ──────────────────────────────────────────────── */}
       <div className="sticky top-0 flex h-[100dvh] w-full items-stretch overflow-hidden">
-        {/* ── 1. Sky panorama (back) — fades in on mount, zooms on scroll ── */}
+        {/* eslint-disable @next/next/no-img-element */}
+        {/* ── 1. Sky panorama layer (Bottom/Back) ── */}
         <motion.div
-          className="absolute inset-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="absolute inset-0 will-change-transform"
+          style={{ scale: skyScale, opacity: skyOpacity }}
         >
-          <motion.img
+          <img
             src="/images/sky-panorama.jpg"
-            alt="Vista del cielo sobre las nubes desde la ventana del avión"
-            className="absolute inset-0 h-full w-full object-cover will-change-transform"
-            style={{ scale: skyScale }}
+            alt="Sky panorama"
+            className="absolute inset-0 h-full w-full object-cover"
           />
         </motion.div>
 
-        {/* ── 2. Cabin overlay with transparent window hole (front) ──
-             Outer div = mount entrance; inner div = scroll-driven zoom. */}
+        {/* ── White backdrop overlay on top of sky (fades in as zoom completes) ── */}
         <motion.div
-          className="absolute inset-0"
-          initial={{ opacity: 0, scale: 1.04 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, ease: ENTER }}
+          className="absolute inset-0 bg-white"
+          style={{ opacity: whiteOverlayOpacity }}
+        />
+
+        {/* ── 2. Cabin overlay with transparent window hole (Top/Front) ── */}
+        <motion.div
+          className="absolute inset-0 will-change-transform"
+          style={{
+            scale: cabinScale,
+            opacity: cabinOpacity,
+            transformOrigin: "50% 49.5%", // Center of transparent window
+          }}
         >
-          <motion.img
+          <img
             src="/images/window-full.png"
-            alt=""
-            aria-hidden
-            className="absolute inset-0 h-full w-full object-cover will-change-transform"
-            style={{
-              scale: cabinScale,
-              opacity: cabinOpacity,
-              transformOrigin: "50.1% 45.6%", // Center of transparent window
-            }}
+            alt="Cabin Window Overlay"
+            className="absolute inset-0 h-full w-full object-cover"
           />
         </motion.div>
 
-        {/* ── White bloom (break-through flash) ── */}
+        {/* eslint-enable @next/next/no-img-element */}
+
+        {/* ── White Bloom transition helper ── */}
         <motion.div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-white"
           style={{ opacity: bloomOpacity }}
         />
 
-        {/* ── Progressive black veil over the sky (darkens on scroll) ── */}
+        {/* ── Dark vignette layer (placed behind text, over cabin) ── */}
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-black"
-          style={{ opacity: skyDarken }}
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-indigo-latam/40"
+          style={{ opacity: cabinOpacity }}
         />
 
-        {/* ── Header / Navigation ── */}
-        <header className="absolute inset-x-0 top-0 z-30">
-          <div className="mx-auto flex max-w-[100rem] items-center justify-between gap-6 px-6 py-7 lg:px-12">
-            <motion.a
-              href="#hero"
-              aria-label="Empleos LATAM — inicio"
-              className="shrink-0"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: ENTER }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/latam-logo.svg"
-                alt="LATAM Airlines"
-                className="h-7 w-auto drop-shadow-[0_1px_8px_rgba(6,10,25,0.35)]"
-              />
-            </motion.a>
-
-            <motion.nav
-              className="hidden items-center gap-9 text-sm font-semibold md:flex"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.6, ease: ENTER }}
-            >
-              {NAV_LINKS.map((link) => (
-                <HoverLink key={link.href} label={link.label} href={link.href} />
-              ))}
-            </motion.nav>
-
-            <motion.div
-              className="hidden items-center gap-6 text-sm font-semibold md:flex"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.6, ease: ENTER }}
-            >
-              <HoverLink label="empleos@latam.com" href="mailto:empleos@latam.com" />
-            </motion.div>
-          </div>
-        </header>
-
-        {/* ── Left readability gradient (cabin phase only — fades before the
-             sky, so it never dims the clouds) ── */}
+        {/* ── Menu Overlay ── */}
         <motion.div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[rgba(5,8,20,0.55)] via-[rgba(5,8,20,0.12)] to-transparent"
-          style={{ opacity: textOpacity }}
-        />
-
-        {/* ── A. Initial hero lockup — cohesive column, centered on the left ── */}
-        <motion.div
-          className="absolute inset-0 z-10 flex items-center"
-          style={{ opacity: textOpacity, y: textY }}
+          initial={false}
+          animate={menuOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: "-100%" }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed inset-0 z-30 bg-[#0d091e]/98 px-8 pt-32 pb-12 flex flex-col justify-between md:px-20 md:pb-20 text-white backdrop-blur-md"
+          style={{ pointerEvents: menuOpen ? "auto" : "none" }}
         >
-          <div className="mx-auto w-full max-w-[100rem] px-6 lg:px-12">
-            <div className="max-w-xl">
-              <h1 className="font-display text-[clamp(3rem,8vw,6.25rem)] font-bold leading-[0.92] tracking-tight text-white [text-shadow:0_2px_36px_rgba(6,10,25,0.45)]">
-                <RevealText text="Despega tu" split="words" />
-                <span className="block text-red-latam">
-                  <RevealText text="carrera" split="chars" delay={0.22} />
-                </span>
-              </h1>
+          {/* Navigation large links */}
+          <div className="flex flex-col gap-6 md:gap-8 mt-10">
+            <span className="text-xs font-bold uppercase tracking-widest text-white/40">
+              Navegación
+            </span>
+            <nav className="flex flex-col gap-4">
+              {NAV_LINKS.map((link, idx) => (
+                <motion.a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={menuOpen ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+                  transition={{ delay: idx * 0.08 + 0.1, duration: 0.3 }}
+                  className="text-4xl md:text-6xl font-bold tracking-tight text-white hover:text-red-latam transition-colors duration-200"
+                >
+                  {link.label}
+                </motion.a>
+              ))}
+            </nav>
+          </div>
 
-              <motion.div
-                className="mt-7 h-1 w-16 origin-left rounded-full bg-red-latam"
-                initial={{ scaleX: 0, opacity: 0 }}
-                animate={{ scaleX: 1, opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.6, ease: ENTER }}
-              />
-
-              <motion.p
-                className="mt-6 max-w-md text-base leading-relaxed text-white/85 [text-shadow:0_1px_16px_rgba(6,10,25,0.5)] md:text-lg"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.55, duration: 0.7, ease: ENTER }}
-              >
-                Únete a los más de 40,000 colaboradores que construyen el futuro
-                de la aviación en América Latina — en tecnología, operaciones y
-                experiencia de clientes.
-              </motion.p>
-
-              <motion.a
-                href="#vacantes"
-                className="group/cta mt-8 inline-flex items-center gap-3 rounded-full bg-red-latam px-6 py-3 text-sm font-semibold text-white shadow-[0_1rem_2.5rem_-0.5rem_rgba(232,17,75,0.55)] transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-red-latam-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7, duration: 0.7, ease: ENTER }}
-              >
-                Postula ahora
-                <AirplaneTiltIcon
-                  weight="fill"
-                  className="h-4 w-4 transition-transform duration-200 group-hover/cta:translate-x-0.5"
-                />
-              </motion.a>
+          {/* Footer of the menu */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-t border-white/10 pt-8">
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-white/40">
+                Contacto
+              </span>
+              <a href="mailto:empleos@latam.com" className="text-lg font-semibold hover:text-red-latam transition-colors">
+                empleos@latam.com
+              </a>
+            </div>
+            
+            <div className="flex flex-col gap-1 text-sm text-white/60">
+              <p>© 2026 LATAM Airlines. Todos los derechos reservados.</p>
+              <p>Construyendo el futuro de la aviación en América Latina.</p>
             </div>
           </div>
         </motion.div>
 
-        {/* ── B. Sky reveal (white text on the darkening sky) ── */}
+        {/* ── Header / Navigation (LATAM Airlines Official Mock Header) ── */}
+        <header className="absolute inset-x-0 top-0 z-40">
+          <div className="mx-auto flex max-w-[100rem] items-center justify-between gap-6 px-6 py-7 lg:px-12 relative">
+            
+            {/* Left: Custom Menu button */}
+            <motion.button 
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="z-40 flex items-center gap-5 lg:gap-6 bg-transparent border-0 font-semibold text-sm cursor-pointer hover:opacity-85 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 rounded-xl px-2 py-1.5"
+              style={{ color: headerTextColor }}
+            >
+              {/* Custom Framer Hamburger Icon */}
+              <div className="w-[30px] h-[30px] relative flex flex-col justify-between overflow-visible flex-shrink-0">
+                {/* Top line container */}
+                <motion.div 
+                  animate={menuOpen ? { y: 9 } : { y: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="absolute top-[4px] left-0 w-[30px] h-[4px] flex"
+                >
+                  <motion.div 
+                    animate={menuOpen ? { rotate: 45 } : { rotate: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    style={{ transformOrigin: "right center", backgroundColor: headerTextColor }}
+                    className="w-[15px] h-[4px] rounded-l-full"
+                  />
+                  <motion.div 
+                    animate={menuOpen ? { rotate: -45 } : { rotate: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    style={{ transformOrigin: "left center", backgroundColor: headerTextColor }}
+                    className="w-[15px] h-[4px] rounded-r-full"
+                  />
+                </motion.div>
+
+                {/* Middle line */}
+                <motion.div 
+                  animate={menuOpen ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  style={{ backgroundColor: headerTextColor }}
+                  className="absolute top-[13px] left-0 w-[30px] h-[4px] rounded-full"
+                />
+
+                {/* Bottom line container */}
+                <motion.div 
+                  animate={menuOpen ? { y: -9 } : { y: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="absolute top-[22px] left-0 w-[30px] h-[4px] flex"
+                >
+                  <motion.div 
+                    animate={menuOpen ? { rotate: -45 } : { rotate: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    style={{ transformOrigin: "right center", backgroundColor: headerTextColor }}
+                    className="w-[15px] h-[4px] rounded-l-full"
+                  />
+                  <motion.div 
+                    animate={menuOpen ? { rotate: 45 } : { rotate: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    style={{ transformOrigin: "left center", backgroundColor: headerTextColor }}
+                    className="w-[15px] h-[4px] rounded-r-full"
+                  />
+                </motion.div>
+              </div>
+              <span className="hidden sm:inline select-none min-w-[45px] text-left">
+                {menuOpen ? "Cerrar" : "Menú"}
+              </span>
+            </motion.button>
+
+            {/* Center: LATAM wordmark (Centered perfectly) */}
+            <a
+              href="#hero"
+              aria-label="Empleos LATAM — inicio"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer z-40 h-7 w-48"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <motion.img
+                src="/images/latam-logo.svg"
+                alt="LATAM Airlines"
+                className="absolute inset-0 h-full w-auto mx-auto"
+                style={{ opacity: whiteLogoOpacity }}
+              />
+              <motion.img
+                src="/images/latam-logo-dark.svg"
+                alt="LATAM Airlines"
+                className="absolute inset-0 h-full w-auto mx-auto"
+                style={{ opacity: darkLogoOpacity }}
+              />
+            </a>
+
+            {/* Right: Country selector & CTA */}
+            <div className="flex items-center gap-3 z-40">
+              <motion.button 
+                className="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold hover:bg-white/10 transition cursor-pointer"
+                style={{ 
+                  color: headerTextColor, 
+                  borderColor: headerBorderColor,
+                  backgroundColor: headerBgColor
+                }}
+              >
+                <Globe size={18} />
+                <span>Chile</span>
+                <CaretDown size={14} />
+              </motion.button>
+
+              <a
+                href="#vacantes"
+                className="rounded-full bg-red-latam px-5 py-2 text-sm font-semibold text-white shadow-md hover:bg-red-latam-deep transition active:scale-95 cursor-pointer text-center animate-pulse-subtle"
+              >
+                Ver vacantes
+              </a>
+            </div>
+
+          </div>
+        </header>
+
+        {/* ── A. Initial Hero Text (Fades out early) ── */}
         <motion.div
-          className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center"
-          style={{ opacity: skyContentOpacity }}
+          className="absolute inset-0 z-10 mx-auto flex w-full max-w-[100rem] flex-col px-6 pt-28 pb-14 pointer-events-none lg:px-12 lg:pb-16"
+          style={{ opacity: textOpacity, y: textY }}
         >
-          <motion.div
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 shadow-sm backdrop-blur-md"
-            style={{ y: skyBadgeY }}
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-pulse rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
-            </span>
-            <span className="text-sm font-semibold text-white">
-              ¡Estamos contratando!
-            </span>
-          </motion.div>
+          {/* Headline block - Left Aligned Title & Right Aligned Subtitle (Centered Vertically) */}
+          <div className="flex-1 flex items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
+              {/* Left Column: Label + Title */}
+              <div className="lg:col-span-8 flex flex-col items-start text-left">
+                <span className="text-[10px] md:text-xs font-semibold tracking-[0.28em] text-white/70 uppercase block mb-3 md:mb-5">
+                  TRABAJA CON NOSOTROS
+                </span>
+                <h1 className="text-[clamp(2.5rem,6.5vw,5rem)] font-bold leading-[0.95] tracking-tight text-white">
+                  Construí tu<br />carrera junto<br />a LATAM
+                </h1>
+              </div>
 
-          <ScrollWordReveal
-            progress={progress}
-            text="Explora nuestras oportunidades y elige cuál será tu próximo destino"
-            start={0.5}
-            end={0.92}
-            className="mx-auto mb-8 max-w-6xl font-display font-bold leading-[1.03] tracking-tight text-[clamp(2.75rem,7.8vw,6.75rem)] [-webkit-text-stroke:0.6px_currentColor]"
-          />
+              {/* Right Column: Subtitle */}
+              <div className="lg:col-span-4 flex items-center justify-start lg:justify-end">
+                <p className="text-base md:text-lg text-white/80 max-w-xs leading-relaxed text-left lg:ml-auto">
+                  Encontrá la vacante que despega tu próximo capítulo profesional.
+                </p>
+              </div>
+            </div>
+          </div>
 
-          <motion.p
-            className="mx-auto max-w-2xl text-lg font-medium text-white/75 md:text-xl"
-            style={{ opacity: skySubOpacity, y: skySubY }}
-          >
-            Más de 40,000 colaboradores en 5 países construyen el futuro de la
-            aviación en América Latina.
-          </motion.p>
+          {/* Bottom Center Search Capsule (Enlarged) */}
+          <div className="mt-8 flex justify-center w-full pointer-events-auto">
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                const el = document.getElementById("vacantes");
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="flex flex-col lg:flex-row items-stretch lg:items-center w-full max-w-6xl rounded-3xl lg:rounded-full border border-white/10 bg-[#0d091e]/70 p-3 lg:p-2.5 backdrop-blur-md text-white shadow-2xl gap-3 lg:gap-0"
+            >
+              {/* Field 1: Cargo, área o palabra clave */}
+              <div className="flex flex-1 items-center gap-3 px-5 py-2.5 lg:py-1">
+                <MagnifyingGlass size={22} className="text-white/60 flex-shrink-0" />
+                <div className="flex flex-col flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 cursor-pointer">
+                    <span className="text-xs lg:text-sm font-bold tracking-tight text-white/95">Cargo, área o palabra clave</span>
+                    <CaretDown size={12} className="text-white/70" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Ej: Tripulación, Tecnología"
+                    className="w-full bg-transparent border-0 p-0 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-0 mt-1"
+                  />
+                </div>
+              </div>
+
+              {/* Separator */}
+              <div className="hidden lg:block w-px h-10 bg-white/15" />
+
+              {/* Field 2: País o ciudad */}
+              <div className="flex flex-1 items-center gap-3 px-5 py-2.5 lg:py-1">
+                <MapPin size={22} className="text-white/60 flex-shrink-0" />
+                <div className="flex flex-col flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 cursor-pointer">
+                    <span className="text-xs lg:text-sm font-bold tracking-tight text-white/95">País o ciudad</span>
+                    <CaretDown size={12} className="text-white/70" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Ej: Chile, São Paulo"
+                    className="w-full bg-transparent border-0 p-0 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-0 mt-1"
+                  />
+                </div>
+              </div>
+
+              {/* Separator */}
+              <div className="hidden lg:block w-px h-10 bg-white/15" />
+
+              {/* Field 3: Modalidad */}
+              <div className="flex flex-1 items-center gap-3 px-5 py-2.5 lg:py-1">
+                <Briefcase size={22} className="text-white/60 flex-shrink-0" />
+                <div className="flex flex-col flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 cursor-pointer">
+                    <span className="text-xs lg:text-sm font-bold tracking-tight text-white/95">Modalidad</span>
+                    <CaretDown size={12} className="text-white/70" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Ej: Presencial, híbrido"
+                    className="w-full bg-transparent border-0 p-0 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-0 mt-1"
+                  />
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="flex items-center justify-center gap-2 rounded-full bg-red-latam px-10 py-4.5 text-base font-bold text-white shadow-[0_0.75rem_2rem_-0.25rem_rgba(232,17,75,0.4)] transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-red-latam-deep active:scale-[0.98] cursor-pointer w-full lg:w-auto flex-shrink-0 lg:ml-3"
+              >
+                Ver vacantes
+                <PaperPlaneTilt size={18} weight="fill" />
+              </button>
+            </form>
+          </div>
         </motion.div>
 
-        {/* ── Scroll-down control (clickable + fills with progress) ── */}
-        <ScrollProgressButton
-          progress={progress}
-          reduced={reduced}
-          onClick={goToNext}
-        />
+        {/* ── B. Sky Center Reveal Text (Nuestro Propósito - White Background & Slate/Navy Text) ── */}
+        <motion.div
+          className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-6 pointer-events-none"
+          style={{ opacity: skyTextOpacity, scale: skyTextScale, y: skyTextY }}
+        >
+          {/* Label: NUESTRO PROPÓSITO in pink/coral */}
+          <p className="text-xs md:text-sm font-bold uppercase tracking-[0.35em] text-[#f0506e] mb-6 md:mb-8">
+            Nuestro propósito
+          </p>
+
+          {/* Heading — words fill from gray to color as you scroll (scroll reveal) */}
+          <h2
+            aria-label="Volar es solo el comienzo. Tu talento conecta personas, mueve negocios y eleva el futuro de la región."
+            className="font-sans text-[clamp(1.65rem,4.5vw,3.2rem)] font-medium leading-[1.25] tracking-[-0.01em] max-w-5xl mx-auto"
+          >
+            {PROPOSITO_LINES.map((line, li) => {
+              const offset = PROPOSITO_LINES.slice(0, li).reduce(
+                (n, l) => n + l.words.length,
+                0,
+              );
+              return (
+                <span
+                  aria-hidden
+                  key={li}
+                  className={li < PROPOSITO_LINES.length - 1 ? "block mb-2" : "block"}
+                >
+                  {line.words.map((w, wi) => (
+                    <ScrollWord
+                      key={wi}
+                      progress={progress}
+                      start={REVEAL_START + (offset + wi) * REVEAL_STEP}
+                      to={line.color}
+                      reduced={!!reduced}
+                    >
+                      {w}
+                    </ScrollWord>
+                  ))}
+                </span>
+              );
+            })}
+          </h2>
+
+          <div className="mt-6 flex items-center gap-3 text-xs font-semibold tracking-wide text-[#757585]">
+            <motion.span
+              animate={reduced ? undefined : { y: [0, 5, 0] }}
+              transition={{
+                duration: 1.6,
+                ease: "easeInOut",
+                repeat: Infinity,
+              }}
+            >
+              <CaretDoubleDownIcon className="h-4 w-4 text-[#f0506e]" />
+            </motion.span>
+            <span>Sigue bajando para explorar las vacantes</span>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
