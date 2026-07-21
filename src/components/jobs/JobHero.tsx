@@ -379,14 +379,14 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                   TRABAJA CON NOSOTROS
                 </span>
                 <h1 className="text-[clamp(2.5rem,6.5vw,5rem)] font-bold leading-[0.95] tracking-tight text-white">
-                  Construí tu<br />carrera junto<br />a LATAM
+                  Construye tu<br />carrera junto<br />a LATAM
                 </h1>
               </div>
 
               {/* Right Column: Subtitle */}
               <div className="lg:col-span-4 flex items-center justify-start lg:justify-end">
                 <p className="text-base md:text-lg text-white/80 max-w-xs leading-relaxed text-left lg:ml-auto">
-                  Encontrá la vacante que despega tu próximo capítulo profesional.
+                  Encuentra la vacante que despega tu próximo capítulo profesional.
                 </p>
               </div>
             </div>
