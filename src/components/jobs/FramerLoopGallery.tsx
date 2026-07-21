@@ -3,228 +3,170 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 
+/**
+ * FramerLoopGallery — sección "Nuestra cultura".
+ *
+ * Collage flotante con parallax por scroll construido EXCLUSIVAMENTE con las
+ * fotos propias de LATAM en `public/images/cultura/`. En desktop las imágenes
+ * se dispersan en un lienzo posicionado; en móvil caen en una grilla limpia.
+ */
+
+// Fotos propias (carpeta "Nuestra cultura"), en orden natural. `portrait`
+// marca la orientación para elegir la proporción adecuada en la grilla móvil.
+const IMAGES = [
+  { src: "/images/cultura/cultura-01.jpg", alt: "Técnica de mantenimiento inspeccionando una aeronave en plataforma", portrait: false },
+  { src: "/images/cultura/cultura-02.jpg", alt: "Avión de LATAM en vuelo", portrait: false },
+  { src: "/images/cultura/cultura-03.jpg", alt: "Equipo de agentes de LATAM en la puerta de embarque", portrait: false },
+  { src: "/images/cultura/cultura-04.jpg", alt: "Técnico de LATAM frente a la turbina de un avión", portrait: true },
+  { src: "/images/cultura/cultura-05.jpg", alt: "Avión de LATAM volando sobre las nubes al atardecer", portrait: false },
+  { src: "/images/cultura/cultura-06.jpg", alt: "Agente de counter de LATAM sonriendo en el aeropuerto", portrait: true },
+  { src: "/images/cultura/cultura-07.jpg", alt: "Colaboradora de LATAM sonriendo junto al mostrador", portrait: false },
+  { src: "/images/cultura/cultura-08.jpg", alt: "Piloto de LATAM junto a la aeronave", portrait: false },
+  { src: "/images/cultura/cultura-09.jpg", alt: "Agente de LATAM ayudando a una pasajera en el autoservicio", portrait: false },
+  { src: "/images/cultura/cultura-10.jpg", alt: "Comandante de LATAM en plataforma junto a un Airbus A320", portrait: true },
+  { src: "/images/cultura/cultura-11.jpg", alt: "Tripulante de cabina de LATAM sonriendo a bordo", portrait: false },
+];
+
+// Cada slot del collage desktop: qué imagen usa y su posición/tamaño absolutos.
+const SLOTS: { img: number; cls: string }[] = [
+  { img: 2, cls: "left-[22%] top-[3%] w-[160px] aspect-[4/3]" },
+  { img: 1, cls: "right-[11%] top-[5%] w-[150px] aspect-[4/3]" },
+  { img: 3, cls: "left-[12%] top-[19%] w-[150px] aspect-[4/5]" },
+  { img: 5, cls: "left-[61%] top-[15%] w-[185px] aspect-[4/5]" },
+  { img: 10, cls: "right-[4%] top-[27%] w-[180px] aspect-[4/3]" },
+  { img: 8, cls: "left-[35%] top-[33%] w-[200px] aspect-[4/3]" },
+  { img: 9, cls: "left-[17%] top-[45%] w-[175px] aspect-[4/5]" },
+  { img: 0, cls: "left-[3%] top-[56%] w-[160px] aspect-square" },
+  { img: 4, cls: "left-[53%] top-[57%] w-[170px] aspect-[4/3]" },
+  { img: 7, cls: "right-[13%] top-[51%] w-[180px] aspect-[4/3]" },
+  { img: 6, cls: "right-[22%] top-[71%] w-[160px] aspect-[4/3]" },
+];
+
 export function FramerLoopGallery(): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
-  // Scroll Progress tracking for the entire gallery section
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "end start"],
   });
 
-  // Unique parallax shifts for each image to create a rich 3D floating effect
-  const y1 = useTransform(scrollYProgress, [0, 1], [40, -40]);      // Turbine mechanic
-  const y2 = useTransform(scrollYProgress, [0, 1], [-50, 50]);     // Check-in machine agent
-  const y3 = useTransform(scrollYProgress, [0, 1], [80, -80]);      // Stewardess cabin
-  const y4 = useTransform(scrollYProgress, [0, 1], [50, -50]);      // LATAM counter agent
-  const y5 = useTransform(scrollYProgress, [0, 1], [-30, 30]);      // Ramp agent tail
-  const y6 = useTransform(scrollYProgress, [0, 1], [100, -100]);    // Pilot stewardess
-  const y7 = useTransform(scrollYProgress, [0, 1], [30, -30]);      // Text block 1
-  const y8 = useTransform(scrollYProgress, [0, 1], [40, -40]);      // Text block 2
-  const y9 = useTransform(scrollYProgress, [0, 1], [-60, 60]);      // Plane clouds
-  const y10 = useTransform(scrollYProgress, [0, 1], [90, -90]);     // Plane flying
-  const y11 = useTransform(scrollYProgress, [0, 1], [-40, 40]);     // Stewardesses walking
-  const y12 = useTransform(scrollYProgress, [0, 1], [70, -70]);     // Mechanic engine
+  // Un desplazamiento parallax distinto por slot para el efecto 3D flotante.
+  const y1 = useTransform(scrollYProgress, [0, 1], [80, -80]);
+  const y2 = useTransform(scrollYProgress, [0, 1], [90, -90]);
+  const y3 = useTransform(scrollYProgress, [0, 1], [-50, 50]);
+  const y4 = useTransform(scrollYProgress, [0, 1], [100, -100]);
+  const y5 = useTransform(scrollYProgress, [0, 1], [-40, 40]);
+  const y6 = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  const y7 = useTransform(scrollYProgress, [0, 1], [-60, 60]);
+  const y8 = useTransform(scrollYProgress, [0, 1], [40, -40]);
+  const y9 = useTransform(scrollYProgress, [0, 1], [-30, 30]);
+  const y10 = useTransform(scrollYProgress, [0, 1], [70, -70]);
+  const y11 = useTransform(scrollYProgress, [0, 1], [-45, 45]);
+  const ys = [y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11];
 
-  const cardStyle = "relative overflow-hidden rounded-[2rem] shadow-lg border border-black/5 bg-zinc-50 hover:scale-[1.04] hover:shadow-2xl transition-all duration-500 cursor-pointer w-full h-full";
+  // Texto (bloques), con su propio parallax suave.
+  const yText1 = useTransform(scrollYProgress, [0, 1], [30, -30]);
+  const yText2 = useTransform(scrollYProgress, [0, 1], [45, -45]);
+
+  const cardStyle =
+    "relative overflow-hidden rounded-[2rem] shadow-lg border border-black/5 bg-zinc-50 hover:scale-[1.04] hover:shadow-2xl transition-all duration-500 cursor-pointer w-full h-full";
 
   return (
-    <section 
+    <section
+      id="cultura"
       ref={containerRef}
-      className="relative z-10 bg-white -mt-32 md:-mt-48 pt-0 md:pt-4 pb-12 md:pb-24 overflow-hidden"
+      className="relative z-10 -mt-32 overflow-hidden bg-white pb-12 pt-0 md:-mt-48 md:pb-24 md:pt-4"
     >
-      <div className="container mx-auto px-4 max-w-7xl relative">
-        
-        {/* Desktop view (Floating absolute grid matching Figma/Screenshot #2) */}
-        <div className="hidden md:block relative h-[1050px] w-full max-w-7xl mx-auto">
-          
-          {/* 1. Stewardess in cabin (top left center) */}
-          <motion.div 
-            style={{ y: reduced ? undefined : y3 }}
-            className="absolute left-[23%] top-[4%] w-[160px] aspect-[4/3]"
-          >
-            <div className={cardStyle}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/crew-smiling.jpg" alt="Tripulación LATAM" className="w-full h-full object-cover" />
-            </div>
-          </motion.div>
+      <div className="container relative mx-auto max-w-7xl px-4">
+        {/* Desktop: collage flotante */}
+        <div className="relative mx-auto hidden h-[1050px] w-full max-w-7xl md:block">
+          {SLOTS.map((slot, i) => {
+            const img = IMAGES[slot.img];
+            return (
+              <motion.div
+                key={img.src}
+                style={{ y: reduced ? undefined : ys[i] }}
+                className={`absolute ${slot.cls}`}
+              >
+                <div className={cardStyle}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img.src} alt={img.alt} loading="lazy" className="h-full w-full object-cover" />
+                </div>
+              </motion.div>
+            );
+          })}
 
-          {/* 2. Text block 1 (top center) */}
-          <motion.div 
-            style={{ y: reduced ? undefined : y7 }}
-            className="absolute left-[45%] top-[8%] max-w-[340px] text-left"
+          {/* Texto 1 (destacado) */}
+          <motion.div
+            style={{ y: reduced ? undefined : yText1 }}
+            className="absolute left-[45%] top-[8%] max-w-[330px] text-left"
           >
-            <p className="text-[17px] font-medium text-[#12103a] leading-relaxed">
-              Discover our curated collection of stunning photography that captures moments of beauty and inspiration from around the world.
+            <p className="text-[17px] font-medium leading-relaxed text-[#12103a]">
+              Detrás de cada vuelo hay personas que hacen de LATAM un gran lugar
+              para crecer.
             </p>
           </motion.div>
 
-          {/* 3. Airplane flying close-up (right top) */}
-          <motion.div 
-            style={{ y: reduced ? undefined : y10 }}
-            className="absolute right-[12%] top-[6%] w-[150px] aspect-[4/3]"
+          {/* Texto 2 (secundario) */}
+          <motion.div
+            style={{ y: reduced ? undefined : yText2 }}
+            className="absolute left-[27%] top-[72%] max-w-[300px] text-left"
           >
-            <div className={cardStyle}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1519074002996-a69e7ac46a42?q=80&w=600&auto=format&fit=crop" alt="Vuelo LATAM" className="w-full h-full object-cover" />
-            </div>
-          </motion.div>
-
-          {/* 4. Check-in machine agent (mid left) */}
-          <motion.div 
-            style={{ y: reduced ? undefined : y2 }}
-            className="absolute left-[13%] top-[20%] w-[150px] aspect-[4/5]"
-          >
-            <div className={cardStyle}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1569154941061-e231b4725ef1?q=80&w=600&auto=format&fit=crop" alt="Agente de check-in" className="w-full h-full object-cover" />
-            </div>
-          </motion.div>
-
-          {/* 5. Pilot stewardess with arms crossed (right center high) */}
-          <motion.div 
-            style={{ y: reduced ? undefined : y6 }}
-            className="absolute left-[62%] top-[16%] w-[200px] aspect-[4/5]"
-          >
-            <div className={cardStyle}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/through-windshield.jpg" alt="Piloto LATAM" className="w-full h-full object-cover" />
-            </div>
-          </motion.div>
-
-          {/* 6. Group of stewardesses walking (right mid) */}
-          <motion.div 
-            style={{ y: reduced ? undefined : y11 }}
-            className="absolute right-[4%] top-[28%] w-[180px] aspect-[4/3]"
-          >
-            <div className={cardStyle}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1527689368864-3a821dbccc34?q=80&w=600&auto=format&fit=crop" alt="Personal LATAM" className="w-full h-full object-cover" />
-            </div>
-          </motion.div>
-
-          {/* 7. Ramp agent in front of airplane tail (center) */}
-          <motion.div 
-            style={{ y: reduced ? undefined : y5 }}
-            className="absolute left-[36%] top-[34%] w-[200px] aspect-[4/3]"
-          >
-            <div className={cardStyle}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=600&auto=format&fit=crop" alt="Operaciones de rampa" className="w-full h-full object-cover" />
-            </div>
-          </motion.div>
-
-          {/* 8. LATAM counter agent (bottom left center) */}
-          <motion.div 
-            style={{ y: reduced ? undefined : y4 }}
-            className="absolute left-[18%] top-[45%] w-[190px] aspect-[4/5]"
-          >
-            <div className={cardStyle}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/office-tech.jpg" alt="Oficina LATAM" className="w-full h-full object-cover" />
-            </div>
-          </motion.div>
-
-          {/* 9. Turbine mechanic (bottom left) */}
-          <motion.div 
-            style={{ y: reduced ? undefined : y1 }}
-            className="absolute left-[4%] top-[56%] w-[160px] aspect-square"
-          >
-            <div className={cardStyle}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=600&auto=format&fit=crop" alt="Mantenimiento de turbinas" className="w-full h-full object-cover" />
-            </div>
-          </motion.div>
-
-          {/* 10. Plane flying above clouds (right center bottom) */}
-          <motion.div 
-            style={{ y: reduced ? undefined : y9 }}
-            className="absolute left-[54%] top-[58%] w-[170px] aspect-[4/3]"
-          >
-            <div className={cardStyle}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/sky-panorama.jpg" alt="Vuelo sobre nubes" className="w-full h-full object-cover" />
-            </div>
-          </motion.div>
-
-          {/* 11. Mechanic under engine (right bottom) */}
-          <motion.div 
-            style={{ y: reduced ? undefined : y12 }}
-            className="absolute right-[14%] top-[52%] w-[180px] aspect-[4/3]"
-          >
-            <div className={cardStyle}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1485083269755-a7b559a4fe5e?q=80&w=600&auto=format&fit=crop" alt="Ingeniería hangar" className="w-full h-full object-cover" />
-            </div>
-          </motion.div>
-
-          {/* 12. Text block 2 (bottom left-center) */}
-          <motion.div 
-            style={{ y: reduced ? undefined : y8 }}
-            className="absolute left-[29%] top-[70%] max-w-[320px] text-left"
-          >
-            <p className="text-[15px] text-zinc-500 leading-relaxed">
-              Explore our collection of stunning photography that captures moments of beauty and inspiration from around the world.
+            <p className="text-[15px] leading-relaxed text-zinc-500">
+              Pilotos, tripulación, mantenimiento y equipos en tierra: una sola
+              cultura que conecta a toda la región.
             </p>
           </motion.div>
 
-          {/* Red button "Nuestra cultura" centered at the bottom */}
+          {/* Botón "Nuestra cultura" */}
           <div className="absolute bottom-[2%] left-1/2 -translate-x-1/2">
-            <a 
+            <a
               href="#cultura"
-              className="inline-flex items-center justify-center rounded-full bg-red-latam px-8 py-3.5 text-base font-bold text-white shadow-lg hover:bg-red-latam-deep hover:scale-105 active:scale-95 transition-all duration-300 select-none cursor-pointer"
+              className="inline-flex select-none items-center justify-center rounded-full bg-red-latam px-8 py-3.5 text-base font-bold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-red-latam-deep active:scale-95"
             >
               Nuestra cultura
             </a>
           </div>
-
         </div>
 
-        {/* Mobile View (Clean stack layout for readability & responsive layout) */}
-        <div className="block md:hidden flex flex-col gap-8">
-          
-          <div className="text-center px-4">
-            <p className="text-base font-medium text-[#12103a] leading-relaxed">
-              Discover our curated collection of stunning photography that captures moments of beauty and inspiration from around the world.
+        {/* Móvil: grilla limpia con las mismas fotos */}
+        <div className="flex flex-col gap-8 md:hidden">
+          <div className="px-4 text-center">
+            <p className="text-base font-medium leading-relaxed text-[#12103a]">
+              Detrás de cada vuelo hay personas que hacen de LATAM un gran lugar
+              para crecer.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-md">
-              <img src="/images/crew-smiling.jpg" alt="Tripulación" className="w-full h-full object-cover" />
-            </div>
-            <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-md">
-              <img src="https://images.unsplash.com/photo-1569154941061-e231b4725ef1?q=80&w=600&auto=format&fit=crop" alt="Agente" className="w-full h-full object-cover" />
-            </div>
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-md">
-              <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=600&auto=format&fit=crop" alt="Operaciones" className="w-full h-full object-cover" />
-            </div>
-            <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-md">
-              <img src="/images/through-windshield.jpg" alt="Piloto" className="w-full h-full object-cover" />
-            </div>
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-md col-span-2">
-              <img src="/images/sky-panorama.jpg" alt="Cielo" className="w-full h-full object-cover" />
-            </div>
+            {IMAGES.map((img) => (
+              <div
+                key={img.src}
+                className={`${img.portrait ? "aspect-[3/4]" : "aspect-[4/3]"} overflow-hidden rounded-2xl shadow-md`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img.src} alt={img.alt} loading="lazy" className="h-full w-full object-cover" />
+              </div>
+            ))}
           </div>
 
-          <div className="text-center px-4">
-            <p className="text-sm text-zinc-500 leading-relaxed">
-              Explore our collection of stunning photography that captures moments of beauty and inspiration from around the world.
+          <div className="px-4 text-center">
+            <p className="text-sm leading-relaxed text-zinc-500">
+              Pilotos, tripulación, mantenimiento y equipos en tierra: una sola
+              cultura que conecta a toda la región.
             </p>
           </div>
 
-          <div className="flex justify-center mt-4">
-            <a 
+          <div className="mt-4 flex justify-center">
+            <a
               href="#cultura"
-              className="rounded-full bg-red-latam px-8 py-3 text-sm font-bold text-white shadow-md text-center"
+              className="rounded-full bg-red-latam px-8 py-3 text-center text-sm font-bold text-white shadow-md"
             >
               Nuestra cultura
             </a>
           </div>
-
         </div>
-
       </div>
     </section>
   );
