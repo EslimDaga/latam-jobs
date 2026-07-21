@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Manrope, Martian_Mono } from "next/font/google";
+import {
+  Bricolage_Grotesque,
+  Manrope,
+  Martian_Mono,
+  Space_Grotesk,
+  Space_Mono,
+  Barlow_Condensed,
+  Inter,
+} from "next/font/google";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { CurtainLoader } from "@/components/motion/CurtainLoader";
 import "lenis/dist/lenis.css";
@@ -25,6 +33,34 @@ const bricolage = Bricolage_Grotesque({
   weight: ["600", "700", "800"],
 });
 
+// Fuentes de las secciones "Vacantes con embarque abierto" (Space Grotesk /
+// Space Mono) y "Pase de Embarque" (Barlow Condensed / Inter), portadas 1:1
+// desde los diseños de Figma. Se exponen como variables CSS para poder
+// referenciarlas en los estilos inline de ambos componentes.
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const spaceMono = Space_Mono({
+  variable: "--font-space-mono",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
+const barlowCondensed = Barlow_Condensed({
+  variable: "--font-barlow",
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   title: "Empleos LATAM — Despega tu carrera con nosotros",
   description:
@@ -37,7 +73,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es-PE" className={`${manrope.variable} ${martianMono.variable} ${bricolage.variable} h-full antialiased`}>
+    <html
+      lang="es-PE"
+      className={`${manrope.variable} ${martianMono.variable} ${bricolage.variable} ${spaceGrotesk.variable} ${spaceMono.variable} ${barlowCondensed.variable} ${inter.variable} h-full antialiased`}
+    >
       <body className="flex min-h-full flex-col">
         <SmoothScroll>
           <CurtainLoader />
