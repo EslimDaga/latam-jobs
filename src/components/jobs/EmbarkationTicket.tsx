@@ -123,7 +123,7 @@ export function EmbarkationTicket(): React.JSX.Element {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: "22px",
+        gap: "34px",
         background: "#ffffff",
         fontFamily: INTER,
         padding: "50px 20px",
@@ -133,19 +133,52 @@ export function EmbarkationTicket(): React.JSX.Element {
       <Reveal from="up">
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            color: "rgba(15,0,79,0.62)",
-            fontSize: "13px",
-            fontWeight: 600,
-            letterSpacing: "2px",
-            textTransform: "uppercase",
+            fontFamily: "'Latam Sans', var(--font-manrope), sans-serif",
+            textAlign: "center",
+            width: "100%",
+            maxWidth: "min(940px, 92vw)",
+            padding: "0 16px",
+            margin: "0 auto",
           }}
         >
-          <span>Proceso de Selección</span>
-          <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "rgba(15,0,79,0.4)" }} />
-          <span>LATAM</span>
+          <span
+            style={{
+              display: "block",
+              color: "#E8114B",
+              fontSize: "12px",
+              fontWeight: 700,
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              marginBottom: "14px",
+            }}
+          >
+            Tu ruta de vuelo
+          </span>
+          <h2
+            className="md:whitespace-nowrap"
+            style={{
+              margin: 0,
+              color: "#1B0088",
+              fontWeight: 700,
+              fontSize: "clamp(1.75rem, 4.4vw, 3.25rem)",
+              lineHeight: 1.04,
+              letterSpacing: "-0.01em",
+            }}
+          >
+            Así comienza tu viaje con LATAM
+          </h2>
+          <p
+            className="md:whitespace-nowrap"
+            style={{
+              margin: "16px auto 0",
+              color: "#616a75",
+              fontSize: "clamp(0.95rem, 1.5vw, 1.125rem)",
+              lineHeight: 1.5,
+            }}
+          >
+            Desde tu postulación hasta el embarque, te acompañamos en cada etapa
+            del proceso.
+          </p>
         </div>
       </Reveal>
 

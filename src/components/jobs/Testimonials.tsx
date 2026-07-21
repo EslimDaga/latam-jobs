@@ -34,17 +34,17 @@ export function Testimonials(): React.JSX.Element {
     >
       <div className="mx-auto max-w-7xl">
         {/* Encabezado */}
-        <Reveal className="mx-auto max-w-3xl text-center" from="up">
+        <Reveal className="text-center" from="up">
           <span className="mb-4 block text-[11px] font-semibold uppercase tracking-[0.32em] text-pink-latam">
             Voces a bordo
           </span>
           <h2
             id="testimonios-title"
-            className="text-[clamp(2rem,4.6vw,3.25rem)] font-bold leading-[1.05] tracking-tight text-indigo-latam"
+            className="mx-auto text-[clamp(1.9rem,7vw,2.35rem)] font-bold leading-[1.1] tracking-tight text-indigo-latam md:whitespace-nowrap md:text-[clamp(1.5rem,3.7vw,3rem)]"
           >
             Historias de quienes ya vuelan con nosotros
           </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-ink-soft sm:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-ink-soft sm:text-lg lg:max-w-none lg:whitespace-nowrap lg:text-[clamp(0.95rem,1.5vw,1.125rem)]">
             Conoce las experiencias de las personas que construyen LATAM desde
             distintos equipos y profesiones.
           </p>
