@@ -202,11 +202,15 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
           style={{ opacity: bloomOpacity }}
         />
 
-        {/* ── Dark vignette layer (placed behind text, over cabin) ── */}
+        {/* ── Overlay+Shadow del Figma (89:2382): sombra interna azul noche
+             (dx 21, dy 91, blur 125) que oscurece el borde superior/izquierdo ── */}
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-indigo-latam/40"
-          style={{ opacity: cabinOpacity }}
+          className="pointer-events-none absolute inset-0 z-[4]"
+          style={{
+            opacity: cabinOpacity,
+            boxShadow: "inset 21px 91px 125px rgba(6,16,35,0.85)",
+          }}
         />
 
         {/* ── Radial overlay del Figma (89:2383), SIEMPRE encima de la imagen:
