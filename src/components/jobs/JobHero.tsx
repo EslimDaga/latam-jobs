@@ -141,10 +141,6 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
     ["rgba(255, 255, 255, 0.05)", "rgba(16, 0, 79, 0.05)"]
   );
 
-  /* ── Radial overlay del Figma (nodo 89:2383): viñeta índigo al 33%, se
-     desvanece junto con la cabina ── */
-  const radialOpacity = useTransform(cabinOpacity, (v) => v * 0.33);
-
   /* ── Logo opacity fade (white logo vs dark logo cross-fade: 55% → 68%) ── */
   const whiteLogoOpacity = useTransform(progress, [0.55, 0.68], [1, 0]);
   const darkLogoOpacity = useTransform(progress, [0.55, 0.68], [0, 1]);
@@ -220,9 +216,9 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
           aria-hidden
           className="pointer-events-none absolute inset-0 z-[5]"
           style={{
-            opacity: radialOpacity,
+            opacity: cabinOpacity,
             background:
-              "radial-gradient(circle 58.25vw at 50.03% 65.33%, rgba(164,149,80,0.26) 11%, #0C104F 57%)",
+              "radial-gradient(circle 58.25vw at 50.03% 65.33%, rgba(164,149,80,0.086) 11%, rgba(12,16,79,0.33) 57%)",
           }}
         />
 
