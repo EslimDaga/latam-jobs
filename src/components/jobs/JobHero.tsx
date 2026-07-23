@@ -417,7 +417,16 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                 const el = document.getElementById("vacantes");
                 if (el) el.scrollIntoView({ behavior: "smooth" });
               }}
-              className="flex w-full max-w-[898px] flex-col gap-5 rounded-[16px] bg-[rgba(242,242,242,0.04)] px-[21px] py-6 text-white backdrop-blur-[2px] [font-family:var(--font-inter),sans-serif] lg:flex-row lg:items-center lg:gap-5"
+              className="flex w-full max-w-[898px] flex-col gap-5 rounded-[16px] bg-[rgba(242,242,242,0.04)] px-[21px] py-6 text-white backdrop-blur-[16px] backdrop-saturate-[1.35] [font-family:var(--font-inter),sans-serif] lg:flex-row lg:items-center lg:gap-5"
+              style={{
+                // Efecto "Glass" del Figma (Frost 16, Light -45° 80%, Refraction 27):
+                // brillo diagonal desde arriba-izquierda + filete luminoso en los
+                // bordes que imita la refracción del vidrio.
+                backgroundImage:
+                  "linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 32%, rgba(255,255,255,0) 55%)",
+                boxShadow:
+                  "inset 0 1px 0 rgba(255,255,255,0.22), inset 1px 0 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(255,255,255,0.07), inset -1px 0 0 rgba(255,255,255,0.06), 0 18px 42px -20px rgba(6,16,35,0.55)",
+              }}
             >
               {/* Campo 1: Cargo, área o palabra clave */}
               <div className="flex flex-1 flex-col gap-2">
