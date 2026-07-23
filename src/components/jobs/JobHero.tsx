@@ -1,14 +1,12 @@
 "use client";
 
 import {
-  AirplaneTiltIcon,
+  AirplaneTakeoff,
   CaretDoubleDownIcon,
   MagnifyingGlass,
   MapPin,
   Briefcase,
   CaretDown,
-  PaperPlaneTilt,
-  List,
   Globe,
 } from "@phosphor-icons/react";
 import {
@@ -143,6 +141,10 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
     ["rgba(255, 255, 255, 0.05)", "rgba(16, 0, 79, 0.05)"]
   );
 
+  /* ── Radial overlay del Figma (nodo 89:2383): viñeta índigo al 33%, se
+     desvanece junto con la cabina ── */
+  const radialOpacity = useTransform(cabinOpacity, (v) => v * 0.33);
+
   /* ── Logo opacity fade (white logo vs dark logo cross-fade: 55% → 68%) ── */
   const whiteLogoOpacity = useTransform(progress, [0.55, 0.68], [1, 0]);
   const darkLogoOpacity = useTransform(progress, [0.55, 0.68], [0, 1]);
@@ -198,6 +200,18 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-white"
           style={{ opacity: bloomOpacity }}
+        />
+
+        {/* ── Radial overlay del Figma (89:2383): centro cálido translúcido que
+             cae a índigo #0c104f, opacidad 33% ── */}
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            opacity: radialOpacity,
+            background:
+              "radial-gradient(58.25vw circle at 50.03% 65.33%, rgba(164,149,80,0.26) 10.97%, rgba(88,82,80,0.63) 33.85%, rgba(50,49,79,0.815) 45.29%, rgba(31,32,79,0.9075) 51.01%, rgba(12,16,79,1) 56.73%)",
+          }}
         />
 
         {/* ── Dark vignette layer (placed behind text, over cabin) ── */}
@@ -381,7 +395,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                   Trabaja con nosotros
                 </span>
                 <h1 className="text-[clamp(2.75rem,7.64vw,6.875rem)] font-bold leading-[1.1075] tracking-[-0.0236em] text-white">
-                  Construye tu carrera junto<br />a LATAM
+                  Construye tu<br />carrera junto<br />a LATAM
                 </h1>
               </div>
 
@@ -396,75 +410,84 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
 
           {/* Bottom Center Search Capsule (Enlarged) */}
           <div className="mt-8 flex justify-center w-full pointer-events-auto">
-            <form 
+            <form
               onSubmit={(e) => {
                 e.preventDefault();
                 const el = document.getElementById("vacantes");
                 if (el) el.scrollIntoView({ behavior: "smooth" });
               }}
-              className="flex flex-col lg:flex-row items-stretch lg:items-center w-full max-w-6xl rounded-3xl lg:rounded-full border border-white/10 bg-[#0d091e]/70 p-3 lg:p-2.5 backdrop-blur-md text-white shadow-2xl gap-3 lg:gap-0"
+              className="flex w-full max-w-[898px] flex-col gap-5 rounded-[16px] bg-[rgba(242,242,242,0.04)] px-[21px] py-6 text-white backdrop-blur-[2px] [font-family:var(--font-inter),sans-serif] lg:flex-row lg:items-center lg:gap-5"
             >
-              {/* Field 1: Cargo, área o palabra clave */}
-              <div className="flex flex-1 items-center gap-3 px-5 py-2.5 lg:py-1">
-                <MagnifyingGlass size={22} className="text-white/60 flex-shrink-0" />
-                <div className="flex flex-col flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 cursor-pointer">
-                    <span className="text-sm font-medium text-white [font-family:var(--font-inter),sans-serif]">Cargo, área o palabra clave</span>
-                    <CaretDown size={12} className="text-white/70" />
+              {/* Campo 1: Cargo, área o palabra clave */}
+              <div className="flex flex-1 flex-col gap-2">
+                <div className="flex cursor-pointer items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <MagnifyingGlass size={16} className="shrink-0 text-white" />
+                    <span className="whitespace-nowrap text-sm font-medium text-white">Cargo, área o palabra clave</span>
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Ej: Tripulación, Tecnología"
-                    className="w-full bg-transparent border-0 p-0 text-xs font-normal text-white [font-family:var(--font-inter),sans-serif] placeholder:text-white/40 focus:outline-none focus:ring-0 mt-1"
-                  />
+                  <CaretDown size={16} className="shrink-0 text-white" />
                 </div>
+                <input
+                  type="text"
+                  placeholder="Ej: Tripulación, Tecnología"
+                  className="w-full border-0 bg-transparent p-0 pl-6 text-xs font-normal text-white placeholder:text-white/50 focus:outline-none focus:ring-0"
+                />
               </div>
 
-              {/* Separator */}
-              <div className="hidden lg:block w-px h-10 bg-white/15" />
-
-              {/* Field 2: País o ciudad */}
-              <div className="flex flex-1 items-center gap-3 px-5 py-2.5 lg:py-1">
-                <MapPin size={22} className="text-white/60 flex-shrink-0" />
-                <div className="flex flex-col flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 cursor-pointer">
-                    <span className="text-sm font-medium text-white [font-family:var(--font-inter),sans-serif]">País o ciudad</span>
-                    <CaretDown size={12} className="text-white/70" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Ej: Chile, São Paulo"
-                    className="w-full bg-transparent border-0 p-0 text-xs font-normal text-white [font-family:var(--font-inter),sans-serif] placeholder:text-white/40 focus:outline-none focus:ring-0 mt-1"
-                  />
-                </div>
+              {/* Divisor */}
+              <div className="hidden h-6 w-4 shrink-0 items-center justify-center lg:flex">
+                <span className="h-full w-px bg-white/25" />
               </div>
 
-              {/* Separator */}
-              <div className="hidden lg:block w-px h-10 bg-white/15" />
-
-              {/* Field 3: Modalidad */}
-              <div className="flex flex-1 items-center gap-3 px-5 py-2.5 lg:py-1">
-                <Briefcase size={22} className="text-white/60 flex-shrink-0" />
-                <div className="flex flex-col flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 cursor-pointer">
-                    <span className="text-sm font-medium text-white [font-family:var(--font-inter),sans-serif]">Modalidad</span>
-                    <CaretDown size={12} className="text-white/70" />
+              {/* Campo 2: País o ciudad */}
+              <div className="flex flex-1 flex-col gap-2">
+                <div className="flex cursor-pointer items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <MapPin size={16} className="shrink-0 text-white" />
+                    <span className="whitespace-nowrap text-sm font-medium text-white">País o ciudad</span>
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Ej: Presencial, híbrido"
-                    className="w-full bg-transparent border-0 p-0 text-xs font-normal text-white [font-family:var(--font-inter),sans-serif] placeholder:text-white/40 focus:outline-none focus:ring-0 mt-1"
-                  />
+                  <CaretDown size={16} className="shrink-0 text-white" />
                 </div>
+                <input
+                  type="text"
+                  placeholder="Ej: Chile, São Paulo"
+                  className="w-full border-0 bg-transparent p-0 pl-6 text-xs font-normal text-white placeholder:text-white/50 focus:outline-none focus:ring-0"
+                />
               </div>
 
-              {/* Submit Button */}
+              {/* Divisor */}
+              <div className="hidden h-6 w-4 shrink-0 items-center justify-center lg:flex">
+                <span className="h-full w-px bg-white/25" />
+              </div>
+
+              {/* Campo 3: Modalidad */}
+              <div className="flex flex-1 flex-col gap-2">
+                <div className="flex cursor-pointer items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Briefcase size={16} className="shrink-0 text-white" />
+                    <span className="whitespace-nowrap text-sm font-medium text-white">Modalidad</span>
+                  </div>
+                  <CaretDown size={16} className="shrink-0 text-white" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Ej: Presencial, híbrido"
+                  className="w-full border-0 bg-transparent p-0 pl-6 text-xs font-normal text-white placeholder:text-white/50 focus:outline-none focus:ring-0"
+                />
+              </div>
+
+              {/* Divisor */}
+              <div className="hidden h-6 w-4 shrink-0 items-center justify-center lg:flex">
+                <span className="h-full w-px bg-white/25" />
+              </div>
+
+              {/* CTA */}
               <button
                 type="submit"
-                className="flex items-center justify-center gap-2 rounded-full bg-red-latam px-10 py-4.5 text-[15.75px] font-medium text-white [font-family:var(--font-inter),sans-serif] shadow-[0_0.75rem_2rem_-0.25rem_rgba(232,17,75,0.4)] transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-red-latam-deep active:scale-[0.98] cursor-pointer w-full lg:w-auto flex-shrink-0 lg:ml-3"
+                className="flex h-[42px] w-full shrink-0 cursor-pointer items-center justify-center gap-[7px] rounded-full border border-red-latam bg-red-latam px-[17px] text-[15.75px] font-medium text-white transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-red-latam-deep active:scale-[0.98] lg:w-auto"
               >
                 Ver vacantes
-                <PaperPlaneTilt size={18} weight="fill" />
+                <AirplaneTakeoff size={17} weight="fill" />
               </button>
             </form>
           </div>
