@@ -202,23 +202,24 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
           style={{ opacity: bloomOpacity }}
         />
 
-        {/* ── Radial overlay del Figma (89:2383): centro cálido translúcido que
-             cae a índigo #0c104f, opacidad 33% ── */}
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            opacity: radialOpacity,
-            background:
-              "radial-gradient(58.25vw circle at 50.03% 65.33%, rgba(164,149,80,0.26) 10.97%, rgba(88,82,80,0.63) 33.85%, rgba(50,49,79,0.815) 45.29%, rgba(31,32,79,0.9075) 51.01%, rgba(12,16,79,1) 56.73%)",
-          }}
-        />
-
         {/* ── Dark vignette layer (placed behind text, over cabin) ── */}
         <motion.div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-indigo-latam/40"
           style={{ opacity: cabinOpacity }}
+        />
+
+        {/* ── Radial overlay del Figma (89:2383), SIEMPRE encima de la imagen:
+             centro cálido rgba(164,149,80,.26) que cae a índigo #0C104F al 57%,
+             capa al 33% ── */}
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-[5]"
+          style={{
+            opacity: radialOpacity,
+            background:
+              "radial-gradient(circle 58.25vw at 50.03% 65.33%, rgba(164,149,80,0.26) 11%, #0C104F 57%)",
+          }}
         />
 
         {/* ── Menu Overlay ── */}
