@@ -43,10 +43,12 @@ const NAV_LINKS = [
 ] as const;
 
 /* ── "Nuestro propósito" — scroll-linked word reveal (gray → color) ──────── */
+// Texto y bitono exactos del Figma (nodo 89:2466): índigo #1b0088 para las
+// frases de apertura/cierre y gris azulado para el tramo central.
 const PROPOSITO_LINES: readonly { words: readonly string[]; color: string }[] = [
-  { words: ["Volar", "es", "solo", "el", "comienzo."], color: "#10004f" },
-  { words: ["Tu", "talento", "conecta", "personas,", "mueve", "negocios", "y"], color: "#10004f" },
-  { words: ["eleva", "el", "futuro", "de", "la", "región."], color: "#8a8a99" },
+  { words: ["Con", "tu", "talento,"], color: "#1b0088" },
+  { words: ["acercamos", "personas,", "abrimos", "oportunidades"], color: "rgba(49,50,69,0.73)" },
+  { words: ["y", "hacemos", "que", "la", "región", "siga", "avanzando."], color: "#1b0088" },
 ];
 const PROPOSITO_TOTAL = PROPOSITO_LINES.reduce((n, l) => n + l.words.length, 0);
 const REVEAL_START = 0.58;
@@ -260,7 +262,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
             {/* Left: Custom Menu button */}
             <motion.button 
               onClick={() => setMenuOpen(!menuOpen)}
-              className="z-40 flex items-center gap-5 lg:gap-6 bg-transparent border-0 font-semibold text-sm cursor-pointer hover:opacity-85 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 rounded-xl px-2 py-1.5"
+              className="z-40 flex items-center gap-5 lg:gap-6 bg-transparent border-0 font-medium text-sm [font-family:var(--font-inter),sans-serif] cursor-pointer hover:opacity-85 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 rounded-xl px-2 py-1.5"
               style={{ color: headerTextColor }}
             >
               {/* Custom Framer Hamburger Icon */}
@@ -342,7 +344,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
             {/* Right: Country selector & CTA */}
             <div className="flex items-center gap-3 z-40">
               <motion.button 
-                className="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold hover:bg-white/10 transition cursor-pointer"
+                className="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium [font-family:var(--font-inter),sans-serif] hover:bg-white/10 transition cursor-pointer"
                 style={{ 
                   color: headerTextColor, 
                   borderColor: headerBorderColor,
@@ -356,7 +358,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
 
               <a
                 href="#vacantes"
-                className="rounded-full bg-red-latam px-5 py-2 text-sm font-semibold text-white shadow-md hover:bg-red-latam-deep transition active:scale-95 cursor-pointer text-center animate-pulse-subtle"
+                className="rounded-full bg-red-latam px-5 py-2 text-[15px] font-semibold text-white [font-family:var(--font-jakarta),sans-serif] shadow-md hover:bg-red-latam-deep transition active:scale-95 cursor-pointer text-center animate-pulse-subtle"
               >
                 Ver vacantes
               </a>
@@ -375,17 +377,17 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
               {/* Left Column: Label + Title */}
               <div className="lg:col-span-8 flex flex-col items-start text-left">
-                <span className="text-[10px] md:text-xs font-semibold tracking-[0.28em] text-white/70 uppercase block mb-3 md:mb-5">
-                  TRABAJA CON NOSOTROS
+                <span className="mb-3 block text-sm font-bold uppercase leading-[22.448px] tracking-[4.4896px] text-white [font-family:var(--font-space-mono),monospace] md:mb-5">
+                  Trabaja con nosotros
                 </span>
-                <h1 className="text-[clamp(2.5rem,6.5vw,5rem)] font-bold leading-[0.95] tracking-tight text-white">
-                  Construye tu<br />carrera junto<br />a LATAM
+                <h1 className="text-[clamp(2.75rem,7.64vw,6.875rem)] font-bold leading-[1.1075] tracking-[-0.0236em] text-white">
+                  Construye tu carrera junto<br />a LATAM
                 </h1>
               </div>
 
               {/* Right Column: Subtitle */}
               <div className="lg:col-span-4 flex items-center justify-start lg:justify-end">
-                <p className="text-base md:text-lg text-white/80 max-w-xs leading-relaxed text-left lg:ml-auto">
+                <p className="max-w-[375px] text-center text-[20.16px] font-normal leading-[32.256px] text-[#f2f2f2] lg:ml-auto">
                   Encuentra la vacante que despega tu próximo capítulo profesional.
                 </p>
               </div>
@@ -407,13 +409,13 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                 <MagnifyingGlass size={22} className="text-white/60 flex-shrink-0" />
                 <div className="flex flex-col flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 cursor-pointer">
-                    <span className="text-xs lg:text-sm font-bold tracking-tight text-white/95">Cargo, área o palabra clave</span>
+                    <span className="text-sm font-medium text-white [font-family:var(--font-inter),sans-serif]">Cargo, área o palabra clave</span>
                     <CaretDown size={12} className="text-white/70" />
                   </div>
                   <input
                     type="text"
                     placeholder="Ej: Tripulación, Tecnología"
-                    className="w-full bg-transparent border-0 p-0 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-0 mt-1"
+                    className="w-full bg-transparent border-0 p-0 text-xs font-normal text-white [font-family:var(--font-inter),sans-serif] placeholder:text-white/40 focus:outline-none focus:ring-0 mt-1"
                   />
                 </div>
               </div>
@@ -426,13 +428,13 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                 <MapPin size={22} className="text-white/60 flex-shrink-0" />
                 <div className="flex flex-col flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 cursor-pointer">
-                    <span className="text-xs lg:text-sm font-bold tracking-tight text-white/95">País o ciudad</span>
+                    <span className="text-sm font-medium text-white [font-family:var(--font-inter),sans-serif]">País o ciudad</span>
                     <CaretDown size={12} className="text-white/70" />
                   </div>
                   <input
                     type="text"
                     placeholder="Ej: Chile, São Paulo"
-                    className="w-full bg-transparent border-0 p-0 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-0 mt-1"
+                    className="w-full bg-transparent border-0 p-0 text-xs font-normal text-white [font-family:var(--font-inter),sans-serif] placeholder:text-white/40 focus:outline-none focus:ring-0 mt-1"
                   />
                 </div>
               </div>
@@ -445,13 +447,13 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                 <Briefcase size={22} className="text-white/60 flex-shrink-0" />
                 <div className="flex flex-col flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 cursor-pointer">
-                    <span className="text-xs lg:text-sm font-bold tracking-tight text-white/95">Modalidad</span>
+                    <span className="text-sm font-medium text-white [font-family:var(--font-inter),sans-serif]">Modalidad</span>
                     <CaretDown size={12} className="text-white/70" />
                   </div>
                   <input
                     type="text"
                     placeholder="Ej: Presencial, híbrido"
-                    className="w-full bg-transparent border-0 p-0 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-0 mt-1"
+                    className="w-full bg-transparent border-0 p-0 text-xs font-normal text-white [font-family:var(--font-inter),sans-serif] placeholder:text-white/40 focus:outline-none focus:ring-0 mt-1"
                   />
                 </div>
               </div>
@@ -459,7 +461,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="flex items-center justify-center gap-2 rounded-full bg-red-latam px-10 py-4.5 text-base font-bold text-white shadow-[0_0.75rem_2rem_-0.25rem_rgba(232,17,75,0.4)] transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-red-latam-deep active:scale-[0.98] cursor-pointer w-full lg:w-auto flex-shrink-0 lg:ml-3"
+                className="flex items-center justify-center gap-2 rounded-full bg-red-latam px-10 py-4.5 text-[15.75px] font-medium text-white [font-family:var(--font-inter),sans-serif] shadow-[0_0.75rem_2rem_-0.25rem_rgba(232,17,75,0.4)] transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-red-latam-deep active:scale-[0.98] cursor-pointer w-full lg:w-auto flex-shrink-0 lg:ml-3"
               >
                 Ver vacantes
                 <PaperPlaneTilt size={18} weight="fill" />
@@ -474,14 +476,14 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
           style={{ opacity: skyTextOpacity, scale: skyTextScale, y: skyTextY }}
         >
           {/* Label: NUESTRO PROPÓSITO in pink/coral */}
-          <p className="text-xs md:text-sm font-bold uppercase tracking-[0.35em] text-[#f0506e] mb-6 md:mb-8">
+          <p className="mb-6 text-sm font-black uppercase leading-[22.448px] tracking-[4.4896px] text-[#fc4a78] md:mb-8">
             Nuestro propósito
           </p>
 
           {/* Heading — words fill from gray to color as you scroll (scroll reveal) */}
           <h2
-            aria-label="Volar es solo el comienzo. Tu talento conecta personas, mueve negocios y eleva el futuro de la región."
-            className="font-sans text-[clamp(1.65rem,4.5vw,3.2rem)] font-medium leading-[1.25] tracking-[-0.01em] max-w-5xl mx-auto"
+            aria-label="Con tu talento, acercamos personas, abrimos oportunidades y hacemos que la región siga avanzando."
+            className="font-sans text-[clamp(1.75rem,3.75vw,3.375rem)] font-normal leading-[1.216] tracking-[-0.0101em] max-w-[954px] mx-auto"
           >
             {PROPOSITO_LINES.map((line, li) => {
               const offset = PROPOSITO_LINES.slice(0, li).reduce(
@@ -489,11 +491,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                 0,
               );
               return (
-                <span
-                  aria-hidden
-                  key={li}
-                  className={li < PROPOSITO_LINES.length - 1 ? "block mb-2" : "block"}
-                >
+                <span aria-hidden key={li} className="inline">
                   {line.words.map((w, wi) => (
                     <ScrollWord
                       key={wi}

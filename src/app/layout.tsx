@@ -7,6 +7,7 @@ import {
   Space_Mono,
   Barlow_Condensed,
   Inter,
+  Plus_Jakarta_Sans,
 } from "next/font/google";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { CurtainLoader } from "@/components/motion/CurtainLoader";
@@ -61,6 +62,14 @@ const inter = Inter({
   weight: ["400", "500", "600", "700"],
 });
 
+// CTA del nav y títulos de columnas del footer, según el Figma
+// "LATAM Careers D2".
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin"],
+  weight: ["600", "700"],
+});
+
 export const metadata: Metadata = {
   title: "Empleos LATAM — Despega tu carrera con nosotros",
   description:
@@ -75,7 +84,7 @@ export default function RootLayout({
   return (
     <html
       lang="es-PE"
-      className={`${manrope.variable} ${martianMono.variable} ${bricolage.variable} ${spaceGrotesk.variable} ${spaceMono.variable} ${barlowCondensed.variable} ${inter.variable} h-full antialiased`}
+      className={`${manrope.variable} ${martianMono.variable} ${bricolage.variable} ${spaceGrotesk.variable} ${spaceMono.variable} ${barlowCondensed.variable} ${inter.variable} ${plusJakarta.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <SmoothScroll>

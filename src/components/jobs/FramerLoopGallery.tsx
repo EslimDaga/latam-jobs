@@ -34,7 +34,7 @@ const SLOTS: { img: number; cls: string }[] = [
   { img: 3, cls: "left-[12%] top-[19%] w-[150px] aspect-[4/5]" },
   { img: 5, cls: "left-[61%] top-[15%] w-[185px] aspect-[4/5]" },
   { img: 10, cls: "right-[4%] top-[27%] w-[180px] aspect-[4/3]" },
-  { img: 8, cls: "left-[35%] top-[33%] w-[200px] aspect-[4/3]" },
+  { img: 8, cls: "left-[30%] top-[24%] w-[200px] aspect-[4/3]" },
   { img: 9, cls: "left-[17%] top-[45%] w-[175px] aspect-[4/5]" },
   { img: 0, cls: "left-[3%] top-[56%] w-[160px] aspect-square" },
   { img: 4, cls: "left-[53%] top-[57%] w-[170px] aspect-[4/3]" },
@@ -67,7 +67,6 @@ export function FramerLoopGallery(): React.JSX.Element {
 
   // Texto (bloques), con su propio parallax suave.
   const yText1 = useTransform(scrollYProgress, [0, 1], [30, -30]);
-  const yText2 = useTransform(scrollYProgress, [0, 1], [45, -45]);
 
   const cardStyle =
     "relative overflow-hidden rounded-[2rem] shadow-lg border border-black/5 bg-zinc-50 hover:scale-[1.04] hover:shadow-2xl transition-all duration-500 cursor-pointer w-full h-full";
@@ -97,46 +96,29 @@ export function FramerLoopGallery(): React.JSX.Element {
             );
           })}
 
-          {/* Texto 1 (destacado) */}
+          {/* Titular central + CTA, como en el Figma (nodo 89:2472) */}
           <motion.div
             style={{ y: reduced ? undefined : yText1 }}
-            className="absolute left-[45%] top-[8%] max-w-[330px] text-left"
+            className="absolute left-1/2 top-1/2 z-10 flex w-max -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-6 text-center"
           >
-            <p className="text-[17px] font-medium leading-relaxed text-[#12103a]">
-              Detrás de cada vuelo hay personas que hacen de LATAM un gran lugar
-              para crecer.
-            </p>
-          </motion.div>
-
-          {/* Texto 2 (secundario) */}
-          <motion.div
-            style={{ y: reduced ? undefined : yText2 }}
-            className="absolute left-[27%] top-[72%] max-w-[300px] text-left"
-          >
-            <p className="text-[15px] leading-relaxed text-zinc-500">
-              Pilotos, tripulación, mantenimiento y equipos en tierra: una sola
-              cultura que conecta a toda la región.
-            </p>
-          </motion.div>
-
-          {/* Botón "Nuestra cultura" */}
-          <div className="absolute bottom-[2%] left-1/2 -translate-x-1/2">
+            <h2 className="text-[42px] font-bold leading-[40.052px] tracking-[-0.3927px] text-[#1b0088] [font-family:var(--font-inter),sans-serif]">
+              Sé tú. Volemos más alto.
+            </h2>
             <a
               href="#cultura"
-              className="inline-flex select-none items-center justify-center rounded-full bg-red-latam px-8 py-3.5 text-base font-bold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-red-latam-deep active:scale-95"
+              className="inline-flex select-none items-center justify-center rounded-full bg-red-latam px-[17px] py-2.5 text-[15.75px] font-medium text-white [font-family:var(--font-inter),sans-serif] shadow-lg transition-all duration-300 hover:scale-105 hover:bg-red-latam-deep active:scale-95"
             >
               Nuestra cultura
             </a>
-          </div>
+          </motion.div>
         </div>
 
         {/* Móvil: grilla limpia con las mismas fotos */}
         <div className="flex flex-col gap-8 md:hidden">
           <div className="px-4 text-center">
-            <p className="text-base font-medium leading-relaxed text-[#12103a]">
-              Detrás de cada vuelo hay personas que hacen de LATAM un gran lugar
-              para crecer.
-            </p>
+            <h2 className="text-[clamp(1.75rem,8vw,42px)] font-bold leading-[0.9536] tracking-[-0.3927px] text-[#1b0088] [font-family:var(--font-inter),sans-serif]">
+              Sé tú. Volemos más alto.
+            </h2>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -151,17 +133,10 @@ export function FramerLoopGallery(): React.JSX.Element {
             ))}
           </div>
 
-          <div className="px-4 text-center">
-            <p className="text-sm leading-relaxed text-zinc-500">
-              Pilotos, tripulación, mantenimiento y equipos en tierra: una sola
-              cultura que conecta a toda la región.
-            </p>
-          </div>
-
           <div className="mt-4 flex justify-center">
             <a
               href="#cultura"
-              className="rounded-full bg-red-latam px-8 py-3 text-center text-sm font-bold text-white shadow-md"
+              className="rounded-full bg-red-latam px-[17px] py-2.5 text-center text-[15.75px] font-medium text-white [font-family:var(--font-inter),sans-serif] shadow-md"
             >
               Nuestra cultura
             </a>

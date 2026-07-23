@@ -35,18 +35,18 @@ export function Testimonials(): React.JSX.Element {
       <div className="mx-auto max-w-7xl">
         {/* Encabezado */}
         <Reveal className="text-center" from="up">
-          <span className="mb-4 block text-[11px] font-semibold uppercase tracking-[0.32em] text-pink-latam">
-            Voces a bordo
+          <span className="mb-4 block text-xs font-black uppercase leading-[10.798px] tracking-[3.4554px] text-[#E6114C]">
+            Explora tu próximo rol
           </span>
           <h2
             id="testimonios-title"
-            className="mx-auto text-[clamp(1.9rem,7vw,2.35rem)] font-bold leading-[1.1] tracking-tight text-indigo-latam md:whitespace-nowrap md:text-[clamp(1.5rem,3.7vw,3rem)]"
+            className="mx-auto text-[clamp(1.75rem,2.86vw,41.212px)] font-bold leading-[0.9719] tracking-[-0.3927px] text-[#1B0088] [font-family:var(--font-inter),sans-serif] md:whitespace-nowrap"
           >
-            Historias de quienes ya vuelan con nosotros
+            Hay muchas formas de construir LATAM
           </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-ink-soft sm:text-lg lg:max-w-none lg:whitespace-nowrap lg:text-[clamp(0.95rem,1.5vw,1.125rem)]">
-            Conoce las experiencias de las personas que construyen LATAM desde
-            distintos equipos y profesiones.
+          <p className="mx-auto mt-5 max-w-2xl text-[15.216px] font-normal leading-[22.823px] text-[#5B6172] [font-family:var(--font-inter),sans-serif] lg:max-w-none lg:whitespace-nowrap">
+            Descubre dónde puede despegar tu talento y conoce las oportunidades
+            disponibles en nuestros distintos equipos.
           </p>
         </Reveal>
 
@@ -77,9 +77,9 @@ export function Testimonials(): React.JSX.Element {
         <Reveal className="mt-12 flex justify-center" from="up" delay={0.1}>
           <a
             href="#vacantes"
-            className="group inline-flex items-center gap-2.5 rounded-full bg-red-latam px-8 py-4 text-base font-semibold text-white shadow-[0_0.75rem_2rem_-0.4rem_rgba(232,17,75,0.5)] transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-red-latam-deep active:scale-[0.98]"
+            className="group inline-flex items-center gap-2.5 rounded-full bg-red-latam px-8 py-4 text-[15.75px] font-medium text-white [font-family:var(--font-inter),sans-serif] shadow-[0_0.75rem_2rem_-0.4rem_rgba(232,17,75,0.5)] transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-red-latam-deep active:scale-[0.98]"
           >
-            Ver vacantes
+            Explorar todos los roles
             <PaperPlaneTilt
               size={18}
               weight="fill"

@@ -21,6 +21,7 @@ import { Reveal } from "@/components/motion";
 
 const SG = "var(--font-space-grotesk),system-ui,sans-serif";
 const SM = "var(--font-space-mono),monospace";
+const LS = "'Latam Sans',var(--font-manrope),sans-serif";
 
 type Palette = Record<string, string> & { light?: string };
 
@@ -208,7 +209,7 @@ function buildBoardHTML(d: BoardData): string {
   const chips = restAreas
     .map(
       (area) =>
-        `<span data-chip style="font:500 13px/1 ${SG};padding:10px 16px;border-radius:999px;cursor:pointer;transition:all .16s;border:1px solid ${p.chipBd};color:${p.chipText}">${area}</span>`,
+        `<span data-chip style="font:500 12.762px/12.762px ${SG};padding:9.8px 15.7px;border-radius:999px;cursor:pointer;transition:all .16s;border:1px solid ${p.chipBd};color:${p.chipText}">${area}</span>`,
     )
     .join("");
 
@@ -278,33 +279,33 @@ function buildBoardHTML(d: BoardData): string {
   <div data-vac-board style="width:100%;font-family:${SG}">
     <div style="position:relative;width:100%;border-radius:22px;overflow:hidden;padding:40px 44px;background:${p.boardBg};box-shadow:${p.boardShadow}">
       <div data-view-toggle style="position:absolute;top:40px;right:44px;z-index:6;display:inline-flex;align-items:center;gap:4px;padding:5px;border-radius:999px;-webkit-backdrop-filter:blur(22px) saturate(140%);backdrop-filter:blur(22px) saturate(140%);background:${p.panelBg};border:1px solid ${p.panelBd};box-shadow:${p.panelShadow}">
-        <button data-view-btn="lista" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:0;border-radius:999px;cursor:pointer;font:600 13.5px/1 ${SG};transition:background .18s ease,color .18s ease">
+        <button data-view-btn="lista" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:0;border-radius:999px;cursor:pointer;font:700 13.252px/13.252px ${SG};transition:background .18s ease,color .18s ease">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
           <span data-view-label="lista">Lista</span>
         </button>
-        <button data-view-btn="mapa" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:0;border-radius:999px;cursor:pointer;font:600 13.5px/1 ${SG};background:transparent;transition:background .18s ease,color .18s ease">
+        <button data-view-btn="mapa" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:0;border-radius:999px;cursor:pointer;font:700 13.252px/13.252px ${SG};background:transparent;transition:background .18s ease,color .18s ease">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
           <span data-view-label="mapa" style="display:none">Mapa</span>
         </button>
       </div>
-      <div style="font:700 11px/1 ${SM};letter-spacing:.32em;text-transform:uppercase;color:${p.accent}">Tablero de embarque</div>
-      <h2 style="margin:12px 0 8px;font:600 40px/1.02 ${SG};letter-spacing:-.01em;color:${p.heading}">Vacantes con embarque abierto</h2>
-      <p style="margin:0 0 24px;font:400 15.5px/1.5 ${SG};max-width:560px;color:${p.body}">Cada vacante es un pase de embarque. Filtra por área o busca tu próximo vuelo.</p>
+      <div style="font:900 14px/10.798px ${LS};letter-spacing:3.4554px;text-transform:uppercase;color:${p.accent}">Vacantes disponibles</div>
+      <h2 style="margin:14px 0 10px;font:700 42px/40.052px ${LS};letter-spacing:-.3927px;color:${p.heading}">Encuentra tu próxima oportunidad en LATAM</h2>
+      <p style="margin:0 0 24px;font:400 15.216px/22.823px ${LS};max-width:560px;color:${p.body}">Explora las vacantes abiertas, filtra por área y descubre dónde puede crecer tu talento.</p>
 
       <div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px">
-        <span style="font:600 13px/1 ${SG};padding:10px 16px;border-radius:999px;background:${p.chipActiveBg};color:${p.chipActiveText}">Todas</span>
+        <span style="font:700 12.762px/12.762px ${SG};padding:9.8px 15.7px;border-radius:999px;background:${p.chipActiveBg};color:${p.chipActiveText}">Todas</span>
         ${chips}
       </div>
 
       <div data-view-panel="lista" style="position:relative;border-radius:16px;-webkit-backdrop-filter:blur(22px) saturate(140%);backdrop-filter:blur(22px) saturate(140%);border:1px solid ${p.panelBd};background:${p.panelBg};box-shadow:${p.panelShadow}">
         <div style="display:flex;align-items:center;gap:10px;padding:15px 20px;border-bottom:1px solid ${p.divider}">
           <span style="font-size:16px;color:${p.accent}">✈</span>
-          <span style="font:700 12px/1 ${SM};letter-spacing:.18em;color:${p.heading}">SALIDAS · EMBARQUE ABIERTO</span>
+          <span style="font:900 11.78px/11.78px ${LS};letter-spacing:2.1204px;color:${p.heading}">SALIDAS · EMBARQUE ABIERTO</span>
           <span style="width:6px;height:6px;border-radius:50%;background:#37d18a;animation:vacBlink 1.6s infinite;margin-left:2px"></span>
-          <span style="font:400 10.5px/1 ${SM};letter-spacing:.14em;color:${p.label}">EN VIVO</span>
-          <span data-clock style="margin-left:auto;font:700 13px/1 ${SM};letter-spacing:.12em;color:${p.clock}">${clock}</span>
+          <span style="font:400 10.307px/10.307px ${SM};letter-spacing:1.443px;color:${p.label}">EN VIVO</span>
+          <span data-clock style="margin-left:auto;font:900 13px/12.762px ${LS};letter-spacing:1.5314px;color:${p.clock}">${clock}</span>
         </div>
-        <div style="display:grid;grid-template-columns:188px minmax(168px,1.3fr) 186px 172px 120px;column-gap:14px;padding:14px 20px;font:700 12px/1 ${SM};letter-spacing:.18em;text-transform:uppercase;background:${p.headBg};border-bottom:1px solid ${p.divider};color:${p.headText}">
+        <div style="display:grid;grid-template-columns:188px minmax(168px,1.3fr) 186px 172px 120px;column-gap:14px;padding:14px 20px;font:900 11.78px/11.78px ${LS};letter-spacing:2.1204px;text-transform:uppercase;background:${p.headBg};border-bottom:1px solid ${p.divider};color:${p.headText}">
           <span style="display:flex;align-items:center;gap:7px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:.7"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>Área</span>
           <span style="display:flex;align-items:center;gap:7px;color:${p.accent}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:.9"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path></svg>Cargo</span>
           <span style="display:flex;align-items:center;gap:7px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:.7"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>Ubicación</span>
@@ -315,10 +316,10 @@ function buildBoardHTML(d: BoardData): string {
           ${rowsHtml}
         </div>
         <div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-top:1px solid ${p.divider}">
-          <span style="font:700 12px/1 ${SM};letter-spacing:.12em;color:${p.heading}">6 VACANTES CON POSTULACIÓN ABIERTA</span>
+          <span style="font:900 12px/11.78px ${LS};letter-spacing:1.4136px;color:${p.heading}">6 VACANTES CON POSTULACIÓN ABIERTA</span>
           <div style="margin-left:auto;display:flex;align-items:center;gap:9px;padding:9px 16px;border-radius:999px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);min-width:300px;border:1px solid ${p.searchBd};background:${p.searchBg}">
             <span style="font-size:13px;color:${p.label}">⌕</span>
-            <input placeholder="Buscar por cargo o palabra clave" style="flex:1;border:0;background:transparent;outline:none;font:400 13px/1 ${SG};color:${p.inputText}">
+            <input placeholder="Buscar por cargo o palabra clave" style="flex:1;border:0;background:transparent;outline:none;font:400 13px/1 ${LS};color:${p.inputText}">
           </div>
         </div>
       </div>
@@ -576,8 +577,8 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
       s.fontFamily = SM; s.flex = "0 0 auto";
       const skin = tileSkin();
       s.borderRadius = "3px"; s.boxShadow = skin.boxShadow; s.background = skin.background; s.marginRight = "1px";
-      if (col === "area") { s.width = "13px"; s.height = "20px"; s.fontSize = "12.5px"; s.color = p.tileTextArea; }
-      else { s.width = "13px"; s.height = "22px"; s.fontSize = "14px"; s.color = p.tileText; }
+      if (col === "area") { s.width = "13px"; s.height = "20px"; s.fontSize = "12.271px"; s.color = p.tileTextArea; }
+      else { s.width = "13px"; s.height = "22px"; s.fontSize = "13.743px"; s.color = p.tileText; }
     };
 
     let raf = 0;
@@ -607,7 +608,7 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
         }
         if (col === "cargo") {
           cell.textContent = text;
-          s.fontFamily = SG; s.fontWeight = "600"; s.fontSize = "16px"; s.lineHeight = "1.15"; s.color = p.cargoText;
+          s.fontFamily = LS; s.fontWeight = "700"; s.fontSize = "16.485px"; s.lineHeight = "18.062px"; s.color = p.cargoText;
           return;
         }
         cell.textContent = "";

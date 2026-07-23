@@ -144,15 +144,16 @@ export function EmbarkationTicket(): React.JSX.Element {
           <span
             style={{
               display: "block",
-              color: "#E8114B",
+              color: "#E6114C",
               fontSize: "12px",
-              fontWeight: 700,
-              letterSpacing: "0.28em",
+              fontWeight: 900,
+              lineHeight: "10.798px",
+              letterSpacing: "3.4554px",
               textTransform: "uppercase",
               marginBottom: "14px",
             }}
           >
-            Tu ruta de vuelo
+            Tu camino en LATAM
           </span>
           <h2
             className="md:whitespace-nowrap"
@@ -160,9 +161,9 @@ export function EmbarkationTicket(): React.JSX.Element {
               margin: 0,
               color: "#1B0088",
               fontWeight: 700,
-              fontSize: "clamp(1.75rem, 4.4vw, 3.25rem)",
-              lineHeight: 1.04,
-              letterSpacing: "-0.01em",
+              fontSize: "clamp(1.75rem, 2.92vw, 42px)",
+              lineHeight: 0.9536,
+              letterSpacing: "-0.3927px",
             }}
           >
             Así comienza tu viaje con LATAM
@@ -171,13 +172,13 @@ export function EmbarkationTicket(): React.JSX.Element {
             className="md:whitespace-nowrap"
             style={{
               margin: "16px auto 0",
-              color: "#616a75",
-              fontSize: "clamp(0.95rem, 1.5vw, 1.125rem)",
-              lineHeight: 1.5,
+              color: "#5B6172",
+              fontSize: "15.216px",
+              lineHeight: "22.823px",
             }}
           >
-            Desde tu postulación hasta el embarque, te acompañamos en cada etapa
-            del proceso.
+            Desde tu postulación hasta tu primer día, te acompañamos en cada
+            etapa del proceso.
           </p>
         </div>
       </Reveal>
@@ -209,11 +210,11 @@ export function EmbarkationTicket(): React.JSX.Element {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <LatamLogo />
-                <span style={{ fontSize: "12px", letterSpacing: "2px", color: "#A7A2E0", textTransform: "uppercase", fontWeight: 600 }}>
+                <span style={{ fontSize: "14.16px", letterSpacing: "2.36px", color: "#A7A2E0", textTransform: "uppercase", fontWeight: 600 }}>
                   Pase de Embarque
                 </span>
               </div>
-              <span style={{ fontSize: "12px", letterSpacing: "2px", color: "#A7A2E0", fontWeight: 700, textTransform: "uppercase" }}>
+              <span style={{ fontSize: "14.16px", letterSpacing: "2.36px", color: "#A7A2E0", fontWeight: 700, textTransform: "uppercase" }}>
                 Itinerario · 7 Etapas
               </span>
             </div>
@@ -259,7 +260,7 @@ export function EmbarkationTicket(): React.JSX.Element {
                   >
                     <span style={{ width: "32px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       {isLast ? (
-                        <span style={{ fontSize: "16px", color: "#E8114B", lineHeight: 1 }}>✈</span>
+                        <span style={{ fontSize: "18.88px", color: "#E8114B", lineHeight: 1 }}>✈</span>
                       ) : (
                         <span
                           style={{
@@ -275,12 +276,12 @@ export function EmbarkationTicket(): React.JSX.Element {
                     </span>
                     <span
                       style={{
-                        width: "54px",
+                        width: "58px",
                         flexShrink: 0,
                         fontFamily: BARLOW,
                         fontWeight: 700,
-                        fontSize: "21px",
-                        letterSpacing: "0.5px",
+                        fontSize: "24.78px",
+                        letterSpacing: "0.59px",
                         color: on ? "#E8114B" : "#EAE8FA",
                         transition: "color 0.2s",
                       }}
@@ -290,7 +291,7 @@ export function EmbarkationTicket(): React.JSX.Element {
                     <span
                       style={{
                         flex: 1,
-                        fontSize: "14.5px",
+                        fontSize: "17.11px",
                         fontWeight: 600,
                         color: on ? "#ffffff" : "#C9C5F0",
                         transition: "color 0.2s",
@@ -303,9 +304,9 @@ export function EmbarkationTicket(): React.JSX.Element {
                     </span>
                     <span
                       style={{
-                        fontSize: "11px",
+                        fontSize: "12.98px",
                         fontWeight: 700,
-                        letterSpacing: "1.5px",
+                        letterSpacing: "1.77px",
                         color: on ? "#A7A2E0" : "#7F7AC8",
                         transition: "color 0.2s",
                       }}
@@ -343,15 +344,15 @@ export function EmbarkationTicket(): React.JSX.Element {
                   }}
                 >
                   <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                    <span style={{ fontSize: "10px", letterSpacing: "1.5px", color: "#7F7AC8", textTransform: "uppercase" }}>Ruta</span>
-                    <span style={{ fontSize: "17px", fontWeight: 700, color: "#ffffff", lineHeight: 1.35 }}>Postulación &gt; Embarque LATAM</span>
+                    <span style={{ fontSize: "11.8px", fontWeight: 400, letterSpacing: "1.77px", color: "#7F7AC8", textTransform: "uppercase" }}>Ruta</span>
+                    <span style={{ fontSize: "20.06px", fontWeight: 700, color: "#ffffff", lineHeight: "27.081px" }}>Postulación &gt; Embarque LATAM</span>
                   </div>
                   <div style={{ height: "1px", background: "rgba(255,255,255,0.16)" }} />
                   <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                    <span style={{ fontSize: "10px", letterSpacing: "1.5px", color: "#7F7AC8", textTransform: "uppercase" }}>Destino</span>
-                    <span style={{ fontSize: "17px", fontWeight: 700, color: "#ffffff", lineHeight: 1.35 }}>Tu próximo gran viaje empieza aquí</span>
+                    <span style={{ fontSize: "11.8px", fontWeight: 400, letterSpacing: "1.77px", color: "#7F7AC8", textTransform: "uppercase" }}>Destino</span>
+                    <span style={{ fontSize: "20.06px", fontWeight: 700, color: "#ffffff", lineHeight: "27.081px" }}>Tu próximo gran viaje empieza aquí</span>
                   </div>
-                  <p style={{ margin: "auto 0 0", fontSize: "12px", lineHeight: 1.5, color: "#7F7AC8" }}>
+                  <p style={{ margin: "auto 0 0", fontSize: "14.16px", lineHeight: "21.24px", color: "#7F7AC8" }}>
                     Pasa el cursor o toca una etapa del itinerario para ver su detalle.
                   </p>
                 </div>
@@ -370,17 +371,17 @@ export function EmbarkationTicket(): React.JSX.Element {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-                    <span style={{ fontFamily: BARLOW, fontWeight: 800, fontSize: "44px", color: "#E8114B", lineHeight: 1 }}>{cur.code}</span>
-                    <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "1.5px", color: "#A7A2E0" }}>
+                    <span style={{ fontFamily: BARLOW, fontWeight: 800, fontSize: "51.92px", color: "#E8114B", lineHeight: "51.92px" }}>{cur.code}</span>
+                    <span style={{ fontSize: "12.98px", fontWeight: 700, letterSpacing: "1.77px", color: "#A7A2E0" }}>
                       ETAPA {idx + 1} / {STEPS.length}
                     </span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "9px", flexWrap: "wrap" }}>
                     <span
                       style={{
-                        fontSize: "10px",
+                        fontSize: "11.8px",
                         fontWeight: 700,
-                        letterSpacing: "1.5px",
+                        letterSpacing: "1.77px",
                         textTransform: "uppercase",
                         color: "#E8114B",
                         background: "rgba(232,17,75,0.16)",
@@ -390,9 +391,9 @@ export function EmbarkationTicket(): React.JSX.Element {
                     >
                       {cur.phase}
                     </span>
-                    <span style={{ fontSize: "16px", fontWeight: 700, color: "#ffffff" }}>{cur.title}</span>
+                    <span style={{ fontSize: "18.88px", fontWeight: 700, color: "#ffffff" }}>{cur.title}</span>
                   </div>
-                  <p style={{ margin: 0, fontSize: "13px", lineHeight: 1.6, color: "#D8D5F4" }}>{cur.desc}</p>
+                  <p style={{ margin: 0, fontSize: "15.34px", lineHeight: "24.544px", color: "#D8D5F4" }}>{cur.desc}</p>
                 </div>
               </div>
 
@@ -404,7 +405,7 @@ export function EmbarkationTicket(): React.JSX.Element {
                     <span key={i} style={{ width: `${w}px`, background: "rgba(255,255,255,0.55)", flexShrink: 0 }} />
                   ))}
                 </div>
-                <span style={{ fontSize: "10px", letterSpacing: "2px", color: "#7F7AC8" }}>LA 2025 07 01</span>
+                <span style={{ fontSize: "11.8px", letterSpacing: "2.36px", color: "#7F7AC8" }}>LA 2025 07 01</span>
               </div>
             </div>
 
@@ -412,16 +413,16 @@ export function EmbarkationTicket(): React.JSX.Element {
             <div style={{ flexShrink: 0, display: "flex", gap: "12px", alignItems: "stretch" }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "14px" }}>
                 <span style={{ flex: 1, width: "1px", background: "rgba(255,255,255,0.28)" }} />
-                <span style={{ fontSize: "15px", color: "rgba(255,255,255,0.85)", lineHeight: 1, transform: "rotate(-90deg)", padding: "6px 0", display: "inline-block" }}>✈</span>
+                <span style={{ fontSize: "17.7px", color: "rgba(255,255,255,0.85)", lineHeight: "17.7px", transform: "rotate(-90deg)", padding: "6px 0", display: "inline-block" }}>✈</span>
                 <span style={{ flex: 1, width: "1px", background: "rgba(255,255,255,0.28)" }} />
               </div>
               <span
                 style={{
                   writingMode: "vertical-rl",
                   transform: "rotate(180deg)",
-                  fontSize: "10px",
+                  fontSize: "11.8px",
                   fontWeight: 600,
-                  letterSpacing: "3px",
+                  letterSpacing: "3.54px",
                   textTransform: "uppercase",
                   color: "#A7A2E0",
                   textAlign: "center",
