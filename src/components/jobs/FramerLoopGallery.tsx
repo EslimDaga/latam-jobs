@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { useRef, useState } from "react";
+import { motion, useScroll, useTransform, useReducedMotion, AnimatePresence } from "framer-motion";
 
 /**
  * FramerLoopGallery — sección "Nuestra cultura".
@@ -11,36 +11,176 @@ import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion
  * se dispersan en un lienzo posicionado; en móvil caen en una grilla limpia.
  */
 
-// Fotos propias (carpeta "Nuestra cultura"), en orden natural. `portrait`
-// marca la orientación para elegir la proporción adecuada en la grilla móvil.
-const IMAGES = [
-  { src: "/images/cultura/cultura-01.jpg", alt: "Técnica de mantenimiento inspeccionando una aeronave en plataforma", portrait: false },
-  { src: "/images/cultura/cultura-02.jpg", alt: "Avión de LATAM en vuelo", portrait: false },
-  { src: "/images/cultura/cultura-03.jpg", alt: "Equipo de agentes de LATAM en la puerta de embarque", portrait: false },
-  { src: "/images/cultura/cultura-04.jpg", alt: "Técnico de LATAM frente a la turbina de un avión", portrait: true },
-  { src: "/images/cultura/cultura-05.jpg", alt: "Avión de LATAM volando sobre las nubes al atardecer", portrait: false },
-  { src: "/images/cultura/cultura-06.jpg", alt: "Agente de counter de LATAM sonriendo en el aeropuerto", portrait: true },
-  { src: "/images/cultura/cultura-07.jpg", alt: "Colaboradora de LATAM sonriendo junto al mostrador", portrait: false },
-  { src: "/images/cultura/cultura-08.jpg", alt: "Piloto de LATAM junto a la aeronave", portrait: false },
-  { src: "/images/cultura/cultura-09.jpg", alt: "Agente de LATAM ayudando a una pasajera en el autoservicio", portrait: false },
-  { src: "/images/cultura/cultura-10.jpg", alt: "Comandante de LATAM en plataforma junto a un Airbus A320", portrait: true },
-  { src: "/images/cultura/cultura-11.jpg", alt: "Tripulante de cabina de LATAM sonriendo a bordo", portrait: false },
+interface CultureImage {
+  src: string;
+  alt: string;
+  quote?: string;
+  name?: string;
+}
+
+// Las 13 fotos oficiales de "Nuestra cultura" para el collage completo según Figma
+const IMAGES: CultureImage[] = [
+  { src: "/images/cultura/cultura-01.jpg", alt: "Técnica de mantenimiento inspeccionando una aeronave en plataforma" },
+  {
+    src: "/images/cultura/cultura-02.jpg",
+    alt: "Vicente Ignacio Silva, Product Manager de Selección de LATAM sonriendo",
+    quote: "“soy Product Manager de Selección dentro del área digital, lo que le da sentido al rol es con quiénes lo construyo: trabajar cross-país te obliga a salir de tu cabeza, y esa diversidad de miradas termina siendo el ingrediente que le da riqueza real a lo que entregamos.”",
+    name: "Vicente Ignacio SIlva",
+  },
+  { src: "/images/cultura/cultura-03.jpg", alt: "Equipo de agentes de LATAM en la puerta de embarque" },
+  {
+    src: "/images/cultura/cultura-04.jpg",
+    alt: "Rodrigo Crisostomo, colaborador de mantenimiento de LATAM en la turbina de un avión",
+    quote: "“Lo que más valoro y que me gusta de trabajar en latam, específicamente en el área de mantenimiento de línea base, es que cada día representa un nuevo desafío y una oportunidad de aprendizaje.”",
+    name: "Rodrigo Crisostomo",
+  },
+  { src: "/images/cultura/cultura-05.jpg", alt: "Avión de LATAM volando sobre las nubes al atardecer" },
+  {
+    src: "/images/cultura/cultura-06.jpg",
+    alt: "Andrés Mesía, colaborador de LATAM sonriendo en oficina",
+    quote: "“Lo que más disfruto de trabajar en LATAM es el dinamismo de la industria y la oportunidad de aprender de personas con esa misma pasión por la aviación.”",
+    name: "ANDRES MESIA",
+  },
+  {
+    src: "/images/cultura/cultura-07.jpg",
+    alt: "Vanina Valle, colaboradora de LATAM sonriendo en oficina",
+    quote: "“LATAM es una organización con un propósito fuerte y un sentido de pertenencia único. Es una verdadera escuela que impulsa el crecimiento profesional y personal, enseñando colaboración, resiliencia y la importancia de conectar con el trabajo que uno realiza.”",
+    name: "Vanina Valle",
+  },
+  { src: "/images/cultura/cultura-08.jpg", alt: "Piloto de LATAM junto a la aeronave" },
+  { src: "/images/cultura/cultura-09.jpg", alt: "Agente de LATAM ayudando a una pasajera en el autoservicio" },
+  { src: "/images/cultura/cultura-10.jpg", alt: "Comandante de LATAM en plataforma junto a un Airbus A320" },
+  {
+    src: "/images/cultura/cultura-11.jpg",
+    alt: "Domenica Aguirre, tripulante de cabina de LATAM sonriendo",
+    quote: "“LATAM desde el día uno demostró que cumple lo que promete no solo con nuestros clientes, sino con el núcleo de la empresa como somos nosotros.”",
+    name: "Domenica Aguirre",
+  },
+  {
+    src: "/images/voces/voces-01.jpg",
+    alt: "Juan Pablo Rodriguez Henao, colaborador de LATAM CARGO sonriendo",
+    quote: "“De LATAM valoro profundamente su cultura humana: una compañía donde te sientes en familia, donde se reconoce el esfuerzo y se brindan oportunidades reales de desarrollo, sin importar la edad o las condiciones físicas.”",
+    name: "Juan Pablo Rodriguez Henao",
+  },
+  {
+    src: "/images/voces/voces-02.jpg",
+    alt: "Francia Alcaíno, colaboradora de LATAM Airlines sonriendo",
+    quote: "“Trabajar en LATAM Airlines ha sido una experiencia verdaderamente transformadora. Viniendo del mundo del periodismo y las comunicaciones, nunca imaginé que encontraría en la aviación un lugar donde me sentiría tan plena y realizada.”",
+    name: "Francia Alcaíno",
+  },
 ];
 
-// Cada slot del collage desktop: qué imagen usa y su posición/tamaño absolutos.
-const SLOTS: { img: number; cls: string }[] = [
-  { img: 2, cls: "left-[22%] top-[3%] w-[160px] aspect-[4/3]" },
-  { img: 1, cls: "right-[11%] top-[5%] w-[150px] aspect-[4/3]" },
-  { img: 3, cls: "left-[12%] top-[19%] w-[150px] aspect-[4/5]" },
-  { img: 5, cls: "left-[61%] top-[15%] w-[185px] aspect-[4/5]" },
-  { img: 10, cls: "right-[4%] top-[27%] w-[180px] aspect-[4/3]" },
-  { img: 8, cls: "left-[30%] top-[24%] w-[200px] aspect-[4/3]" },
-  { img: 9, cls: "left-[17%] top-[45%] w-[175px] aspect-[4/5]" },
-  { img: 0, cls: "left-[3%] top-[56%] w-[160px] aspect-square" },
-  { img: 4, cls: "left-[53%] top-[57%] w-[170px] aspect-[4/3]" },
-  { img: 7, cls: "right-[13%] top-[51%] w-[180px] aspect-[4/3]" },
-  { img: 6, cls: "right-[22%] top-[71%] w-[160px] aspect-[4/3]" },
+// Disposición en anillo elíptico armónico con separación limpia entre todas las columnas para que no choquen
+const SLOTS: { img: number; cls: string; align?: "top" | "bottom" | "center" }[] = [
+  // COLUMNA 1 (Extremo izquierdo - exterior)
+  { img: 8,  cls: "left-[1%]   top-[5%]  w-[150px] lg:w-[175px] aspect-square", align: "top" }, // Top-Left-Outer: kiosco
+  { img: 5,  cls: "left-[0%]   top-[37%] w-[150px] lg:w-[175px] aspect-square", align: "center" }, // Middle-Left: Andrés Mesía
+  { img: 3,  cls: "left-[1.5%] top-[68%] w-[160px] lg:w-[180px] aspect-square", align: "top" }, // Bottom-Left-Outer: Giovanni turbina
+  // COLUMNA 2 (Segunda columna izquierda - separada al 18% para no chocar con col 1 ni con el centro)
+  { img: 6,  cls: "left-[18%]  top-[11%] w-[165px] lg:w-[185px] aspect-[4/5]", align: "top" },   // Top-Left-Inner: Vanina Valle
+  { img: 9,  cls: "left-[18%]  top-[55%] w-[165px] lg:w-[185px] aspect-[4/5]", align: "top" },   // Bottom-Left-Inner: piloto plataforma
+  // CENTRO ARRIBA Y ABAJO (separados en 34% horizontal y alejados del texto central para no cubrir "Sé tú. Volemos más alto.")
+  { img: 10, cls: "left-[44%]  top-[3%]  w-[155px] lg:w-[175px] aspect-square", align: "top" }, // Top-Center: Domenica Aguirre
+  { img: 12, cls: "left-[34%]  top-[66%] w-[145px] lg:w-[170px] aspect-square", align: "top" }, // Bottom-Center-Left: Francia Alcaíno (se abre hacia ABAJO)
+  { img: 4,  cls: "right-[34%] top-[66%] w-[155px] lg:w-[180px] aspect-[4/3]", align: "top" },   // Bottom-Center-Right: avión nubes (se abre hacia ABAJO)
+  // PENÚLTIMA COLUMNA (Segunda columna derecha - separada al 18% desde la derecha)
+  { img: 7,  cls: "right-[18%] top-[12%] w-[165px] lg:w-[185px] aspect-[4/5]", align: "top" },  // Top-Right-Inner: piloto mujer
+  { img: 1,  cls: "right-[18%] top-[68%] w-[145px] lg:w-[170px] aspect-square", align: "top" }, // Bottom-Right-Inner: Vicente Silva (se abre hacia ABAJO)
+  // ÚLTIMA COLUMNA (Extremo derecho - exterior)
+  { img: 11, cls: "right-[1%]  top-[5%]  w-[150px] lg:w-[175px] aspect-square", align: "top" }, // Top-Right-Outer: Juan Pablo Rodriguez Henao
+  { img: 2,  cls: "right-[0%]  top-[39%] w-[160px] lg:w-[185px] aspect-[4/3]", align: "center" },   // Middle-Right: equipo gate F01
+  { img: 0,  cls: "right-[1.5%] top-[67%] w-[160px] lg:w-[180px] aspect-[4/5]", align: "top" },  // Bottom-Right-Outer: técnica
 ];
+
+function CultureCard({
+  img,
+  cardStyle,
+  align = "center",
+}: {
+  img: CultureImage;
+  cardStyle: string;
+  align?: "top" | "bottom" | "center";
+}): React.JSX.Element {
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Si no tiene quote ni name, renderizamos solo la tarjeta normal
+  if (!img.quote || !img.name) {
+    return (
+      <div className={cardStyle}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={img.src} alt={img.alt} loading="lazy" className="h-full w-full object-cover" />
+      </div>
+    );
+  }
+
+  // Posicionamiento inteligente para evitar recortes arriba o abajo:
+  // - Top slots se anclan en 'top-0' y se abren hacia abajo.
+  // - Bottom slots se anclan en 'bottom-0' y se abren hacia arriba.
+  const positionClasses =
+    align === "top"
+      ? "-left-10 top-0"
+      : align === "bottom"
+        ? "-left-10 bottom-0"
+        : "-left-10 -top-8";
+
+  const initialY = align === "top" ? -15 : align === "bottom" ? 15 : 10;
+  const animateY = 0;
+
+  return (
+    <div
+      className="relative h-full w-full"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Tarjeta base normal */}
+      <div
+        className={`${cardStyle} transition-opacity duration-300 ${
+          isHovered ? "opacity-0" : "opacity-100"
+        }`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={img.src} alt={img.alt} loading="lazy" className="h-full w-full object-cover" />
+      </div>
+
+      {/* Overlay animado al hacer hover (efecto auténtico Glass de Figma: blur 24px, refracción e iluminación -45° + tinte violeta #573AD0 4%) */}
+      <AnimatePresence>
+        {isHovered && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.88, y: initialY }}
+            animate={{ opacity: 1, scale: 1.25, y: animateY }}
+            exit={{ opacity: 0, scale: 0.88, y: initialY }}
+            transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+            className={`absolute z-50 w-[254px] sm:w-[264px] rounded-[22px] bg-[rgba(113,113,122,0.68)] p-3.5 backdrop-blur-[24px] backdrop-saturate-[1.8] backdrop-contrast-[1.05] cursor-pointer ${positionClasses}`}
+            style={{
+              backgroundImage:
+                "linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(87, 58, 208, 0.04) 40%, rgba(255, 255, 255, 0.08) 100%)",
+              boxShadow:
+                "inset 0 1.5px 1px rgba(255, 255, 255, 0.45), inset 1.5px 0 1px rgba(255, 255, 255, 0.25), inset 0 -1px 1px rgba(0, 0, 0, 0.15), inset -1px 0 1px rgba(255, 255, 255, 0.12), 0 24px 48px -12px rgba(15, 23, 42, 0.65)",
+            }}
+          >
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[14px] bg-zinc-800 shadow-sm">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={img.src}
+                alt={img.alt}
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="mt-3 px-0.5 pb-0.5 text-left">
+              <p className="text-[12px] font-medium leading-[1.38] text-[#1b0088] [font-family:var(--font-inter),sans-serif]">
+                {img.quote}
+              </p>
+              <p className="mt-2 text-[13px] font-bold text-[#1b0088] [font-family:var(--font-inter),sans-serif]">
+                {img.name}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export function FramerLoopGallery(): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -51,47 +191,46 @@ export function FramerLoopGallery(): React.JSX.Element {
     offset: ["start end", "end start"],
   });
 
-  // Un desplazamiento parallax distinto por slot para el efecto 3D flotante.
-  const y1 = useTransform(scrollYProgress, [0, 1], [80, -80]);
-  const y2 = useTransform(scrollYProgress, [0, 1], [90, -90]);
-  const y3 = useTransform(scrollYProgress, [0, 1], [-50, 50]);
-  const y4 = useTransform(scrollYProgress, [0, 1], [100, -100]);
-  const y5 = useTransform(scrollYProgress, [0, 1], [-40, 40]);
-  const y6 = useTransform(scrollYProgress, [0, 1], [50, -50]);
-  const y7 = useTransform(scrollYProgress, [0, 1], [-60, 60]);
-  const y8 = useTransform(scrollYProgress, [0, 1], [40, -40]);
-  const y9 = useTransform(scrollYProgress, [0, 1], [-30, 30]);
-  const y10 = useTransform(scrollYProgress, [0, 1], [70, -70]);
-  const y11 = useTransform(scrollYProgress, [0, 1], [-45, 45]);
-  const ys = [y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11];
+  // 13 parallax — uno por slot del collage
+  const y1 = useTransform(scrollYProgress, [0, 1], [70, -70]);
+  const y2 = useTransform(scrollYProgress, [0, 1], [-50, 50]);
+  const y3 = useTransform(scrollYProgress, [0, 1], [80, -80]);
+  const y4 = useTransform(scrollYProgress, [0, 1], [-60, 60]);
+  const y5 = useTransform(scrollYProgress, [0, 1], [40, -40]);
+  const y6 = useTransform(scrollYProgress, [0, 1], [90, -90]);
+  const y7 = useTransform(scrollYProgress, [0, 1], [-70, 70]);
+  const y8 = useTransform(scrollYProgress, [0, 1], [60, -60]);
+  const y9 = useTransform(scrollYProgress, [0, 1], [-40, 40]);
+  const y10 = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  const y11 = useTransform(scrollYProgress, [0, 1], [-65, 65]);
+  const y12 = useTransform(scrollYProgress, [0, 1], [75, -75]);
+  const y13 = useTransform(scrollYProgress, [0, 1], [-55, 55]);
+  const ys = [y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13];
 
   // Texto (bloques), con su propio parallax suave.
   const yText1 = useTransform(scrollYProgress, [0, 1], [30, -30]);
 
   const cardStyle =
-    "relative overflow-hidden rounded-[2rem] shadow-lg border border-black/5 bg-zinc-50 hover:scale-[1.04] hover:shadow-2xl transition-all duration-500 cursor-pointer w-full h-full";
+    "relative overflow-hidden rounded-[1.5rem] shadow-lg border border-black/5 bg-zinc-50 hover:scale-[1.04] hover:shadow-2xl transition-all duration-500 cursor-pointer w-full h-full";
 
   return (
     <section
       id="cultura"
       ref={containerRef}
-      className="relative z-10 -mt-32 overflow-hidden bg-white pb-12 pt-0 md:-mt-48 md:pb-24 md:pt-4"
+      className="relative z-10 -mt-32 overflow-hidden bg-white pb-16 pt-0 md:-mt-48 md:pb-36 md:pt-6"
     >
-      <div className="container relative mx-auto max-w-7xl px-4">
+      <div className="container relative mx-auto max-w-[1550px] px-4">
         {/* Desktop: collage flotante */}
-        <div className="relative mx-auto hidden h-[1050px] w-full max-w-7xl md:block">
+        <div className="relative mx-auto hidden h-[1080px] w-full max-w-[1550px] md:block">
           {SLOTS.map((slot, i) => {
             const img = IMAGES[slot.img];
             return (
               <motion.div
-                key={img.src}
+                key={`slot-${i}`}
                 style={{ y: reduced ? undefined : ys[i] }}
                 className={`absolute ${slot.cls}`}
               >
-                <div className={cardStyle}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img.src} alt={img.alt} loading="lazy" className="h-full w-full object-cover" />
-                </div>
+                <CultureCard img={img} cardStyle={cardStyle} align={slot.align} />
               </motion.div>
             );
           })}
@@ -122,13 +261,17 @@ export function FramerLoopGallery(): React.JSX.Element {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {IMAGES.map((img) => (
+            {IMAGES.map((img, i) => (
               <div
                 key={img.src}
-                className={`${img.portrait ? "aspect-[3/4]" : "aspect-[4/3]"} overflow-hidden rounded-2xl shadow-md`}
+                className={`aspect-[4/3] overflow-hidden rounded-2xl shadow-md ${
+                  i === 12 ? "col-span-2" : ""
+                }`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.src} alt={img.alt} loading="lazy" className="h-full w-full object-cover" />
+                <CultureCard
+                  img={img}
+                  cardStyle="relative h-full w-full overflow-hidden rounded-2xl cursor-pointer"
+                />
               </div>
             ))}
           </div>
@@ -146,3 +289,5 @@ export function FramerLoopGallery(): React.JSX.Element {
     </section>
   );
 }
+
+
