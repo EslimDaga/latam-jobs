@@ -31,8 +31,8 @@ const IMAGES: CultureImage[] = [
   { src: "/images/cultura/cultura-01.jpg", alt: "Técnica de mantenimiento inspeccionando una aeronave en plataforma" },
   {
     src: "/images/cultura/cultura-02.jpg",
-    alt: "Vicente Ignacio Silva, Product Manager de Selección de LATAM sonriendo",
-    quote: "“soy Product Manager de Selección dentro del área digital, lo que le da sentido al rol es con quiénes lo construyo: trabajar cross-país te obliga a salir de tu cabeza, y esa diversidad de miradas termina siendo el ingrediente que le da riqueza real a lo que entregamos.”",
+    alt: "Vicente Ignacio Silva, Domain Specialist de Selección de LATAM sonriendo",
+    quote: "“soy Domain Specialist de Selección dentro del área digital, lo que le da sentido al rol es con quiénes lo construyo: trabajar cross-país te obliga a salir de tu cabeza, y esa diversidad de miradas termina siendo el ingrediente que le da riqueza real a lo que entregamos.”",
     name: "Vicente",
   },
   { src: "/images/cultura/cultura-03.jpg", alt: "Equipo de agentes de LATAM en la puerta de embarque" },
