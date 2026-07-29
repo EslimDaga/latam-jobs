@@ -51,7 +51,7 @@ export function Testimonials(): React.JSX.Element {
         </Reveal>
 
         {/* Fila de tarjetas en arco */}
-        <div className="mt-16 flex items-center justify-start gap-4 overflow-x-auto pb-6 sm:gap-5 lg:justify-center lg:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mt-16 flex items-center justify-start gap-4 overflow-x-auto pb-6 sm:gap-5 xl:justify-center xl:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {STORIES.map((s, i) => (
             <Reveal key={s.src} from="up" delay={i * 0.09} offset={32} className="shrink-0">
               <figure

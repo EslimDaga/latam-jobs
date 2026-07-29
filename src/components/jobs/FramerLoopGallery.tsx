@@ -1,7 +1,15 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, useScroll, useTransform, useReducedMotion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useReducedMotion,
+  AnimatePresence,
+  type MotionValue,
+  type Variants,
+} from "framer-motion";
 
 /**
  * FramerLoopGallery — sección "Nuestra cultura".
@@ -25,27 +33,27 @@ const IMAGES: CultureImage[] = [
     src: "/images/cultura/cultura-02.jpg",
     alt: "Vicente Ignacio Silva, Product Manager de Selección de LATAM sonriendo",
     quote: "“soy Product Manager de Selección dentro del área digital, lo que le da sentido al rol es con quiénes lo construyo: trabajar cross-país te obliga a salir de tu cabeza, y esa diversidad de miradas termina siendo el ingrediente que le da riqueza real a lo que entregamos.”",
-    name: "Vicente Ignacio SIlva",
+    name: "Vicente",
   },
   { src: "/images/cultura/cultura-03.jpg", alt: "Equipo de agentes de LATAM en la puerta de embarque" },
   {
     src: "/images/cultura/cultura-04.jpg",
     alt: "Rodrigo Crisostomo, colaborador de mantenimiento de LATAM en la turbina de un avión",
     quote: "“Lo que más valoro y que me gusta de trabajar en latam, específicamente en el área de mantenimiento de línea base, es que cada día representa un nuevo desafío y una oportunidad de aprendizaje.”",
-    name: "Rodrigo Crisostomo",
+    name: "Rodrigo",
   },
   { src: "/images/cultura/cultura-05.jpg", alt: "Avión de LATAM volando sobre las nubes al atardecer" },
   {
     src: "/images/cultura/cultura-06.jpg",
     alt: "Andrés Mesía, colaborador de LATAM sonriendo en oficina",
     quote: "“Lo que más disfruto de trabajar en LATAM es el dinamismo de la industria y la oportunidad de aprender de personas con esa misma pasión por la aviación.”",
-    name: "ANDRES MESIA",
+    name: "Andrés",
   },
   {
     src: "/images/cultura/cultura-07.jpg",
     alt: "Vanina Valle, colaboradora de LATAM sonriendo en oficina",
     quote: "“LATAM es una organización con un propósito fuerte y un sentido de pertenencia único. Es una verdadera escuela que impulsa el crecimiento profesional y personal, enseñando colaboración, resiliencia y la importancia de conectar con el trabajo que uno realiza.”",
-    name: "Vanina Valle",
+    name: "Vanina",
   },
   { src: "/images/cultura/cultura-08.jpg", alt: "Piloto de LATAM junto a la aeronave" },
   { src: "/images/cultura/cultura-09.jpg", alt: "Agente de LATAM ayudando a una pasajera en el autoservicio" },
@@ -54,28 +62,33 @@ const IMAGES: CultureImage[] = [
     src: "/images/cultura/cultura-11.jpg",
     alt: "Domenica Aguirre, tripulante de cabina de LATAM sonriendo",
     quote: "“LATAM desde el día uno demostró que cumple lo que promete no solo con nuestros clientes, sino con el núcleo de la empresa como somos nosotros.”",
-    name: "Domenica Aguirre",
+    name: "Domenica",
   },
   {
     src: "/images/voces/voces-01.jpg",
     alt: "Juan Pablo Rodriguez Henao, colaborador de LATAM CARGO sonriendo",
     quote: "“De LATAM valoro profundamente su cultura humana: una compañía donde te sientes en familia, donde se reconoce el esfuerzo y se brindan oportunidades reales de desarrollo, sin importar la edad o las condiciones físicas.”",
-    name: "Juan Pablo Rodriguez Henao",
+    name: "Juan Pablo",
   },
   {
     src: "/images/voces/voces-02.jpg",
     alt: "Francia Alcaíno, colaboradora de LATAM Airlines sonriendo",
     quote: "“Trabajar en LATAM Airlines ha sido una experiencia verdaderamente transformadora. Viniendo del mundo del periodismo y las comunicaciones, nunca imaginé que encontraría en la aviación un lugar donde me sentiría tan plena y realizada.”",
-    name: "Francia Alcaíno",
+    name: "Francia",
   },
 ];
 
 // Disposición en anillo elíptico armónico con separación limpia entre todas las columnas para que no choquen
-const SLOTS: { img: number; cls: string; align?: "top" | "bottom" | "center" }[] = [
+const SLOTS: {
+  img: number;
+  cls: string;
+  align?: "top" | "bottom" | "center";
+  edge?: "left" | "right";
+}[] = [
   // COLUMNA 1 (Extremo izquierdo - exterior)
-  { img: 8,  cls: "left-[1%]   top-[5%]  w-[150px] lg:w-[175px] aspect-square", align: "top" }, // Top-Left-Outer: kiosco
-  { img: 5,  cls: "left-[0%]   top-[37%] w-[150px] lg:w-[175px] aspect-square", align: "center" }, // Middle-Left: Andrés Mesía
-  { img: 3,  cls: "left-[1.5%] top-[68%] w-[160px] lg:w-[180px] aspect-square", align: "top" }, // Bottom-Left-Outer: Giovanni turbina
+  { img: 8,  cls: "left-[1%]   top-[5%]  w-[150px] lg:w-[175px] aspect-square", align: "top", edge: "left" }, // Top-Left-Outer: kiosco
+  { img: 5,  cls: "left-[0%]   top-[37%] w-[150px] lg:w-[175px] aspect-square", align: "center", edge: "left" }, // Middle-Left: Andrés Mesía
+  { img: 3,  cls: "left-[1.5%] top-[68%] w-[160px] lg:w-[180px] aspect-square", align: "top", edge: "left" }, // Bottom-Left-Outer: Giovanni turbina
   // COLUMNA 2 (Segunda columna izquierda - separada al 18% para no chocar con col 1 ni con el centro)
   { img: 6,  cls: "left-[18%]  top-[11%] w-[165px] lg:w-[185px] aspect-[4/5]", align: "top" },   // Top-Left-Inner: Vanina Valle
   { img: 9,  cls: "left-[18%]  top-[55%] w-[165px] lg:w-[185px] aspect-[4/5]", align: "top" },   // Bottom-Left-Inner: piloto plataforma
@@ -87,21 +100,31 @@ const SLOTS: { img: number; cls: string; align?: "top" | "bottom" | "center" }[]
   { img: 7,  cls: "right-[18%] top-[12%] w-[165px] lg:w-[185px] aspect-[4/5]", align: "top" },  // Top-Right-Inner: piloto mujer
   { img: 1,  cls: "right-[18%] top-[68%] w-[145px] lg:w-[170px] aspect-square", align: "top" }, // Bottom-Right-Inner: Vicente Silva (se abre hacia ABAJO)
   // ÚLTIMA COLUMNA (Extremo derecho - exterior)
-  { img: 11, cls: "right-[1%]  top-[5%]  w-[150px] lg:w-[175px] aspect-square", align: "top" }, // Top-Right-Outer: Juan Pablo Rodriguez Henao
-  { img: 2,  cls: "right-[0%]  top-[39%] w-[160px] lg:w-[185px] aspect-[4/3]", align: "center" },   // Middle-Right: equipo gate F01
-  { img: 0,  cls: "right-[1.5%] top-[67%] w-[160px] lg:w-[180px] aspect-[4/5]", align: "top" },  // Bottom-Right-Outer: técnica
+  { img: 11, cls: "right-[1%]  top-[5%]  w-[150px] lg:w-[175px] aspect-square", align: "top", edge: "right" }, // Top-Right-Outer: Juan Pablo Rodriguez Henao
+  { img: 2,  cls: "right-[0%]  top-[39%] w-[160px] lg:w-[185px] aspect-[4/3]", align: "center", edge: "right" },   // Middle-Right: equipo gate F01
+  { img: 0,  cls: "right-[1.5%] top-[67%] w-[160px] lg:w-[180px] aspect-[4/5]", align: "top", edge: "right" },  // Bottom-Right-Outer: técnica
 ];
 
 function CultureCard({
   img,
   cardStyle,
   align = "center",
+  edge,
+  onRaiseChange,
 }: {
   img: CultureImage;
   cardStyle: string;
   align?: "top" | "bottom" | "center";
+  // Columnas exteriores del collage: el overlay se ancla al borde y crece
+  // hacia adentro para que la sección (overflow-hidden) no lo recorte.
+  edge?: "left" | "right";
+  // Avisa al slot contenedor que debe subir su z-index mientras el overlay
+  // Glass esté visible (incluida la animación de salida), porque el transform
+  // del parallax crea un stacking context que el z-50 interno no puede escapar.
+  onRaiseChange?: (raised: boolean) => void;
 }): React.JSX.Element {
   const [isHovered, setIsHovered] = useState(false);
+  const reduced = useReducedMotion();
 
   // Si no tiene quote ni name, renderizamos solo la tarjeta normal
   if (!img.quote || !img.name) {
@@ -116,20 +139,70 @@ function CultureCard({
   // Posicionamiento inteligente para evitar recortes arriba o abajo:
   // - Top slots se anclan en 'top-0' y se abren hacia abajo.
   // - Bottom slots se anclan en 'bottom-0' y se abren hacia arriba.
-  const positionClasses =
-    align === "top"
-      ? "-left-10 top-0"
-      : align === "bottom"
-        ? "-left-10 bottom-0"
-        : "-left-10 -top-8";
+  const horizontalClasses =
+    edge === "left" ? "left-0" : edge === "right" ? "right-0" : "-left-10";
+  const verticalClasses =
+    align === "top" ? "top-0" : align === "bottom" ? "bottom-0" : "-top-8";
+  const positionClasses = `${horizontalClasses} ${verticalClasses}`;
 
-  const initialY = align === "top" ? -15 : align === "bottom" ? 15 : 10;
-  const animateY = 0;
+  // El scale crece desde el borde anclado para no salirse del viewport.
+  const transformOrigin = `${edge ?? "center"} ${
+    align === "top" ? "top" : align === "bottom" ? "bottom" : "center"
+  }`;
+
+  const initialY = align === "top" ? -14 : align === "bottom" ? 14 : 10;
+
+  // Entrada: spring que emerge desde el borde ancla (scale 0.9 → 1, nunca 1.25
+  // como estado final para no dejar el texto rasterizado con transform).
+  // Salida: más rápida que la entrada, como espera el usuario.
+  const overlayVariants: Variants = reduced
+    ? {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { duration: 0.2, ease: "easeOut" } },
+        exit: { opacity: 0, transition: { duration: 0.15, ease: "easeOut" } },
+      }
+    : {
+        hidden: { opacity: 0, scale: 0.9, y: initialY },
+        visible: {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          transition: {
+            type: "spring",
+            stiffness: 340,
+            damping: 28,
+            mass: 0.9,
+            delayChildren: 0.05,
+            staggerChildren: 0.05,
+          },
+        },
+        exit: {
+          opacity: 0,
+          scale: 0.94,
+          y: initialY * 0.4,
+          transition: { duration: 0.18, ease: [0.4, 0, 1, 1] },
+        },
+      };
+
+  // Imagen → cita → nombre entran en cascada (50ms entre cada uno).
+  const itemVariants: Variants = reduced
+    ? { hidden: { opacity: 1 }, visible: { opacity: 1 } }
+    : {
+        hidden: { opacity: 0, y: 12 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
+        },
+      };
 
   return (
     <div
       className="relative h-full w-full"
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => {
+        setIsHovered(true);
+        onRaiseChange?.(true);
+      }}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Tarjeta base normal */}
@@ -143,22 +216,28 @@ function CultureCard({
       </div>
 
       {/* Overlay animado al hacer hover (efecto auténtico Glass de Figma: blur 24px, refracción e iluminación -45° + tinte violeta #573AD0 4%) */}
-      <AnimatePresence>
+      <AnimatePresence onExitComplete={() => onRaiseChange?.(false)}>
         {isHovered && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.88, y: initialY }}
-            animate={{ opacity: 1, scale: 1.25, y: animateY }}
-            exit={{ opacity: 0, scale: 0.88, y: initialY }}
-            transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
-            className={`absolute z-50 w-[254px] sm:w-[264px] rounded-[22px] bg-[rgba(113,113,122,0.68)] p-3.5 backdrop-blur-[24px] backdrop-saturate-[1.8] backdrop-contrast-[1.05] cursor-pointer ${positionClasses}`}
+            variants={overlayVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className={`absolute z-50 w-[min(318px,calc(100vw-40px))] sm:w-[330px] rounded-[42px] bg-[rgba(87,58,208,0.04)] p-[22px] backdrop-blur-[16px] backdrop-saturate-[1.4] cursor-pointer ${positionClasses}`}
             style={{
+              transformOrigin,
+              // Glass de Figma (nodo 89:3589): fill #573AD0 4%, Frost 16,
+              // luz -45° 80% → brillo superior-izquierdo que se apaga en diagonal.
               backgroundImage:
-                "linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(87, 58, 208, 0.04) 40%, rgba(255, 255, 255, 0.08) 100%)",
+                "linear-gradient(135deg, rgba(255, 255, 255, 0.40) 0%, rgba(255, 255, 255, 0.10) 32%, rgba(87, 58, 208, 0.03) 62%, rgba(255, 255, 255, 0.16) 100%)",
               boxShadow:
-                "inset 0 1.5px 1px rgba(255, 255, 255, 0.45), inset 1.5px 0 1px rgba(255, 255, 255, 0.25), inset 0 -1px 1px rgba(0, 0, 0, 0.15), inset -1px 0 1px rgba(255, 255, 255, 0.12), 0 24px 48px -12px rgba(15, 23, 42, 0.65)",
+                "inset 0 2px 2px rgba(255, 255, 255, 0.65), inset 2px 0 2px rgba(255, 255, 255, 0.35), inset 0 -1px 1.5px rgba(31, 0, 153, 0.12), inset -1px 0 1px rgba(255, 255, 255, 0.14), 0 24px 48px -12px rgba(15, 23, 42, 0.35)",
             }}
           >
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[14px] bg-zinc-800 shadow-sm">
+            <motion.div
+              variants={itemVariants}
+              className="relative aspect-[4/3] w-full overflow-hidden rounded-[30px] shadow-sm"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={img.src}
@@ -166,18 +245,83 @@ function CultureCard({
                 loading="lazy"
                 className="h-full w-full object-cover"
               />
-            </div>
-            <div className="mt-3 px-0.5 pb-0.5 text-left">
-              <p className="text-[12px] font-medium leading-[1.38] text-[#1b0088] [font-family:var(--font-inter),sans-serif]">
+            </motion.div>
+            <div className="mt-[21px] px-0.5 pb-0.5 text-left">
+              <motion.p
+                variants={itemVariants}
+                className="text-[13px] font-normal leading-[1.45] text-[#1f0099] [font-family:var(--font-inter),sans-serif]"
+              >
                 {img.quote}
-              </p>
-              <p className="mt-2 text-[13px] font-bold text-[#1b0088] [font-family:var(--font-inter),sans-serif]">
+              </motion.p>
+              <motion.p
+                variants={itemVariants}
+                className="mt-2.5 text-[13px] font-bold text-[#1f0099] [font-family:var(--font-inter),sans-serif]"
+              >
                 {img.name}
-              </p>
+              </motion.p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function CollageSlot({
+  y,
+  cls,
+  img,
+  cardStyle,
+  align,
+  edge,
+}: {
+  y?: MotionValue<number>;
+  cls: string;
+  img: CultureImage;
+  cardStyle: string;
+  align?: "top" | "bottom" | "center";
+  edge?: "left" | "right";
+}): React.JSX.Element {
+  const [raised, setRaised] = useState(false);
+
+  return (
+    <motion.div
+      style={{ y, zIndex: raised ? 60 : undefined }}
+      className={`absolute ${cls}`}
+    >
+      <CultureCard
+        img={img}
+        cardStyle={cardStyle}
+        align={align}
+        edge={edge}
+        onRaiseChange={setRaised}
+      />
+    </motion.div>
+  );
+}
+
+function MobileCell({
+  img,
+  wide,
+  edge,
+}: {
+  img: CultureImage;
+  wide: boolean;
+  edge?: "left" | "right";
+}): React.JSX.Element {
+  const [raised, setRaised] = useState(false);
+
+  return (
+    <div
+      className={`relative aspect-[4/3] rounded-2xl ${wide ? "col-span-2" : ""}`}
+      style={{ zIndex: raised ? 60 : undefined }}
+    >
+      <CultureCard
+        img={img}
+        cardStyle="relative h-full w-full overflow-hidden rounded-2xl shadow-md cursor-pointer"
+        edge={edge}
+        onRaiseChange={setRaised}
+      />
     </div>
   );
 }
@@ -217,23 +361,22 @@ export function FramerLoopGallery(): React.JSX.Element {
     <section
       id="cultura"
       ref={containerRef}
-      className="relative z-10 -mt-32 overflow-hidden bg-white pb-16 pt-0 md:-mt-48 md:pb-36 md:pt-6"
+      className="relative z-10 -mt-24 overflow-hidden bg-white pb-16 pt-0 lg:-mt-48 lg:pb-36 lg:pt-6"
     >
       <div className="container relative mx-auto max-w-[1550px] px-4">
         {/* Desktop: collage flotante */}
-        <div className="relative mx-auto hidden h-[1080px] w-full max-w-[1550px] md:block">
-          {SLOTS.map((slot, i) => {
-            const img = IMAGES[slot.img];
-            return (
-              <motion.div
-                key={`slot-${i}`}
-                style={{ y: reduced ? undefined : ys[i] }}
-                className={`absolute ${slot.cls}`}
-              >
-                <CultureCard img={img} cardStyle={cardStyle} align={slot.align} />
-              </motion.div>
-            );
-          })}
+        <div className="relative mx-auto hidden h-[1080px] w-full max-w-[1550px] lg:block">
+          {SLOTS.map((slot, i) => (
+            <CollageSlot
+              key={`slot-${i}`}
+              y={reduced ? undefined : ys[i]}
+              cls={slot.cls}
+              img={IMAGES[slot.img]}
+              cardStyle={cardStyle}
+              align={slot.align}
+              edge={slot.edge}
+            />
+          ))}
 
           {/* Titular central + CTA, como en el Figma (nodo 89:2472) */}
           <motion.div
@@ -252,8 +395,8 @@ export function FramerLoopGallery(): React.JSX.Element {
           </motion.div>
         </div>
 
-        {/* Móvil: grilla limpia con las mismas fotos */}
-        <div className="flex flex-col gap-8 md:hidden">
+        {/* Móvil/tablet: grilla limpia con las mismas fotos */}
+        <div className="flex flex-col gap-8 pt-8 lg:hidden">
           <div className="px-4 text-center">
             <h2 className="text-[clamp(1.75rem,8vw,42px)] font-bold leading-[0.9536] tracking-[-0.3927px] text-[#1b0088] [font-family:var(--font-inter),sans-serif]">
               Sé tú. Volemos más alto.
@@ -262,17 +405,12 @@ export function FramerLoopGallery(): React.JSX.Element {
 
           <div className="grid grid-cols-2 gap-4">
             {IMAGES.map((img, i) => (
-              <div
+              <MobileCell
                 key={img.src}
-                className={`aspect-[4/3] overflow-hidden rounded-2xl shadow-md ${
-                  i === 12 ? "col-span-2" : ""
-                }`}
-              >
-                <CultureCard
-                  img={img}
-                  cardStyle="relative h-full w-full overflow-hidden rounded-2xl cursor-pointer"
-                />
-              </div>
+                img={img}
+                wide={i === 12}
+                edge={i === 12 ? "left" : i % 2 === 0 ? "left" : "right"}
+              />
             ))}
           </div>
 

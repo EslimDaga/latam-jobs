@@ -227,7 +227,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
           initial={false}
           animate={menuOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: "-100%" }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 z-30 bg-[#0d091e]/98 px-8 pt-32 pb-12 flex flex-col justify-between md:px-20 md:pb-20 text-white backdrop-blur-md"
+          className="fixed inset-0 z-30 bg-[#0d091e]/98 px-6 pt-28 pb-10 flex flex-col justify-between sm:px-8 sm:pt-32 sm:pb-12 md:px-20 md:pb-20 text-white backdrop-blur-md"
           style={{ pointerEvents: menuOpen ? "auto" : "none" }}
         >
           {/* Navigation large links */}
@@ -244,7 +244,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                   initial={{ opacity: 0, x: -20 }}
                   animate={menuOpen ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
                   transition={{ delay: idx * 0.08 + 0.1, duration: 0.3 }}
-                  className="text-4xl md:text-6xl font-bold tracking-tight text-white hover:text-red-latam transition-colors duration-200"
+                  className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight text-white hover:text-red-latam transition-colors duration-200"
                 >
                   {link.label}
                 </motion.a>
@@ -272,7 +272,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
 
         {/* ── Header / Navigation (LATAM Airlines Official Mock Header) ── */}
         <header className="absolute inset-x-0 top-0 z-40">
-          <div className="mx-auto flex max-w-[100rem] items-center justify-between gap-6 px-6 py-7 lg:px-12 relative">
+          <div className="mx-auto flex max-w-[100rem] items-center justify-between gap-3 px-4 py-5 sm:gap-6 sm:px-6 sm:py-7 lg:px-12 relative">
             
             {/* Left: Custom Menu button */}
             <motion.button 
@@ -339,7 +339,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
             <a
               href="#hero"
               aria-label="Empleos LATAM — inicio"
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer z-40 h-7 w-48"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer z-40 h-5 w-32 sm:h-6 sm:w-40 md:h-7 md:w-48"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <motion.img
@@ -357,9 +357,9 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
             </a>
 
             {/* Right: Country selector & CTA */}
-            <div className="flex items-center gap-3 z-40">
-              <motion.button 
-                className="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium [font-family:var(--font-inter),sans-serif] hover:bg-white/10 transition cursor-pointer"
+            <div className="flex items-center gap-2 sm:gap-3 z-40">
+              <motion.button
+                className="hidden md:flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium [font-family:var(--font-inter),sans-serif] hover:bg-white/10 transition cursor-pointer"
                 style={{ 
                   color: headerTextColor, 
                   borderColor: headerBorderColor,
@@ -373,7 +373,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
 
               <a
                 href="#vacantes"
-                className="rounded-full bg-red-latam px-5 py-2 text-[15px] font-semibold text-white [font-family:var(--font-jakarta),sans-serif] shadow-md hover:bg-red-latam-deep transition active:scale-95 cursor-pointer text-center animate-pulse-subtle"
+                className="rounded-full bg-red-latam px-4 py-2 text-sm sm:px-5 sm:text-[15px] font-semibold text-white [font-family:var(--font-jakarta),sans-serif] shadow-md hover:bg-red-latam-deep transition active:scale-95 cursor-pointer text-center animate-pulse-subtle"
               >
                 Ver vacantes
               </a>
@@ -384,25 +384,25 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
 
         {/* ── A. Initial Hero Text (Fades out early) ── */}
         <motion.div
-          className="absolute inset-0 z-10 mx-auto flex w-full max-w-[100rem] flex-col px-6 pt-28 pb-14 pointer-events-none lg:px-12 lg:pb-16"
+          className="absolute inset-0 z-10 mx-auto flex w-full max-w-[100rem] flex-col px-4 pt-20 pb-6 pointer-events-none sm:px-6 sm:pt-28 sm:pb-14 lg:px-12 lg:pb-16"
           style={{ opacity: textOpacity, y: textY }}
         >
           {/* Headline block - Left Aligned Title & Right Aligned Subtitle (Centered Vertically) */}
           <div className="flex-1 flex items-center">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-center w-full">
               {/* Left Column: Label + Title */}
               <div className="lg:col-span-8 flex flex-col items-start text-left">
-                <span className="mb-3 block text-sm font-bold uppercase leading-[22.448px] tracking-[4.4896px] text-white [font-family:var(--font-space-mono),monospace] md:mb-5">
+                <span className="mb-3 block text-xs sm:text-sm font-bold uppercase leading-[22.448px] tracking-[3px] sm:tracking-[4.4896px] text-white [font-family:var(--font-space-mono),monospace] md:mb-5">
                   Trabaja con nosotros
                 </span>
-                <h1 className="text-[clamp(2.75rem,7.64vw,6.875rem)] font-bold leading-[1.1075] tracking-[-0.0236em] text-white">
+                <h1 className="text-[clamp(2.125rem,7.64vw,6.875rem)] font-bold leading-[1.1075] tracking-[-0.0236em] text-white">
                   Construye tu<br />carrera junto<br />a LATAM
                 </h1>
               </div>
 
               {/* Right Column: Subtitle */}
               <div className="lg:col-span-4 flex items-center justify-start lg:justify-end">
-                <p className="max-w-[375px] text-center text-[20.16px] font-normal leading-[32.256px] text-[#f2f2f2] lg:ml-auto">
+                <p className="max-w-[375px] text-left text-base leading-relaxed sm:text-center sm:text-[20.16px] sm:leading-[32.256px] font-normal text-[#f2f2f2] lg:ml-auto">
                   Encuentra la vacante que despega tu próximo capítulo profesional.
                 </p>
               </div>
@@ -410,14 +410,14 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
           </div>
 
           {/* Bottom Center Search Capsule (Enlarged) */}
-          <div className="mt-8 flex justify-center w-full pointer-events-auto">
+          <div className="mt-5 sm:mt-8 flex justify-center w-full pointer-events-auto">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 const el = document.getElementById("vacantes");
                 if (el) el.scrollIntoView({ behavior: "smooth" });
               }}
-              className="flex w-full max-w-[898px] flex-col gap-5 rounded-[16px] bg-[rgba(242,242,242,0.04)] px-[21px] py-6 text-white backdrop-blur-[16px] backdrop-saturate-[1.35] [font-family:var(--font-inter),sans-serif] lg:flex-row lg:items-center lg:gap-5"
+              className="flex w-full max-w-[898px] flex-col gap-3.5 rounded-[16px] bg-[rgba(242,242,242,0.04)] px-4 py-4 text-white backdrop-blur-[16px] backdrop-saturate-[1.35] [font-family:var(--font-inter),sans-serif] sm:gap-5 sm:px-[21px] sm:py-6 lg:flex-row lg:items-center lg:gap-5"
               style={{
                 // Efecto "Glass" del Figma (Frost 16, Light -45° 80%, Refraction 27):
                 // brillo diagonal desde arriba-izquierda + filete luminoso en los

@@ -277,7 +277,7 @@ function buildBoardHTML(d: BoardData): string {
 
   return `
   <div data-vac-board style="width:100%;font-family:${SG}">
-    <div style="position:relative;width:100%;border-radius:22px;overflow:hidden;padding:40px 44px;background:${p.boardBg};box-shadow:${p.boardShadow}">
+    <div data-board style="position:relative;width:100%;border-radius:22px;overflow:hidden;padding:40px 44px;background:${p.boardBg};box-shadow:${p.boardShadow}">
       <div data-view-toggle style="position:absolute;top:40px;right:44px;z-index:6;display:inline-flex;align-items:center;gap:4px;padding:5px;border-radius:999px;-webkit-backdrop-filter:blur(22px) saturate(140%);backdrop-filter:blur(22px) saturate(140%);background:${p.panelBg};border:1px solid ${p.panelBd};box-shadow:${p.panelShadow}">
         <button data-view-btn="lista" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:0;border-radius:999px;cursor:pointer;font:700 13.252px/13.252px ${SG};transition:background .18s ease,color .18s ease">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
@@ -305,17 +305,17 @@ function buildBoardHTML(d: BoardData): string {
           <span style="font:400 10.307px/10.307px ${SM};letter-spacing:1.443px;color:${p.label}">EN VIVO</span>
           <span data-clock style="margin-left:auto;font:900 13px/12.762px ${LS};letter-spacing:1.5314px;color:${p.clock}">${clock}</span>
         </div>
-        <div style="display:grid;grid-template-columns:188px minmax(168px,1.3fr) 186px 172px 120px;column-gap:14px;padding:14px 20px;font:900 11.78px/11.78px ${LS};letter-spacing:2.1204px;text-transform:uppercase;background:${p.headBg};border-bottom:1px solid ${p.divider};color:${p.headText}">
+        <div data-cols style="display:grid;grid-template-columns:188px minmax(168px,1.3fr) 186px 172px 120px;column-gap:14px;padding:14px 20px;font:900 11.78px/11.78px ${LS};letter-spacing:2.1204px;text-transform:uppercase;background:${p.headBg};border-bottom:1px solid ${p.divider};color:${p.headText}">
           <span style="display:flex;align-items:center;gap:7px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:.7"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>Área</span>
           <span style="display:flex;align-items:center;gap:7px;color:${p.accent}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:.9"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path></svg>Cargo</span>
           <span style="display:flex;align-items:center;gap:7px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:.7"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>Ubicación</span>
           <span style="display:flex;align-items:center;gap:7px">Estado</span>
           <span></span>
         </div>
-        <div style="padding:6px 12px 12px">
+        <div data-rows style="padding:6px 12px 12px">
           ${rowsHtml}
         </div>
-        <div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-top:1px solid ${p.divider}">
+        <div data-foot style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-top:1px solid ${p.divider}">
           <span style="font:900 12px/11.78px ${LS};letter-spacing:1.4136px;color:${p.heading}">6 VACANTES CON POSTULACIÓN ABIERTA</span>
           <div style="margin-left:auto;display:flex;align-items:center;gap:9px;padding:9px 16px;border-radius:999px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);min-width:300px;border:1px solid ${p.searchBd};background:${p.searchBg}">
             <span style="font-size:13px;color:${p.label}">⌕</span>
@@ -325,7 +325,7 @@ function buildBoardHTML(d: BoardData): string {
       </div>
 
       <div data-view-panel="mapa" style="display:none;flex-direction:column;border-radius:16px;overflow:hidden;-webkit-backdrop-filter:blur(22px) saturate(140%);backdrop-filter:blur(22px) saturate(140%);border:1px solid ${p.panelBd};background:${p.panelBg};box-shadow:${p.panelShadow}">
-        <div style="display:flex;align-items:stretch">
+        <div data-map-row style="display:flex;align-items:stretch">
           <div style="position:relative;flex:1;min-width:0">
             <div data-map-inner style="position:relative;width:133%;aspect-ratio:1200/650;background:${p.mapField};-webkit-mask-image:linear-gradient(90deg,#000 76%,transparent 95%);mask-image:linear-gradient(90deg,#000 76%,transparent 95%)">
               <img src="/images/world-map.png" alt="Mapa del mundo con destinos LATAM" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;z-index:0">
@@ -338,7 +338,7 @@ function buildBoardHTML(d: BoardData): string {
 
               ${pinsHtml}
 
-              <div style="position:absolute;top:22px;left:22px;display:flex;align-items:center;gap:12px;z-index:4">
+              <div data-map-info style="position:absolute;top:22px;left:22px;display:flex;align-items:center;gap:12px;z-index:4">
                 <span style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:13px;background:${p.panelBg};border:1px solid ${p.panelBd};color:${p.accent};-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5a2.12 2.12 0 0 0-3-3L13 8 4.8 6.2a.5.5 0 0 0-.5.8l3.9 4.9-2.9 2.9-2.3-.6a.5.5 0 0 0-.5.8L4 20l1.6 1.4a.5.5 0 0 0 .8-.5l-.6-2.3 2.9-2.9 4.9 3.9a.5.5 0 0 0 .8-.5z"></path></svg>
                 </span>
@@ -348,7 +348,7 @@ function buildBoardHTML(d: BoardData): string {
                 </div>
               </div>
 
-              <div style="position:absolute;left:22px;bottom:22px;display:flex;flex-direction:column;gap:8px;z-index:4">
+              <div data-map-zoom style="position:absolute;left:22px;bottom:22px;display:flex;flex-direction:column;gap:8px;z-index:4">
                 <div style="display:flex;flex-direction:column;border-radius:12px;overflow:hidden;border:1px solid ${p.panelBd};background:${p.panelBg};-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)">
                   <button data-mapbtn aria-label="Acercar" style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:0;border-bottom:1px solid ${p.divider};background:transparent;color:${p.zoomText};cursor:pointer;transition:background .16s ease"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
                   <button data-mapbtn aria-label="Alejar" style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:0;background:transparent;color:${p.zoomText};cursor:pointer;transition:background .16s ease"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
@@ -358,7 +358,7 @@ function buildBoardHTML(d: BoardData): string {
             </div>
           </div>
 
-          <div style="width:404px;flex:0 0 auto;align-self:stretch;position:relative;overflow:hidden;background:${p.panelBgSoft};-webkit-backdrop-filter:blur(22px) saturate(140%);backdrop-filter:blur(22px) saturate(140%)">
+          <div data-map-side style="width:404px;flex:0 0 auto;align-self:stretch;position:relative;overflow:hidden;background:${p.panelBgSoft};-webkit-backdrop-filter:blur(22px) saturate(140%);backdrop-filter:blur(22px) saturate(140%)">
             <div data-mapscroll style="position:absolute;inset:0;overflow-y:auto;padding:22px 20px">
               <div style="display:flex;align-items:center;justify-content:space-between;margin:0 4px 18px">
                 <span style="font:700 12px/1 ${SM};letter-spacing:.24em;color:${p.label}">TODAS LAS VACANTES</span>
@@ -370,7 +370,7 @@ function buildBoardHTML(d: BoardData): string {
           </div>
         </div>
 
-        <div style="display:flex;align-items:center;gap:22px;padding:14px 20px;border-top:1px solid ${p.divider}">
+        <div data-map-legend style="display:flex;align-items:center;gap:22px;padding:14px 20px;border-top:1px solid ${p.divider}">
           <span style="display:flex;align-items:center;gap:8px;font:400 12px/1 ${SG};color:${p.body}"><span style="width:11px;height:11px;border-radius:50%;background:${p.accent};border:2px solid #fff;box-shadow:0 0 0 3px ${p.pinGlow}"></span>Destino con vacantes</span>
           <span style="display:flex;align-items:center;gap:8px;font:400 12px/1 ${SG};color:${p.body}"><span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:${p.heading};color:#fff;font:700 9px/1 ${SM}">4</span>Número de posiciones</span>
           <span style="margin-left:auto;font:700 12px/1 ${SM};letter-spacing:.12em;color:${p.heading}">15 VACANTES · 8 DESTINOS</span>
@@ -457,6 +457,31 @@ function scopedCss(scope: string, p: Palette): string {
     .${scope} [data-close]:hover{background:${p.dCloseHoverBg}!important;border-color:${p.dCloseHoverBd}!important}
     .${scope} [data-cta]:hover{filter:brightness(1.08)}
     .${scope} [data-save]:hover{background:${p.dSaveHoverBg}!important;border-color:${p.dSaveHoverBd}!important}
+
+    /* ── Responsive ─────────────────────────────────────────────────────── */
+    @media (max-width: 1023px){
+      .${scope} [data-board]{padding:28px 18px!important}
+      .${scope} [data-view-toggle]{position:static!important;margin:0 0 18px}
+      .${scope} [data-vac-board] h2{font-size:clamp(26px,5.5vw,42px)!important;line-height:1.06!important}
+      .${scope} [data-map-row]{flex-direction:column}
+      .${scope} [data-map-side]{width:100%!important;height:420px}
+      .${scope} [data-map-inner]{width:100%!important;-webkit-mask-image:none!important;mask-image:none!important}
+      .${scope} [data-map-legend]{flex-wrap:wrap;row-gap:8px}
+      .${scope} [data-map-legend] > span:last-child{margin-left:0!important;flex-basis:100%}
+      .${scope} [data-drawer]{width:100%!important;max-width:100%!important}
+    }
+    @media (max-width: 1099px){
+      .${scope} [data-view-panel="lista"]{overflow-x:auto}
+      .${scope} [data-cols],.${scope} [data-rows]{min-width:760px}
+      .${scope} [data-cols],.${scope} a[data-row]{grid-template-columns:150px minmax(150px,1.3fr) 150px 140px 90px!important}
+      .${scope} [data-foot]{flex-wrap:wrap;row-gap:10px}
+      .${scope} [data-foot] > div{margin-left:0!important;min-width:0!important;flex:1 1 100%}
+    }
+    @media (max-width: 639px){
+      .${scope} [data-map-zoom]{display:none!important}
+      .${scope} [data-map-info]{top:12px!important;left:12px!important;gap:8px}
+      .${scope} [data-map-side]{height:380px}
+    }
   `;
 }
 
@@ -940,7 +965,7 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
   }, [data]);
 
   return (
-    <section aria-label="Vacantes con embarque abierto" style={{ width: "100%", background: "#ffffff", padding: "72px 20px", display: "flex", justifyContent: "center" }}>
+    <section aria-label="Vacantes con embarque abierto" style={{ width: "100%", background: "#ffffff", padding: "clamp(44px, 7vw, 72px) clamp(12px, 3vw, 20px)", display: "flex", justifyContent: "center" }}>
       <div style={{ width: "100%", maxWidth: "1400px" }}>
         <style dangerouslySetInnerHTML={{ __html: css }} />
         <Reveal amount={0.12} offset={40}>
