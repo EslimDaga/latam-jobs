@@ -24,6 +24,9 @@ interface CultureImage {
   alt: string;
   quote?: string;
   name?: string;
+  // object-position del recorte: fotos verticales necesitan anclarse al rostro
+  // para que object-cover no decapite al colaborador en contenedores apaisados.
+  pos?: string;
 }
 
 // Las 13 fotos oficiales de "Nuestra cultura" para el collage completo según Figma
@@ -73,6 +76,7 @@ const IMAGES: CultureImage[] = [
   {
     src: "/images/voces/voces-02.jpg",
     alt: "Francia Alcaíno, colaboradora de LATAM Airlines sonriendo",
+    pos: "50% 8%",
     quote: "“Trabajar en LATAM Airlines ha sido una experiencia verdaderamente transformadora. Viniendo del mundo del periodismo y las comunicaciones, nunca imaginé que encontraría en la aviación un lugar donde me sentiría tan plena y realizada.”",
     name: "Francia",
   },
@@ -131,7 +135,7 @@ function CultureCard({
     return (
       <div className={cardStyle}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={img.src} alt={img.alt} loading="lazy" className="h-full w-full object-cover" />
+        <img src={img.src} alt={img.alt} loading="lazy" className="h-full w-full object-cover" style={{ objectPosition: img.pos }} />
       </div>
     );
   }
@@ -212,7 +216,7 @@ function CultureCard({
         }`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={img.src} alt={img.alt} loading="lazy" className="h-full w-full object-cover" />
+        <img src={img.src} alt={img.alt} loading="lazy" className="h-full w-full object-cover" style={{ objectPosition: img.pos }} />
       </div>
 
       {/* Overlay animado al hacer hover (efecto auténtico Glass de Figma: blur 24px, refracción e iluminación -45° + tinte violeta #573AD0 4%) */}
@@ -244,6 +248,7 @@ function CultureCard({
                 alt={img.alt}
                 loading="lazy"
                 className="h-full w-full object-cover"
+                style={{ objectPosition: img.pos }}
               />
             </motion.div>
             <div className="mt-[21px] px-0.5 pb-0.5 text-left">
