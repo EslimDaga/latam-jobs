@@ -15,7 +15,7 @@ const COLUMNS: FooterColumn[] = [
   {
     title: "Carreras",
     links: [
-      { label: "Vacantes", href: "#vacantes" },
+      { label: "Vacantes", href: "/vacantes" },
       { label: "Proceso de selección", href: "#proceso" },
       { label: "Cultura", href: "#cultura" },
       { label: "Testimonios", href: "#testimonios" },
