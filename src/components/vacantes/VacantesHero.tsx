@@ -78,8 +78,8 @@ interface SearchFieldProps {
 }
 
 /* Campo del buscador: columna con gap 9.839px. Arriba icono (19.68) + rótulo
-   Inter Medium 17.218 y el chevron al final de la fila; abajo la pista en
-   Inter Regular 14.759 sangrada 29.517px para alinearla bajo el rótulo.
+   Latam Sans Medium 17.218 y el chevron al final de la fila; abajo la pista en
+   Latam Sans Regular 14.759 sangrada 29.517px para alinearla bajo el rótulo.
  *
  * En el Figma la columna se ajusta a la MÁS ancha de sus dos filas, y la fila
  * del rótulo se estira hasta ese ancho, que es lo que separa el chevron del
@@ -102,7 +102,7 @@ function SearchField({
       >
         <span className="flex items-center gap-[9.839px]">
           <span className="shrink-0 text-[var(--fig-indigo)]">{icon}</span>
-          <span className="whitespace-nowrap text-[17.218px] font-medium leading-none text-[var(--fig-field)] [font-family:var(--font-inter),sans-serif]">
+          <span className="whitespace-nowrap text-[17.218px] font-medium leading-none text-[var(--fig-field)] font-sans">
             {label}
           </span>
         </span>
@@ -110,7 +110,7 @@ function SearchField({
             son índigo (comprobado sobre el render del Figma). */}
         <CaretDown size={19.68} className="shrink-0 text-[var(--fig-field)]" aria-hidden />
       </span>
-      <span className="grid pl-[29.517px] text-[14.759px] [font-family:var(--font-inter),sans-serif]">
+      <span className="grid pl-[29.517px] text-[14.759px] font-sans">
         <span
           aria-hidden
           className="pointer-events-none invisible col-start-1 row-start-1 h-0 select-none whitespace-pre font-normal"
@@ -211,7 +211,7 @@ export function VacantesHero({ search, onSearchChange, onSubmit }: VacantesHeroP
             <div className="flex items-center gap-8 md:gap-24 lg:gap-[494px]">
               <Link
                 href="/"
-                className="flex items-center gap-2 py-2.5 text-[14px] font-medium text-white transition hover:opacity-80 [font-family:var(--font-inter),sans-serif]"
+                className="flex items-center gap-2 py-2.5 text-[14px] font-medium text-white transition hover:opacity-80 font-sans"
               >
                 <List size={16} aria-hidden />
                 <span className="hidden sm:inline">Menú</span>
@@ -231,7 +231,7 @@ export function VacantesHero({ search, onSearchChange, onSubmit }: VacantesHeroP
             <div className="flex items-center gap-2 sm:gap-[14px]">
               <button
                 type="button"
-                className="hidden h-[42px] cursor-pointer items-center gap-2 rounded-full border border-[rgba(27,17,71,0.1)] bg-white/10 px-4 py-[7px] text-[14px] font-medium text-white backdrop-blur-sm transition hover:bg-white/20 md:flex [font-family:var(--font-inter),sans-serif]"
+                className="hidden h-[42px] cursor-pointer items-center gap-2 rounded-full border border-[rgba(27,17,71,0.1)] bg-white/10 px-4 py-[7px] text-[14px] font-medium text-white backdrop-blur-sm transition hover:bg-white/20 md:flex font-sans"
               >
                 <Globe size={14} aria-hidden />
                 <span>Chile</span>
@@ -239,7 +239,7 @@ export function VacantesHero({ search, onSearchChange, onSubmit }: VacantesHeroP
               </button>
               <a
                 href="#listado"
-                className="flex h-[42px] items-center rounded-full bg-[var(--fig-red-nav)] px-4 text-[14px] font-semibold text-white transition hover:brightness-110 active:scale-95 sm:px-[22px] sm:text-[15px] [font-family:var(--font-jakarta),sans-serif]"
+                className="flex h-[42px] items-center rounded-full bg-[var(--fig-red-nav)] px-4 text-[14px] font-semibold text-white transition hover:brightness-110 active:scale-95 sm:px-[22px] sm:text-[15px] font-sans"
               >
                 Ver vacantes
               </a>
@@ -339,7 +339,7 @@ export function VacantesHero({ search, onSearchChange, onSubmit }: VacantesHeroP
           {/* "button-large" — 51.65px de alto, padding 10.761/19.678 */}
           <button
             type="submit"
-            className="flex h-[51.65px] w-full shrink-0 cursor-pointer items-center justify-center gap-[8.609px] rounded-full bg-[var(--fig-red)] px-[19.678px] text-[19.371px] font-medium text-white transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.98] lg:w-auto [font-family:var(--font-inter),sans-serif]"
+            className="flex h-[51.65px] w-full shrink-0 cursor-pointer items-center justify-center gap-[8.609px] rounded-full bg-[var(--fig-red)] px-[19.678px] text-[19.371px] font-medium text-white transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.98] lg:w-auto font-sans"
           >
             Ver vacantes
             <AirplaneTakeoff size={20.91} weight="fill" aria-hidden />

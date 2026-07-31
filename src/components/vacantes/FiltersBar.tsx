@@ -52,15 +52,15 @@ export function FilterPill({ config, onChange }: FilterPillProps) {
         aria-expanded={open}
         aria-haspopup="listbox"
         onClick={() => setOpen((o) => !o)}
-        className={`flex cursor-pointer items-center gap-2 rounded-full border px-[13px] py-[9px] text-[16px] font-bold transition sm:text-[17px] ${
+        className={`flex h-[42px] cursor-pointer items-center gap-[8.909px] rounded-[35.636px] border-[1.273px] px-[13.364px] py-[8.909px] text-[16px] font-bold transition sm:text-[17.818px] ${
           value
-            ? "border-indigo-latam-soft bg-indigo-latam-soft text-white"
-            : "border-[#e2e8f0] bg-white text-indigo-latam-soft hover:border-indigo-latam-soft/50"
+            ? "border-[var(--fig-indigo)] bg-[var(--fig-indigo)] text-white"
+            : "border-[var(--fig-pill-bd)] bg-white text-[var(--fig-indigo)] hover:border-[var(--fig-indigo)]/50"
         }`}
       >
         {value ?? label}
         <CaretDown
-          size={16}
+          size={17.82}
           aria-hidden
           className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
@@ -119,15 +119,17 @@ interface FiltersBarProps {
 
 export function FiltersBar({ pills, onChange, onClear, hasActiveFilters }: FiltersBarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+    <div className="flex flex-wrap items-center gap-x-[23.333px] gap-y-3">
       {pills.map((pill) => (
         <FilterPill key={pill.id} config={pill} onChange={onChange} />
       ))}
+      {/* "Text" (#3298:16194) — Bricolage Bold 20/35.71px, con 2.976px de aire
+          a la derecha para cuadrar la caja con el resto de la fila. */}
       <button
         type="button"
         onClick={onClear}
         disabled={!hasActiveFilters}
-        className="cursor-pointer text-xl font-bold text-indigo-latam-soft transition [font-family:var(--font-bricolage),sans-serif] hover:text-red-latam disabled:cursor-default disabled:opacity-40"
+        className="h-[35.71px] cursor-pointer pr-[2.976px] text-[20px] font-bold leading-[35.71px] text-[var(--fig-indigo)] transition font-sans hover:text-[var(--fig-red)] disabled:cursor-default disabled:opacity-40"
       >
         Limpiar filtros
       </button>
