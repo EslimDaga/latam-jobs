@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { Reveal } from "@/components/motion";
+import { vacanteHref } from "@/lib/vacantes/vacantes";
 
 /**
  * VacancyBoard — "Vacantes con embarque abierto".
@@ -19,9 +20,11 @@ import { Reveal } from "@/components/motion";
  * una hoja de estilo con alcance por la clase raíz.
  */
 
-const SG = "var(--font-space-grotesk),system-ui,sans-serif";
-const SM = "var(--font-space-mono),monospace";
-const LS = "'Latam Sans',var(--font-manrope),sans-serif";
+// El tablero mezclaba Space Grotesk (UI), Space Mono (celdas del solari) y
+// Latam Sans (cargos). Ahora es una sola familia. Las fichas del split-flap ya
+// tenían ancho fijo, así que el paso constante lo mantiene `tabular-nums` y no
+// la fuente.
+const LS = "var(--font-latam)";
 
 type Palette = Record<string, string> & { light?: string };
 
@@ -105,20 +108,25 @@ function buildData(theme: "Claro" | "Oscuro") {
   const light = theme === "Claro";
   const p = palette(light);
 
+  // El `href` apunta a la ficha correspondiente en /vacantes: el clic abre el
+  // cajón lateral (preventDefault), pero el enlace sigue siendo real, así que
+  // funciona con ⌘-clic, "abrir en pestaña nueva" y para los rastreadores.
   const rows: Row[] = [
-    { area: "TRIPULACIÓN", cargo: "Tripulante de Cabina", ubicacion: "Santiago, CL", estado: "Abierto", href: "#postular" },
-    { area: "PILOTOS", cargo: "Primer Oficial A320", ubicacion: "Lima, PE", estado: "Nuevo", href: "#postular" },
-    { area: "MANTENIMIENTO", cargo: "Técnico de Línea", ubicacion: "São Paulo, BR", estado: "Últimos días", href: "#postular" },
-    { area: "TECNOLOGÍA", cargo: "Data Engineer", ubicacion: "Santiago, CL", estado: "Nuevo", href: "#postular" },
-    { area: "OPERACIONES", cargo: "Agente de Rampa", ubicacion: "Bogotá, CO", estado: "Abierto", href: "#postular" },
-    { area: "TECNOLOGÍA", cargo: "Product Designer", ubicacion: "Remoto", estado: "Últimos días", href: "#postular" },
+    { area: "TRIPULACIÓN", cargo: "Tripulante de Cabina", ubicacion: "Santiago, CL", estado: "Abierto", href: vacanteHref("Tripulante de Cabina") },
+    { area: "PILOTOS", cargo: "Primer Oficial A320", ubicacion: "Lima, PE", estado: "Nuevo", href: vacanteHref("Primer Oficial A320") },
+    { area: "MANTENIMIENTO", cargo: "Técnico de Línea", ubicacion: "São Paulo, BR", estado: "Últimos días", href: vacanteHref("Técnico de Línea") },
+    { area: "TECNOLOGÍA", cargo: "Data Engineer", ubicacion: "Santiago, CL", estado: "Nuevo", href: vacanteHref("Data Engineer") },
+    { area: "OPERACIONES", cargo: "Agente de Rampa", ubicacion: "Bogotá, CO", estado: "Abierto", href: vacanteHref("Agente de Rampa") },
+    { area: "TECNOLOGÍA", cargo: "Product Designer", ubicacion: "Remoto", estado: "Últimos días", href: vacanteHref("Product Designer") },
   ];
   const restAreas = ["Pilotos", "Tripulación de cabina", "Mantenimiento", "Aeropuertos y operaciones", "Corporativo", "Tecnología y datos"];
 
   const pinsRaw = [
     { code: "MIA", lon: -80.3, lat: 25.8, count: 1 },
     { code: "BOG", lon: -74.1, lat: 4.7, count: 2 },
-    { code: "UIO", lon: -78.5, lat: -0.2, count: 1 },
+    // labelLeft: el rótulo "ECUADOR" sale hacia el Pacífico; a la derecha
+    // chocaba con el de COLOMBIA (Bogotá y Quito quedan casi en vertical).
+    { code: "UIO", lon: -78.5, lat: -0.2, count: 1, labelLeft: true },
     { code: "LIM", lon: -77.0, lat: -12.0, count: 2 },
     { code: "GRU", lon: -46.6, lat: -23.5, count: 3 },
     { code: "SCL", lon: -70.6, lat: -33.4, count: 4 },
@@ -130,7 +138,15 @@ function buildData(theme: "Claro" | "Oscuro") {
   const PY = (lat: number) => 399 - 177 * Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
   const mapPins = pinsRaw.map((o) => {
     const big = o.count > 1;
-    return { code: o.code, count: o.count, left: (PX(o.lon) / 12).toFixed(2) + "%", top: (PY(o.lat) / 6.5).toFixed(2) + "%", big, small: !big };
+    return {
+      code: o.code,
+      count: o.count,
+      left: (PX(o.lon) / 12).toFixed(2) + "%",
+      top: (PY(o.lat) / 6.5).toFixed(2) + "%",
+      big,
+      small: !big,
+      labelLeft: "labelLeft" in o && !!o.labelLeft,
+    };
   });
   const pinPx: Record<string, [number, number]> = {};
   pinsRaw.forEach((o) => {
@@ -201,7 +217,7 @@ function buildData(theme: "Claro" | "Oscuro") {
 type BoardData = ReturnType<typeof buildData>;
 
 function buildBoardHTML(d: BoardData): string {
-  const { p, rows, restAreas, mapPins, arcPaths, mapGroups } = d;
+  const { p, rows, restAreas, mapPins, arcPaths, mapGroups, countryInfo } = d;
   // Placeholder estable: el reloj real lo escribe el efecto en cuanto monta, así
   // el HTML del servidor y el del cliente coinciden (sin desajuste de hidratación).
   const clock = "--:--:--";
@@ -209,7 +225,7 @@ function buildBoardHTML(d: BoardData): string {
   const chips = restAreas
     .map(
       (area) =>
-        `<span data-chip style="font:500 12.762px/12.762px ${SG};padding:9.8px 15.7px;border-radius:999px;cursor:pointer;transition:all .16s;border:1px solid ${p.chipBd};color:${p.chipText}">${area}</span>`,
+        `<span data-chip style="font:500 12.762px/12.762px ${LS};padding:9.8px 15.7px;border-radius:999px;cursor:pointer;transition:all .16s;border:1px solid ${p.chipBd};color:${p.chipText}">${area}</span>`,
     )
     .join("");
 
@@ -237,15 +253,26 @@ function buildBoardHTML(d: BoardData): string {
     )
     .join("");
 
+  /* Cada pin ancla su PUNTO (no el grupo punto+rótulo) a la coordenada: con
+     los códigos de 3 letras el `translate(-50%,-50%)` clásico apenas se
+     notaba, pero con nombres de país el rótulo arrastraba el centro del grupo
+     y el punto quedaba lejos de la ciudad (Miami acababa en el Golfo). El
+     `transform-origin` va también en el punto para que el zoom del hover no
+     lo mueva. `data-anchor` lo reutiliza selectPin al re-escribir transform. */
   const pinsHtml = mapPins
-    .map(
-      (pin) => `
-      <div data-pin="${pin.code}" style="position:absolute;left:${pin.left};top:${pin.top};transform:translate(-50%,-50%);display:flex;align-items:center;gap:7px;z-index:3;cursor:pointer;transition:transform .2s ease">
-        ${pin.big ? `<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:${p.heading};color:#fff;font:700 12px/1 ${SM};box-shadow:0 4px 12px -2px rgba(27,0,136,.5)">${pin.count}</span>` : ""}
+    .map((pin) => {
+      const half = pin.big ? 13 : 7; // mitad del badge (26px) o del punto (14px)
+      const anchor = pin.labelLeft
+        ? `translate(calc(-100% + ${half}px),-50%)`
+        : `translate(-${half}px,-50%)`;
+      const origin = pin.labelLeft ? `calc(100% - ${half}px) 50%` : `${half}px 50%`;
+      return `
+      <div data-pin="${pin.code}" data-anchor="${anchor}" style="position:absolute;left:${pin.left};top:${pin.top};transform:${anchor};transform-origin:${origin};display:flex;${pin.labelLeft ? "flex-direction:row-reverse;" : ""}align-items:center;gap:7px;z-index:3;cursor:pointer;transition:transform .2s ease">
+        ${pin.big ? `<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:${p.heading};color:#fff;font:700 12px/1 ${LS};box-shadow:0 4px 12px -2px rgba(27,0,136,.5)">${pin.count}</span>` : ""}
         ${pin.small ? `<span style="width:14px;height:14px;border-radius:50%;background:${p.accent};border:2px solid #fff;box-shadow:0 0 0 4px ${p.pinGlow},0 3px 8px -1px rgba(230,17,76,.5)"></span>` : ""}
-        <span style="font:700 10px/1 ${SM};letter-spacing:.14em;padding:4px 7px;border-radius:6px;background:${p.pinLabelBg};color:${p.body};border:1px solid ${p.divider};white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)">${pin.code}</span>
-      </div>`,
-    )
+        <span style="font:700 10px/1 ${LS};letter-spacing:.14em;padding:4px 7px;border-radius:6px;background:${p.pinLabelBg};color:${p.body};border:1px solid ${p.divider};white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)">${(countryInfo[pin.code]?.name || pin.code).toUpperCase()}</span>
+      </div>`;
+    })
     .join("");
 
   const groupsHtml = mapGroups
@@ -253,19 +280,19 @@ function buildBoardHTML(d: BoardData): string {
       (g) => `
       <div data-group="${g.code}" style="margin-bottom:22px;border-radius:14px;transition:box-shadow .25s ease,background .25s ease">
         <div style="display:flex;align-items:baseline;gap:11px;margin:2px 4px 12px">
-          <span style="font:700 17px/1 ${SG};letter-spacing:.01em;color:${p.heading}">${g.country}</span>
-          <span style="font:700 12px/1 ${SM};letter-spacing:.18em;text-transform:uppercase;color:${p.groupMeta}">${g.meta}</span>
+          <span style="font:700 17px/1 ${LS};letter-spacing:.01em;color:${p.heading}">${g.country}</span>
+          <span style="font:700 12px/1 ${LS};letter-spacing:.18em;text-transform:uppercase;color:${p.groupMeta}">${g.meta}</span>
         </div>
         <div style="display:flex;flex-direction:column;gap:12px">
           ${g.items
             .map(
               (job) => `
-            <a href="#postular" data-mapjob="${job.mapIdx}" style="display:flex;align-items:center;gap:14px;text-decoration:none;padding:18px 20px;border-radius:16px;background:${p.cardBg};border:1px solid ${p.cardBd};box-shadow:${p.cardShadow};transition:background .16s ease,box-shadow .16s ease,transform .16s ease">
+            <a href="${vacanteHref(job.title)}" data-mapjob="${job.mapIdx}" style="display:flex;align-items:center;gap:14px;text-decoration:none;padding:18px 20px;border-radius:16px;background:${p.cardBg};border:1px solid ${p.cardBd};box-shadow:${p.cardShadow};transition:background .16s ease,box-shadow .16s ease,transform .16s ease">
               <span style="flex:1;min-width:0">
-                <span style="display:block;font:600 16.5px/1.28 ${SG};color:${p.heading}">${job.title}</span>
-                <span style="display:block;margin-top:4px;font:400 13.5px/1.35 ${SG};color:${p.body}">${job.sub}</span>
+                <span style="display:block;font:600 16.5px/1.28 ${LS};color:${p.heading}">${job.title}</span>
+                <span style="display:block;margin-top:4px;font:400 13.5px/1.35 ${LS};color:${p.body}">${job.sub}</span>
               </span>
-              <span style="flex:0 0 auto;font:700 11px/1 ${SM};letter-spacing:.1em;padding:7px 11px;border-radius:8px;background:${p.countBadgeBg};color:${p.heading}">${job.code}</span>
+              <span style="flex:0 0 auto;font:700 11px/1 ${LS};letter-spacing:.1em;padding:7px 11px;border-radius:8px;background:${p.countBadgeBg};color:${p.heading}">${job.code}</span>
               <span style="flex:0 0 auto;display:inline-flex;color:${p.accent}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
             </a>`,
             )
@@ -276,14 +303,14 @@ function buildBoardHTML(d: BoardData): string {
     .join("");
 
   return `
-  <div data-vac-board style="width:100%;font-family:${SG}">
+  <div data-vac-board style="width:100%;font-family:${LS}">
     <div data-board style="position:relative;width:100%;border-radius:22px;overflow:hidden;padding:40px 44px;background:${p.boardBg};box-shadow:${p.boardShadow}">
       <div data-view-toggle style="position:absolute;top:40px;right:44px;z-index:6;display:inline-flex;align-items:center;gap:4px;padding:5px;border-radius:999px;-webkit-backdrop-filter:blur(22px) saturate(140%);backdrop-filter:blur(22px) saturate(140%);background:${p.panelBg};border:1px solid ${p.panelBd};box-shadow:${p.panelShadow}">
-        <button data-view-btn="lista" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:0;border-radius:999px;cursor:pointer;font:700 13.252px/13.252px ${SG};transition:background .18s ease,color .18s ease">
+        <button data-view-btn="lista" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:0;border-radius:999px;cursor:pointer;font:700 13.252px/13.252px ${LS};transition:background .18s ease,color .18s ease">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
           <span data-view-label="lista">Lista</span>
         </button>
-        <button data-view-btn="mapa" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:0;border-radius:999px;cursor:pointer;font:700 13.252px/13.252px ${SG};background:transparent;transition:background .18s ease,color .18s ease">
+        <button data-view-btn="mapa" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:0;border-radius:999px;cursor:pointer;font:700 13.252px/13.252px ${LS};background:transparent;transition:background .18s ease,color .18s ease">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
           <span data-view-label="mapa" style="display:none">Mapa</span>
         </button>
@@ -293,7 +320,7 @@ function buildBoardHTML(d: BoardData): string {
       <p style="margin:0 0 24px;font:400 15.216px/22.823px ${LS};max-width:560px;color:${p.body}">Explora las vacantes abiertas, filtra por área y descubre dónde puede crecer tu talento.</p>
 
       <div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px">
-        <span style="font:700 12.762px/12.762px ${SG};padding:9.8px 15.7px;border-radius:999px;background:${p.chipActiveBg};color:${p.chipActiveText}">Todas</span>
+        <span style="font:700 12.762px/12.762px ${LS};padding:9.8px 15.7px;border-radius:999px;background:${p.chipActiveBg};color:${p.chipActiveText}">Todas</span>
         ${chips}
       </div>
 
@@ -302,7 +329,7 @@ function buildBoardHTML(d: BoardData): string {
           <span style="font-size:16px;color:${p.accent}">✈</span>
           <span style="font:900 11.78px/11.78px ${LS};letter-spacing:2.1204px;color:${p.heading}">SALIDAS · EMBARQUE ABIERTO</span>
           <span style="width:6px;height:6px;border-radius:50%;background:#37d18a;animation:vacBlink 1.6s infinite;margin-left:2px"></span>
-          <span style="font:400 10.307px/10.307px ${SM};letter-spacing:1.443px;color:${p.label}">EN VIVO</span>
+          <span style="font:400 10.307px/10.307px ${LS};letter-spacing:1.443px;color:${p.label}">EN VIVO</span>
           <span data-clock style="margin-left:auto;font:900 13px/12.762px ${LS};letter-spacing:1.5314px;color:${p.clock}">${clock}</span>
         </div>
         <div data-cols style="display:grid;grid-template-columns:188px minmax(168px,1.3fr) 186px 172px 120px;column-gap:14px;padding:14px 20px;font:900 11.78px/11.78px ${LS};letter-spacing:2.1204px;text-transform:uppercase;background:${p.headBg};border-bottom:1px solid ${p.divider};color:${p.headText}">
@@ -343,8 +370,8 @@ function buildBoardHTML(d: BoardData): string {
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5a2.12 2.12 0 0 0-3-3L13 8 4.8 6.2a.5.5 0 0 0-.5.8l3.9 4.9-2.9 2.9-2.3-.6a.5.5 0 0 0-.5.8L4 20l1.6 1.4a.5.5 0 0 0 .8-.5l-.6-2.3 2.9-2.9 4.9 3.9a.5.5 0 0 0 .8-.5z"></path></svg>
                 </span>
                 <div>
-                  <div style="font:600 16px/1.1 ${SG};color:${p.heading}">10 vuelos disponibles</div>
-                  <div style="margin-top:3px;font:400 12.5px/1.3 ${SG};color:${p.body}">Explora destinos con vacantes abiertas.</div>
+                  <div style="font:600 16px/1.1 ${LS};color:${p.heading}">10 vuelos disponibles</div>
+                  <div style="margin-top:3px;font:400 12.5px/1.3 ${LS};color:${p.body}">Explora destinos con vacantes abiertas.</div>
                 </div>
               </div>
 
@@ -361,8 +388,8 @@ function buildBoardHTML(d: BoardData): string {
           <div data-map-side style="width:404px;flex:0 0 auto;align-self:stretch;position:relative;overflow:hidden;background:${p.panelBgSoft};-webkit-backdrop-filter:blur(22px) saturate(140%);backdrop-filter:blur(22px) saturate(140%)">
             <div data-mapscroll style="position:absolute;inset:0;overflow-y:auto;padding:22px 20px">
               <div style="display:flex;align-items:center;justify-content:space-between;margin:0 4px 18px">
-                <span style="font:700 12px/1 ${SM};letter-spacing:.24em;color:${p.label}">TODAS LAS VACANTES</span>
-                <span style="font:700 12.5px/1 ${SM};letter-spacing:.04em;color:${p.heading};background:${p.countBadgeBg};padding:6px 11px;border-radius:9px">15</span>
+                <span style="font:700 12px/1 ${LS};letter-spacing:.24em;color:${p.label}">TODAS LAS VACANTES</span>
+                <span style="font:700 12.5px/1 ${LS};letter-spacing:.04em;color:${p.heading};background:${p.countBadgeBg};padding:6px 11px;border-radius:9px">15</span>
               </div>
               ${groupsHtml}
             </div>
@@ -371,15 +398,15 @@ function buildBoardHTML(d: BoardData): string {
         </div>
 
         <div data-map-legend style="display:flex;align-items:center;gap:22px;padding:14px 20px;border-top:1px solid ${p.divider}">
-          <span style="display:flex;align-items:center;gap:8px;font:400 12px/1 ${SG};color:${p.body}"><span style="width:11px;height:11px;border-radius:50%;background:${p.accent};border:2px solid #fff;box-shadow:0 0 0 3px ${p.pinGlow}"></span>Destino con vacantes</span>
-          <span style="display:flex;align-items:center;gap:8px;font:400 12px/1 ${SG};color:${p.body}"><span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:${p.heading};color:#fff;font:700 9px/1 ${SM}">4</span>Número de posiciones</span>
-          <span style="margin-left:auto;font:700 12px/1 ${SM};letter-spacing:.12em;color:${p.heading}">15 VACANTES · 8 DESTINOS</span>
+          <span style="display:flex;align-items:center;gap:8px;font:400 12px/1 ${LS};color:${p.body}"><span style="width:11px;height:11px;border-radius:50%;background:${p.accent};border:2px solid #fff;box-shadow:0 0 0 3px ${p.pinGlow}"></span>Destino con vacantes</span>
+          <span style="display:flex;align-items:center;gap:8px;font:400 12px/1 ${LS};color:${p.body}"><span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:${p.heading};color:#fff;font:700 9px/1 ${LS}">4</span>Número de posiciones</span>
+          <span style="margin-left:auto;font:700 12px/1 ${LS};letter-spacing:.12em;color:${p.heading}">15 VACANTES · 8 DESTINOS</span>
         </div>
       </div>
 
       <div data-scrim style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(6,7,12,.52);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .35s ease;z-index:20"></div>
 
-      <aside data-drawer style="position:absolute;top:0;right:0;bottom:0;width:468px;max-width:86%;transform:translateX(112%);transition:transform .44s cubic-bezier(.22,1,.36,1);z-index:30;display:flex;flex-direction:column;overflow:hidden;border-top-right-radius:22px;border-bottom-right-radius:22px;background:${p.dBg};border-left:1px solid ${p.dBd};box-shadow:${p.dShadow};font-family:${SG}">
+      <aside data-drawer style="position:absolute;top:0;right:0;bottom:0;width:468px;max-width:86%;transform:translateX(112%);transition:transform .44s cubic-bezier(.22,1,.36,1);z-index:30;display:flex;flex-direction:column;overflow:hidden;border-top-right-radius:22px;border-bottom-right-radius:22px;background:${p.dBg};border-left:1px solid ${p.dBd};box-shadow:${p.dShadow};font-family:${LS}">
         <button data-close aria-label="Cerrar" style="position:absolute;top:22px;right:22px;z-index:2;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;border:1px solid ${p.dCloseBd};background:${p.dCloseBg};color:${p.dCloseColor};cursor:pointer;transition:all .16s ease">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
@@ -390,44 +417,44 @@ function buildBoardHTML(d: BoardData): string {
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5a2.12 2.12 0 0 0-3-3L13 8 4.8 6.2a.5.5 0 0 0-.5.8l3.9 4.9-2.9 2.9-2.3-.6a.5.5 0 0 0-.5.8L4 20l1.6 1.4a.5.5 0 0 0 .8-.5l-.6-2.3 2.9-2.9 4.9 3.9a.5.5 0 0 0 .8-.5z"></path></svg>
             </div>
             <div style="min-width:0">
-              <h3 data-d-title style="margin:2px 0 8px;font:600 25px/1.1 ${SG};letter-spacing:-.01em;color:${p.dHeading}">Cargo</h3>
-              <div style="display:flex;align-items:center;gap:8px;font:400 14.5px/1 ${SG};color:${p.dSub}"><span data-d-flag style="font-size:16px">🌎</span><span data-d-loc>Ubicación</span></div>
+              <h3 data-d-title style="margin:2px 0 8px;font:600 25px/1.1 ${LS};letter-spacing:-.01em;color:${p.dHeading}">Cargo</h3>
+              <div style="display:flex;align-items:center;gap:8px;font:400 14.5px/1 ${LS};color:${p.dSub}"><span data-d-flag style="font-size:16px">🌎</span><span data-d-loc>Ubicación</span></div>
             </div>
           </div>
 
           <div style="display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 10px">
-            <span data-d-mod style="font:500 12.5px/1 ${SG};padding:8px 14px;border-radius:999px;background:${p.dChipBg};border:1px solid ${p.dChipBd};color:${p.dChipText}">Modalidad</span>
-            <span data-d-tipo style="font:500 12.5px/1 ${SG};padding:8px 14px;border-radius:999px;background:${p.dChipBg};border:1px solid ${p.dChipBd};color:${p.dChipText}">Contrato</span>
-            <span data-d-estado style="font:600 12.5px/1 ${SG};padding:8px 14px;border-radius:999px;background:rgba(91,226,160,.14);border:1px solid rgba(91,226,160,.4);color:#5be2a0">Estado</span>
+            <span data-d-mod style="font:500 12.5px/1 ${LS};padding:8px 14px;border-radius:999px;background:${p.dChipBg};border:1px solid ${p.dChipBd};color:${p.dChipText}">Modalidad</span>
+            <span data-d-tipo style="font:500 12.5px/1 ${LS};padding:8px 14px;border-radius:999px;background:${p.dChipBg};border:1px solid ${p.dChipBd};color:${p.dChipText}">Contrato</span>
+            <span data-d-estado style="font:600 12.5px/1 ${LS};padding:8px 14px;border-radius:999px;background:rgba(91,226,160,.14);border:1px solid rgba(91,226,160,.4);color:#5be2a0">Estado</span>
           </div>
-          <div style="display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;background:${p.dTagBg};border:1px solid ${p.dTagBd};color:${p.dTagText};font:400 11.5px/1 ${SG}">
+          <div style="display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;background:${p.dTagBg};border:1px solid ${p.dTagBd};color:${p.dTagText};font:400 11.5px/1 ${LS}">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg>
             <span data-d-pub>Publicado</span>
           </div>
 
-          <div style="display:flex;align-items:center;gap:8px;margin:26px 0 10px"><span style="color:${p.accent};font-size:15px">✈</span><span style="font:600 14px/1 ${SG};color:${p.dHeading}">Sobre este vuelo</span></div>
-          <p data-d-desc style="margin:0;font:400 14.5px/1.6 ${SG};color:${p.dSub}">Descripción del rol.</p>
+          <div style="display:flex;align-items:center;gap:8px;margin:26px 0 10px"><span style="color:${p.accent};font-size:15px">✈</span><span style="font:600 14px/1 ${LS};color:${p.dHeading}">Sobre este vuelo</span></div>
+          <p data-d-desc style="margin:0;font:400 14.5px/1.6 ${LS};color:${p.dSub}">Descripción del rol.</p>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:20px 0 4px">
-            <div style="border-radius:12px;padding:13px 15px;background:${p.dCardBg};border:1px solid ${p.dCardBd}"><div style="font:700 10.5px/1 ${SM};letter-spacing:.14em;color:${p.dLabel};text-transform:uppercase">Área</div><div data-g-area style="margin-top:7px;font:500 15px/1.2 ${SG};color:${p.dGridVal}">—</div></div>
-            <div style="border-radius:12px;padding:13px 15px;background:${p.dCardBg};border:1px solid ${p.dCardBd}"><div style="font:700 10.5px/1 ${SM};letter-spacing:.14em;color:${p.dLabel};text-transform:uppercase">Ubicación</div><div data-g-ubic style="margin-top:7px;font:500 15px/1.2 ${SG};color:${p.dGridVal}">—</div></div>
-            <div style="border-radius:12px;padding:13px 15px;background:${p.dCardBg};border:1px solid ${p.dCardBd}"><div style="font:700 10.5px/1 ${SM};letter-spacing:.14em;color:${p.dLabel};text-transform:uppercase">Modalidad</div><div data-g-mod style="margin-top:7px;font:500 15px/1.2 ${SG};color:${p.dGridVal}">—</div></div>
-            <div style="border-radius:12px;padding:13px 15px;background:${p.dCardBg};border:1px solid ${p.dCardBd}"><div style="font:700 10.5px/1 ${SM};letter-spacing:.14em;color:${p.dLabel};text-transform:uppercase">Tipo de contrato</div><div data-g-tipo style="margin-top:7px;font:500 15px/1.2 ${SG};color:${p.dGridVal}">—</div></div>
+            <div style="border-radius:12px;padding:13px 15px;background:${p.dCardBg};border:1px solid ${p.dCardBd}"><div style="font:700 10.5px/1 ${LS};letter-spacing:.14em;color:${p.dLabel};text-transform:uppercase">Área</div><div data-g-area style="margin-top:7px;font:500 15px/1.2 ${LS};color:${p.dGridVal}">—</div></div>
+            <div style="border-radius:12px;padding:13px 15px;background:${p.dCardBg};border:1px solid ${p.dCardBd}"><div style="font:700 10.5px/1 ${LS};letter-spacing:.14em;color:${p.dLabel};text-transform:uppercase">Ubicación</div><div data-g-ubic style="margin-top:7px;font:500 15px/1.2 ${LS};color:${p.dGridVal}">—</div></div>
+            <div style="border-radius:12px;padding:13px 15px;background:${p.dCardBg};border:1px solid ${p.dCardBd}"><div style="font:700 10.5px/1 ${LS};letter-spacing:.14em;color:${p.dLabel};text-transform:uppercase">Modalidad</div><div data-g-mod style="margin-top:7px;font:500 15px/1.2 ${LS};color:${p.dGridVal}">—</div></div>
+            <div style="border-radius:12px;padding:13px 15px;background:${p.dCardBg};border:1px solid ${p.dCardBd}"><div style="font:700 10.5px/1 ${LS};letter-spacing:.14em;color:${p.dLabel};text-transform:uppercase">Tipo de contrato</div><div data-g-tipo style="margin-top:7px;font:500 15px/1.2 ${LS};color:${p.dGridVal}">—</div></div>
           </div>
 
-          <div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px"><span style="color:${p.accent};font-size:15px">◆</span><span style="font:600 14px/1 ${SG};color:${p.dHeading}">Responsabilidades</span></div>
+          <div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px"><span style="color:${p.accent};font-size:15px">◆</span><span style="font:600 14px/1 ${LS};color:${p.dHeading}">Responsabilidades</span></div>
           <ul data-d-resp style="list-style:none;margin:0;padding:0"></ul>
 
-          <div style="display:flex;align-items:center;gap:8px;margin:22px 0 12px"><span style="color:${p.accent};font-size:15px">✓</span><span style="font:600 14px/1 ${SG};color:${p.dHeading}">Requisitos</span></div>
+          <div style="display:flex;align-items:center;gap:8px;margin:22px 0 12px"><span style="color:${p.accent};font-size:15px">✓</span><span style="font:600 14px/1 ${LS};color:${p.dHeading}">Requisitos</span></div>
           <ul data-d-req style="list-style:none;margin:0;padding:0"></ul>
         </div>
 
         <div style="flex:0 0 auto;display:flex;flex-direction:column;gap:10px;padding:18px 22px 24px;border-top:1px solid ${p.dFooterBd};background:${p.dFooterBg};-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)">
-          <a data-cta href="#postular" style="display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:15px;border-radius:12px;text-decoration:none;background:#E8114B;color:#fff;font:600 15px/1 ${SG};box-shadow:0 12px 28px -12px rgba(232,17,75,.7);transition:filter .16s ease">
+          <a data-cta href="/vacantes" style="display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:15px;border-radius:12px;text-decoration:none;background:#E8114B;color:#fff;font:600 15px/1 ${LS};box-shadow:0 12px 28px -12px rgba(232,17,75,.7);transition:filter .16s ease">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             Postularme ahora
           </a>
-          <button data-save style="display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:14px;border-radius:12px;border:1px solid ${p.dSaveBd};background:transparent;color:${p.dSaveText};font:600 14px/1 ${SG};cursor:pointer;transition:all .16s ease">
+          <button data-save style="display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:14px;border-radius:12px;border:1px solid ${p.dSaveBd};background:transparent;color:${p.dSaveText};font:600 14px/1 ${LS};cursor:pointer;transition:all .16s ease">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
             Guardar vacante
           </button>
@@ -591,7 +618,7 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
     const styleTile = (t: HTMLElement, color: string | null, skin: { background: string; boxShadow: string }) => {
       const s = t.style;
       s.display = "inline-flex"; s.alignItems = "center"; s.justifyContent = "center";
-      s.fontFamily = SM; s.flex = "0 0 auto";
+      s.fontFamily = LS; s.fontVariantNumeric = "tabular-nums"; s.flex = "0 0 auto";
       s.width = "13px"; s.height = "22px"; s.marginRight = "1.5px"; s.fontSize = "13.5px";
       s.borderRadius = "2px"; s.color = color || p.tileText;
       s.background = skin.background; s.boxShadow = skin.boxShadow;
@@ -599,7 +626,7 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
     const settleTile = (t: HTMLElement, col: string) => {
       const s = t.style;
       s.display = "inline-flex"; s.alignItems = "center"; s.justifyContent = "center";
-      s.fontFamily = SM; s.flex = "0 0 auto";
+      s.fontFamily = LS; s.fontVariantNumeric = "tabular-nums"; s.flex = "0 0 auto";
       const skin = tileSkin();
       s.borderRadius = "3px"; s.boxShadow = skin.boxShadow; s.background = skin.background; s.marginRight = "1px";
       if (col === "area") { s.width = "13px"; s.height = "20px"; s.fontSize = "12.271px"; s.color = p.tileTextArea; }
@@ -666,7 +693,8 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
         const color = statusColor(col, estado);
         cell.textContent = "";
         cell.style.letterSpacing = "";
-        cell.style.fontFamily = SM;
+        cell.style.fontFamily = LS;
+        cell.style.fontVariantNumeric = "tabular-nums";
         cell.style.color = "";
         Array.from(text).forEach((ch, i) => {
           const t = document.createElement("span");
@@ -727,6 +755,10 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
       set("[data-g-mod]", dd.mod);
       set("[data-g-tipo]", dd.tipo);
 
+      // El CTA del cajón apunta a la ficha concreta dentro de /vacantes.
+      const cta = root.querySelector<HTMLAnchorElement>("[data-cta]");
+      if (cta) cta.href = vacanteHref(row.cargo);
+
       const color = statusColor("estado", row.estado) || "#5be2a0";
       const est = root.querySelector<HTMLElement>("[data-d-estado]");
       if (est) { est.textContent = row.estado; est.style.color = color; est.style.background = rgba(color, 0.14); est.style.borderColor = rgba(color, 0.42); }
@@ -741,7 +773,7 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
           const dot = document.createElement("span");
           dot.style.cssText = "width:6px;height:6px;border-radius:50%;flex:0 0 auto;margin-top:7px;background:" + p.accent;
           const sp = document.createElement("span");
-          sp.style.cssText = "font:400 14px/1.5 " + SG + ";color:" + p.dListText;
+          sp.style.cssText = "font:400 14px/1.5 " + LS + ";color:" + p.dListText;
           sp.textContent = txt;
           li.appendChild(dot); li.appendChild(sp); ul.appendChild(li);
         });
@@ -787,7 +819,11 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
     const selectPin = (code: string) => {
       root.querySelectorAll<HTMLElement>("[data-pin]").forEach((el) => {
         const on = el.getAttribute("data-pin") === code;
-        el.style.transform = on ? "translate(-50%,-50%) scale(1.22)" : "translate(-50%,-50%)";
+        // El anclaje por pin vive en data-anchor (punto clavado en la
+        // coordenada); el scale del hover se compone sobre él y crece desde
+        // el punto gracias al transform-origin del propio pin.
+        const anchor = el.getAttribute("data-anchor") || "translate(-50%,-50%)";
+        el.style.transform = on ? anchor + " scale(1.22)" : anchor;
         el.style.zIndex = on ? "6" : "3";
         const label = el.children[1] as HTMLElement | undefined;
         if (label) { label.style.borderColor = on ? p.accent : p.divider; label.style.color = on ? p.accent : p.body; }
@@ -834,7 +870,7 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
 
       const back = document.createElement("button");
       back.type = "button";
-      back.style.cssText = "display:inline-flex;align-items:center;gap:8px;margin:0 4px 20px;padding:0;border:0;background:transparent;cursor:pointer;font:700 12px/1 " + SM + ";letter-spacing:.16em;text-transform:uppercase;color:" + p.label;
+      back.style.cssText = "display:inline-flex;align-items:center;gap:8px;margin:0 4px 20px;padding:0;border:0;background:transparent;cursor:pointer;font:700 12px/1 " + LS + ";letter-spacing:.16em;text-transform:uppercase;color:" + p.label;
       back.textContent = "← Todos los destinos";
       back.addEventListener("mouseenter", () => (back.style.color = p.accent));
       back.addEventListener("mouseleave", () => (back.style.color = p.label));
@@ -842,12 +878,12 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
       det.appendChild(back);
 
       const title = document.createElement("div");
-      title.style.cssText = "margin:0 4px 6px;font:700 30px/1.05 " + SG + ";letter-spacing:-.01em;color:" + p.heading;
+      title.style.cssText = "margin:0 4px 6px;font:700 30px/1.05 " + LS + ";letter-spacing:-.01em;color:" + p.heading;
       title.textContent = info.name + (info.city ? " — " + info.city : "");
       det.appendChild(title);
 
       const sub = document.createElement("div");
-      sub.style.cssText = "margin:0 4px 22px;font:700 12.5px/1 " + SM + ";letter-spacing:.2em;text-transform:uppercase;color:" + p.groupMeta;
+      sub.style.cssText = "margin:0 4px 22px;font:700 12.5px/1 " + LS + ";letter-spacing:.2em;text-transform:uppercase;color:" + p.groupMeta;
       sub.textContent = info.code + " · " + jobs.length + " Vacantes activas";
       det.appendChild(sub);
 
@@ -855,7 +891,7 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
       listWrap.style.cssText = "display:flex;flex-direction:column;gap:14px";
       jobs.forEach((job) => {
         const a = document.createElement("a");
-        a.href = "#postular";
+        a.href = vacanteHref(job.title);
         a.style.cssText = "display:flex;align-items:center;gap:16px;text-decoration:none;padding:20px 22px;border-radius:16px;background:" + p.cardBg + ";border:1px solid " + p.cardBd + ";box-shadow:" + p.cardShadow + ";transition:background .16s ease,box-shadow .16s ease,transform .16s ease";
         a.addEventListener("mouseenter", () => { a.style.background = p.cardHoverBg; a.style.transform = "translateY(-1px)"; });
         a.addEventListener("mouseleave", () => { a.style.background = p.cardBg; a.style.transform = "none"; });
@@ -864,15 +900,15 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
         const txt = document.createElement("span");
         txt.style.cssText = "flex:1;min-width:0";
         const t = document.createElement("span");
-        t.style.cssText = "display:block;font:600 17px/1.28 " + SG + ";color:" + p.heading;
+        t.style.cssText = "display:block;font:600 17px/1.28 " + LS + ";color:" + p.heading;
         t.textContent = job.title;
         const s = document.createElement("span");
-        s.style.cssText = "display:block;margin-top:5px;font:400 13.5px/1.35 " + SG + ";color:" + p.body;
+        s.style.cssText = "display:block;margin-top:5px;font:400 13.5px/1.35 " + LS + ";color:" + p.body;
         s.textContent = job.sub;
         txt.appendChild(t); txt.appendChild(s);
 
         const rid = document.createElement("span");
-        rid.style.cssText = "flex:0 0 auto;font:700 11px/1 " + SM + ";letter-spacing:.1em;color:" + p.label;
+        rid.style.cssText = "flex:0 0 auto;font:700 11px/1 " + LS + ";letter-spacing:.1em;color:" + p.label;
         rid.textContent = job.reqId;
 
         const chev = document.createElement("span");
