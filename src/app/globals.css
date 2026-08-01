@@ -509,3 +509,14 @@ body {
     transform: translateX(1%);
   }
 }
+
+/* Fuera de pantalla los dos bucles se congelan y sueltan el `will-change`:
+   un hero a sangre completa animándose mientras nadie lo ve mantiene viva una
+   capa de compositor del tamaño de la ventana durante todo el scroll. Lo marca
+   `usePauseOffscreen` con un IntersectionObserver. Al volver a entrar, el
+   bucle retoma en el mismo punto del ciclo, así que no hay salto. */
+[data-motion-idle] .hero__bg-layer,
+[data-motion-idle] .hero__ambient-light {
+  animation-play-state: paused;
+  will-change: auto;
+}

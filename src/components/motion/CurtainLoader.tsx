@@ -142,10 +142,15 @@ export function CurtainLoader({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.45, ease: EASE_ENTER }}
           >
+            {/* `initial` es incondicional a propósito: `useReducedMotion` da
+                false en SSR y true en el primer render del cliente, así que
+                ramificar aquí producía un mismatch de hidratación para los
+                usuarios con motion reducido. La rama vive en la transición:
+                duración 0 = aparición instantánea, sin movimiento. */}
             <motion.div
-              initial={reduced ? false : { opacity: 0, y: 14, filter: "blur(6px)" }}
-              animate={reduced ? {} : { opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.8, ease: EASE_ENTER }}
+              initial={{ opacity: 0, y: 14, filter: "blur(6px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: reduced ? 0 : 0.8, ease: EASE_ENTER }}
             >
               <LatamLogo className="h-12 w-auto sm:h-14" />
             </motion.div>

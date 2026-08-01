@@ -10,8 +10,9 @@ import {
   MapPin,
 } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useRef } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
-import { EASE_ENTER } from "@/components/motion";
+import { EASE_ENTER, usePauseOffscreen } from "@/components/motion";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * VacantesHero — cabecera de la vista /vacantes.
@@ -46,9 +47,13 @@ const HERO_ITEM: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.75, ease: EASE_ENTER } },
 };
 
+/* El `hidden` es idéntico al de arriba a propósito: es lo que se sirve en SSR
+   y `useReducedMotion` difiere entre servidor (false) y cliente (true), así
+   que ramificar el estado inicial rompía la hidratación. Con motion reducido
+   el `y` salta a duración 0 y sólo se percibe el fundido. */
 const HERO_ITEM_REDUCIDO: Variants = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: 0.35 } },
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35, y: { duration: 0 } } },
 };
 
 export interface VacantesSearchState {
@@ -145,12 +150,20 @@ function Divisor() {
 
 export function VacantesHero({ search, onSearchChange, onSubmit }: VacantesHeroProps) {
   const reduced = useReducedMotion();
+
+  // Marco del hero: mientras esté fuera de pantalla, la respiración y la luz
+  // ambiente se pausan (ver `[data-motion-idle]` en globals.css).
+  const marcoRef = useRef<HTMLDivElement>(null);
+  usePauseOffscreen(marcoRef);
   const item = reduced ? HERO_ITEM_REDUCIDO : HERO_ITEM;
 
   return (
     <motion.header className="relative" variants={HERO} initial="hidden" animate="show">
       {/* ── Marco del hero: 1440×614 en el diseño ── */}
-      <div className="relative h-[460px] overflow-hidden bg-[#0c104f] sm:h-[540px] lg:h-[614px]">
+      <div
+        ref={marcoRef}
+        className="relative h-[460px] overflow-hidden bg-[#0c104f] sm:h-[540px] lg:h-[614px]"
+      >
         {/* ── Capa de fondo animada: respiración cinematográfica ─────────────
              El nodo exterior lleva la clase CSS `hero__bg-layer` que controla
              la respiración (keyframe continuo). La entrada visual se consigue
@@ -166,22 +179,26 @@ export function VacantesHero({ search, onSearchChange, onSubmit }: VacantesHeroP
             backgroundPosition: ENCUADRE_FOTO,
           }}
         >
-          {/* Scrim de entrada: opaco → transparente, sólo opacidad */}
+          {/* Scrim de entrada: opaco → transparente, sólo opacidad. El
+              `initial` no ramifica en `reduced` (SSR determinista); un fundido
+              de opacidad es aceptable con motion reducido, sólo más corto. */}
           <motion.div
             className="absolute inset-0 bg-[#0c104f]"
-            initial={reduced ? false : { opacity: 1 }}
+            initial={{ opacity: 1 }}
             animate={{ opacity: 0 }}
-            transition={{ duration: 1.4, ease: EASE_ENTER }}
+            transition={{ duration: reduced ? 0.5 : 1.4, ease: EASE_ENTER }}
           />
         </div>
 
-        {/* ── Luz ambiente: destello cálido que se desplaza sobre el cielo ── */}
-        {!reduced && (
-          <div
-            aria-hidden
-            className="hero__ambient-light pointer-events-none absolute inset-0 z-[1]"
-          />
-        )}
+        {/* ── Luz ambiente: destello cálido que se desplaza sobre el cielo ──
+            Se renderiza siempre (condicionarla a `reduced` desalineaba el
+            árbol entre SSR y cliente): su animación ya está tras
+            `prefers-reduced-motion: no-preference` en globals.css, así que con
+            motion reducido queda como luz estática. */}
+        <div
+          aria-hidden
+          className="hero__ambient-light pointer-events-none absolute inset-0 z-[1]"
+        />
 
         {/* "Overlay+Shadow" — sombra interior desplazada 21/91 con 125.1 de
             desenfoque: encaja el hero por arriba y por la izquierda. */}

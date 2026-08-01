@@ -78,12 +78,18 @@ export function RevealText({
   const step = stagger ?? DEFAULT_STAGGER[split];
 
   // `custom` = índice global de la pieza → su retardo dentro de la cascada.
+  // `hidden` no ramifica en `reduced`: es lo que se sirve en SSR y el valor de
+  // `useReducedMotion` difiere entre servidor y cliente (mismatch de
+  // hidratación). Con motion reducido, el texto aparece de golpe (duración 0,
+  // sin cascada) — la máscara de overflow ya lo ocultaba en el estado hidden.
   const piece: Variants = {
-    hidden: reduced ? { opacity: 0 } : { y: "110%" },
+    hidden: { y: "110%" },
     show: (i: number) => ({
       opacity: 1,
       y: "0%",
-      transition: { duration: 0.7, ease: EASE_ENTER, delay: delay + (reduced ? 0 : i * step) },
+      transition: reduced
+        ? { duration: 0, delay }
+        : { duration: 0.7, ease: EASE_ENTER, delay: delay + i * step },
     }),
   };
 

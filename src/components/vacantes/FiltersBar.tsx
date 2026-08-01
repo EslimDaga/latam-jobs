@@ -1,15 +1,21 @@
 "use client";
 
 import { CaretDown } from "@phosphor-icons/react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { EASE_ENTER } from "@/components/motion";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * FiltersBar — píldoras de filtro de la vista /vacantes.
  *
  * Cada píldora abre un popover con opciones excluyentes; la píldora activa
  * muestra el valor elegido y se pinta en índigo invertido. "Limpiar filtros"
- * resetea todo. El popover usa la clase global `.ui-popover` para animar su
- * entrada vía @starting-style.
+ * resetea todo.
+ *
+ * El popover nace desde su píldora (origen arriba-izquierda, que es donde
+ * está el disparador) con tiempos asimétricos: abre en 180ms y cierra en
+ * 120ms. Cerrar es una respuesta directa a un click y debe sentirse
+ * inmediato; abrir puede permitirse el gesto.
  * ──────────────────────────────────────────────────────────────────────────── */
 
 export interface FilterPillConfig {
@@ -28,6 +34,7 @@ export function FilterPill({ config, onChange }: FilterPillProps) {
   const { id, label, options, value } = config;
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     if (!open) return;
@@ -66,46 +73,61 @@ export function FilterPill({ config, onChange }: FilterPillProps) {
         />
       </button>
 
-      {open && (
-        <ul
-          role="listbox"
-          aria-label={label}
-          className="ui-popover absolute left-0 top-[calc(100%+8px)] z-30 min-w-[220px] rounded-2xl border border-line-strong bg-white p-1.5 shadow-[0_18px_45px_-18px_rgba(27,0,136,0.35)]"
-        >
-          {value && (
-            <li>
-              <button
-                type="button"
-                onClick={() => {
-                  onChange(id, null);
-                  setOpen(false);
-                }}
-                className="w-full cursor-pointer rounded-xl px-3.5 py-2 text-left text-[15px] text-ink-soft transition hover:bg-surface"
-              >
-                Todos
-              </button>
-            </li>
-          )}
-          {options.map((opt) => (
-            <li key={opt}>
-              <button
-                type="button"
-                role="option"
-                aria-selected={opt === value}
-                onClick={() => {
-                  onChange(id, opt);
-                  setOpen(false);
-                }}
-                className={`w-full cursor-pointer rounded-xl px-3.5 py-2 text-left text-[15px] transition hover:bg-surface ${
-                  opt === value ? "font-bold text-indigo-latam-soft" : "text-ink"
-                }`}
-              >
-                {opt}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.ul
+            role="listbox"
+            aria-label={label}
+            initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -4 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              transition: { duration: 0.18, ease: EASE_ENTER },
+            }}
+            exit={{
+              opacity: 0,
+              ...(reduced ? {} : { scale: 0.98, y: -2 }),
+              transition: { duration: 0.12, ease: EASE_ENTER },
+            }}
+            style={{ transformOrigin: "top left" }}
+            className="absolute left-0 top-[calc(100%+8px)] z-30 min-w-[220px] rounded-2xl border border-line-strong bg-white p-1.5 shadow-[0_18px_45px_-18px_rgba(27,0,136,0.35)]"
+          >
+            {value && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange(id, null);
+                    setOpen(false);
+                  }}
+                  className="w-full cursor-pointer rounded-xl px-3.5 py-2 text-left text-[15px] text-ink-soft transition hover:bg-surface"
+                >
+                  Todos
+                </button>
+              </li>
+            )}
+            {options.map((opt) => (
+              <li key={opt}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={opt === value}
+                  onClick={() => {
+                    onChange(id, opt);
+                    setOpen(false);
+                  }}
+                  className={`w-full cursor-pointer rounded-xl px-3.5 py-2 text-left text-[15px] transition hover:bg-surface ${
+                    opt === value ? "font-bold text-indigo-latam-soft" : "text-ink"
+                  }`}
+                >
+                  {opt}
+                </button>
+              </li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -123,8 +145,8 @@ export function FiltersBar({ pills, onChange, onClear, hasActiveFilters }: Filte
       {pills.map((pill) => (
         <FilterPill key={pill.id} config={pill} onChange={onChange} />
       ))}
-      {/* "Text" (#3298:16194) — Bricolage Bold 20/35.71px, con 2.976px de aire
-          a la derecha para cuadrar la caja con el resto de la fila. */}
+      {/* "Text" (#3298:16194) — 20/35.71px en Bold, con 2.976px de aire a la
+          derecha para cuadrar la caja con el resto de la fila. */}
       <button
         type="button"
         onClick={onClear}

@@ -25,3 +25,4 @@ export {
 // Ya existentes en el proyecto, reexportados para tener el motion en un sitio.
 export { SmoothScroll } from "./SmoothScroll";
 export { useScrollProgress } from "./useScrollProgress";
+export { usePauseOffscreen } from "./usePauseOffscreen";

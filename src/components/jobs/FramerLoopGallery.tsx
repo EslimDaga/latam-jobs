@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import {
   motion,
+  useMotionValue,
   useScroll,
   useTransform,
   useReducedMotion,
@@ -254,13 +255,13 @@ function CultureCard({
             <div className="mt-[21px] px-0.5 pb-0.5 text-left">
               <motion.p
                 variants={itemVariants}
-                className="text-[13px] font-normal leading-[1.45] text-[#1f0099] [font-family:var(--font-inter),sans-serif]"
+                className="text-[13px] font-normal leading-[1.45] text-[#1f0099]"
               >
                 {img.quote}
               </motion.p>
               <motion.p
                 variants={itemVariants}
-                className="mt-2.5 text-[13px] font-bold text-[#1f0099] [font-family:var(--font-inter),sans-serif]"
+                className="mt-2.5 text-[13px] font-bold text-[#1f0099]"
               >
                 {img.name}
               </motion.p>
@@ -340,24 +341,31 @@ export function FramerLoopGallery(): React.JSX.Element {
     offset: ["start end", "end start"],
   });
 
+  // Con motion reducido el parallax se congela en su fotograma inicial (p=0),
+  // que es exactamente lo que pinta el SSR. Antes se pasaba `y={undefined}`,
+  // pero el servidor siempre evalúa reduced=false y servía los offsets
+  // iniciales → mismatch de hidratación para usuarios con motion reducido.
+  const quieto = useMotionValue(0);
+  const progreso = reduced ? quieto : scrollYProgress;
+
   // 13 parallax — uno por slot del collage
-  const y1 = useTransform(scrollYProgress, [0, 1], [70, -70]);
-  const y2 = useTransform(scrollYProgress, [0, 1], [-50, 50]);
-  const y3 = useTransform(scrollYProgress, [0, 1], [80, -80]);
-  const y4 = useTransform(scrollYProgress, [0, 1], [-60, 60]);
-  const y5 = useTransform(scrollYProgress, [0, 1], [40, -40]);
-  const y6 = useTransform(scrollYProgress, [0, 1], [90, -90]);
-  const y7 = useTransform(scrollYProgress, [0, 1], [-70, 70]);
-  const y8 = useTransform(scrollYProgress, [0, 1], [60, -60]);
-  const y9 = useTransform(scrollYProgress, [0, 1], [-40, 40]);
-  const y10 = useTransform(scrollYProgress, [0, 1], [50, -50]);
-  const y11 = useTransform(scrollYProgress, [0, 1], [-65, 65]);
-  const y12 = useTransform(scrollYProgress, [0, 1], [75, -75]);
-  const y13 = useTransform(scrollYProgress, [0, 1], [-55, 55]);
+  const y1 = useTransform(progreso, [0, 1], [70, -70]);
+  const y2 = useTransform(progreso, [0, 1], [-50, 50]);
+  const y3 = useTransform(progreso, [0, 1], [80, -80]);
+  const y4 = useTransform(progreso, [0, 1], [-60, 60]);
+  const y5 = useTransform(progreso, [0, 1], [40, -40]);
+  const y6 = useTransform(progreso, [0, 1], [90, -90]);
+  const y7 = useTransform(progreso, [0, 1], [-70, 70]);
+  const y8 = useTransform(progreso, [0, 1], [60, -60]);
+  const y9 = useTransform(progreso, [0, 1], [-40, 40]);
+  const y10 = useTransform(progreso, [0, 1], [50, -50]);
+  const y11 = useTransform(progreso, [0, 1], [-65, 65]);
+  const y12 = useTransform(progreso, [0, 1], [75, -75]);
+  const y13 = useTransform(progreso, [0, 1], [-55, 55]);
   const ys = [y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13];
 
   // Texto (bloques), con su propio parallax suave.
-  const yText1 = useTransform(scrollYProgress, [0, 1], [30, -30]);
+  const yText1 = useTransform(progreso, [0, 1], [30, -30]);
 
   const cardStyle =
     "relative overflow-hidden rounded-[1.5rem] shadow-lg border border-black/5 bg-zinc-50 hover:scale-[1.04] hover:shadow-2xl transition-all duration-500 cursor-pointer w-full h-full";
@@ -374,7 +382,7 @@ export function FramerLoopGallery(): React.JSX.Element {
           {SLOTS.map((slot, i) => (
             <CollageSlot
               key={`slot-${i}`}
-              y={reduced ? undefined : ys[i]}
+              y={ys[i]}
               cls={slot.cls}
               img={IMAGES[slot.img]}
               cardStyle={cardStyle}
@@ -385,15 +393,15 @@ export function FramerLoopGallery(): React.JSX.Element {
 
           {/* Titular central + CTA, como en el Figma (nodo 89:2472) */}
           <motion.div
-            style={{ y: reduced ? undefined : yText1 }}
+            style={{ y: yText1 }}
             className="absolute left-1/2 top-1/2 z-10 flex w-max -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-6 text-center"
           >
-            <h2 className="text-[42px] font-bold leading-[40.052px] tracking-[-0.3927px] text-[#1b0088] [font-family:var(--font-inter),sans-serif]">
+            <h2 className="text-[42px] font-bold leading-[40.052px] tracking-[-0.3927px] text-[#1b0088]">
               Sé tú. Volemos más alto.
             </h2>
             <a
               href="#cultura"
-              className="inline-flex select-none items-center justify-center rounded-full bg-red-latam px-[17px] py-2.5 text-[15.75px] font-medium text-white [font-family:var(--font-inter),sans-serif] shadow-lg transition-all duration-300 hover:scale-105 hover:bg-red-latam-deep active:scale-95"
+              className="inline-flex select-none items-center justify-center rounded-full bg-red-latam px-[17px] py-2.5 text-[15.75px] font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-red-latam-deep active:scale-95"
             >
               Nuestra cultura
             </a>
@@ -403,7 +411,7 @@ export function FramerLoopGallery(): React.JSX.Element {
         {/* Móvil/tablet: grilla limpia con las mismas fotos */}
         <div className="flex flex-col gap-8 pt-8 lg:hidden">
           <div className="px-4 text-center">
-            <h2 className="text-[clamp(1.75rem,8vw,42px)] font-bold leading-[0.9536] tracking-[-0.3927px] text-[#1b0088] [font-family:var(--font-inter),sans-serif]">
+            <h2 className="text-[clamp(1.75rem,8vw,42px)] font-bold leading-[0.9536] tracking-[-0.3927px] text-[#1b0088]">
               Sé tú. Volemos más alto.
             </h2>
           </div>
@@ -422,7 +430,7 @@ export function FramerLoopGallery(): React.JSX.Element {
           <div className="mt-4 flex justify-center">
             <a
               href="#cultura"
-              className="rounded-full bg-red-latam px-[17px] py-2.5 text-center text-[15.75px] font-medium text-white [font-family:var(--font-inter),sans-serif] shadow-md"
+              className="rounded-full bg-red-latam px-[17px] py-2.5 text-center text-[15.75px] font-medium text-white shadow-md"
             >
               Nuestra cultura
             </a>

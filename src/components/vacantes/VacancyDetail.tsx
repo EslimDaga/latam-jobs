@@ -41,9 +41,12 @@ const LINEA: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: EASE_ENTER } },
 };
 
+/* `hidden` idéntico al de LINEA a propósito: es lo que se sirve en SSR y
+   `useReducedMotion` difiere entre servidor y cliente (mismatch de
+   hidratación). El `y` salta a duración 0 y sólo queda el fundido. */
 const LINEA_REDUCIDA: Variants = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: 0.2 } },
+  hidden: { opacity: 0, y: 8 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.2, y: { duration: 0 } } },
 };
 
 function MetaItem({

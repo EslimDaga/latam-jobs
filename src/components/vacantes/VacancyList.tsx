@@ -1,15 +1,25 @@
 "use client";
 
 import { AirplaneTakeoff, Briefcase, Calendar, MapPin } from "@phosphor-icons/react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { EASE_ENTER } from "@/components/motion";
 import type { Vacante, VacanteEstado } from "@/lib/vacantes/vacantes";
 
 /* ────────────────────────────────────────────────────────────────────────────
- * VacancyList — columna izquierda de la vista /vacantes.
+ * VacancyList — columna izquierda (#3298:16205), 442.05px de ancho.
  *
- * Tablero "Salidas · En vivo" con reloj corriendo, tarjetas de vacante
- * seleccionables (la activa se pinta en lavanda #dfe2f6 con borde #4658df,
- * como en el Figma) y el botón "Cargar más".
+ * Cotas del Figma:
+ *   · Cabecera (#16206): padding 14.183/21.275, fondo #1B0088, radio superior
+ *     15.365px, gap 11.819px. "Salidas"/"En vivo" en Latam Sans 12/18.72 con
+ *     tracking 0.208em; el punto vivo mide 8.27px y va en #FC4A78.
+ *   · Contenedor de fichas (#16216): padding-top 16.547px, gap 11.819px. En el
+ *     Figma la caja mide 881px de alto y recorta; aquí crece con el contenido
+ *     (sin scroll interno) para que la columna se lea de una sola pasada.
+ *   · Ficha (#16217): padding 24/22, radio 16, sombra
+ *     0 11.819px 35.458px -23.639px rgba(27,0,136,.5). Seleccionada en
+ *     #DFE2F6 con borde #4658DF; en reposo blanca con borde rgba(27,0,136,.1).
+ *   · "Cargar más" (#16370): padding 14.183/30.730, borde rgba(27,0,136,.16).
  * ──────────────────────────────────────────────────────────────────────────── */
 
 const ESTADO_CHIP: Record<VacanteEstado, { bg: string; text: string }> = {
@@ -37,66 +47,119 @@ function LiveClock() {
   }, []);
 
   return (
-    <span className="text-sm font-bold tracking-[1.48px] text-white tabular-nums">
+    <span className="text-[14px] font-bold leading-[18.72px] tracking-[0.106em] text-white tabular-nums">
       {now ?? "--:--:--"}
     </span>
   );
 }
 
+/* Dato con icono de la ficha: gap 8px, icono 14px, texto Latam Sans 14.751 /
+   22.13px en #5C5C5C. */
+function MetaDato({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <span className="flex items-center gap-2 text-[14.751px] font-normal leading-[22.13px] text-[var(--fig-meta)]">
+      <span className="shrink-0 text-[#66718a]">{icon}</span>
+      {children}
+    </span>
+  );
+}
+
+/** Fichas por página. Vive aquí (la hoja) y lo importa la vista, para que el
+ *  barrido de entrada pueda calcular la posición dentro del lote. */
+export const PAGE_SIZE = 8;
+
 interface VacancyCardProps {
   vacante: Vacante;
   selected: boolean;
   index: number;
+  reduced: boolean;
   onSelect: (id: string) => void;
 }
 
-function VacancyCard({ vacante, selected, index, onSelect }: VacancyCardProps) {
+function VacancyCard({ vacante, selected, index, reduced, onSelect }: VacancyCardProps) {
   const chip = ESTADO_CHIP[vacante.estado];
   return (
-    <button
+    <motion.button
       type="button"
       onClick={() => onSelect(vacante.id)}
       aria-pressed={selected}
-      style={{ "--i": index } as React.CSSProperties}
-      className={`list-enter w-full cursor-pointer rounded-2xl border px-[22px] py-6 text-left transition-[border-color,background-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 ${
+      layout={reduced ? false : "position"}
+      // El `initial` no ramifica en `reduced`: es lo que se sirve en SSR y
+      // `useReducedMotion` difiere entre servidor y cliente (mismatch de
+      // hidratación). Con motion reducido, el `y` salta a duración 0.
+      initial={{ opacity: 0, y: 10 }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        // El barrido va sobre la posición dentro del lote, no sobre el índice
+        // absoluto: con el índice absoluto, todas las fichas de "Cargar más"
+        // (8ª en adelante) caían del lado del tope y entraban a la vez, con el
+        // mismo retardo. Se topa en la 6ª para que el barrido total quede por
+        // debajo de 250ms y no se lea como una cascada lenta.
+        // Con motion reducido el barrido desaparece: sólo queda el fade, sin
+        // retardo (misma trampa que documenta `.list-enter` en globals.css).
+        transition: {
+          duration: reduced ? 0.2 : 0.32,
+          ease: EASE_ENTER,
+          delay: reduced ? 0 : Math.min(index % PAGE_SIZE, 6) * 0.04,
+          ...(reduced ? { y: { duration: 0 } } : {}),
+        },
+      }}
+      exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.97 }}
+      transition={{ duration: 0.16, ease: EASE_ENTER }}
+      style={{ boxShadow: "0px 11.819px 35.458px -23.639px rgba(27,0,136,0.5)" }}
+      className={`relative w-full cursor-pointer justify-center rounded-[16px] border px-[22px] py-6 text-left transition-[border-color,transform] duration-200 hover:-translate-y-0.5 ${
         selected
-          ? "border-[#4658df] bg-[#dfe2f6] shadow-[0_12px_35px_-14px_rgba(27,0,136,0.45)]"
-          : "border-indigo-latam-soft/40 bg-white shadow-[0_12px_35px_-20px_rgba(27,0,136,0.35)] hover:border-indigo-latam-soft"
+          ? "border-transparent"
+          : "border-[var(--fig-indigo-border)] bg-white hover:border-[var(--fig-indigo)]/40"
       }`}
     >
-      <p className="text-xs font-normal uppercase tracking-[1.69px] text-[#5b567a]">
-        {vacante.area}
-      </p>
-      <h3 className="mt-1.5 text-[21px] font-bold tracking-[-0.015em] text-indigo-latam-soft">
-        {vacante.titulo}
-      </h3>
+      {/* Realce de selección: un único elemento compartido que se desliza de
+          una ficha a otra en vez de apagarse aquí y encenderse allá. */}
+      {selected && (
+        <motion.span
+          aria-hidden
+          layoutId={reduced ? undefined : "vacante-seleccionada"}
+          className="pointer-events-none absolute inset-0 rounded-[16px] border border-[var(--fig-selected-bd)] bg-[var(--fig-selected-bg)]"
+          transition={{ type: "spring", stiffness: 420, damping: 40, mass: 0.9 }}
+        />
+      )}
 
-      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-        <span className="flex items-center gap-2 text-[15px] text-[#5c5c5c]">
-          <MapPin size={14} weight="fill" className="text-[#66718a]" aria-hidden />
-          {vacante.ubicacion}
-        </span>
-        <span className="flex items-center gap-2 text-[15px] text-[#5c5c5c]">
-          <Briefcase size={14} weight="fill" className="text-[#66718a]" aria-hidden />
-          {vacante.modalidad}
-        </span>
-        {vacante.horas && (
-          <span className="flex items-center gap-2 text-[15px] text-[#5c5c5c]">
-            <Calendar size={14} className="text-[#66718a]" aria-hidden />
-            {vacante.horas}
+      <div className="relative">
+        {/* "Container" (#16218) — padding 4px 0 */}
+        <p className="py-1 text-[12.103px] font-normal uppercase leading-[18px] tracking-[0.14em] text-[var(--fig-muted)]">
+          {vacante.area}
+        </p>
+
+        {/* "Text" (#16220) — padding-top 6px */}
+        <h3 className="pt-1.5 text-[21.559px] font-bold leading-[24.15px] tracking-[-0.015em] text-[var(--fig-indigo)]">
+          {vacante.titulo}
+        </h3>
+
+        {/* "Text" (#16222) — padding-top 10px, gap 16px */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-2.5">
+          <MetaDato icon={<MapPin size={14} weight="fill" aria-hidden />}>
+            {vacante.ubicacion}
+          </MetaDato>
+          <MetaDato icon={<Briefcase size={14} weight="fill" aria-hidden />}>
+            {vacante.modalidad}
+          </MetaDato>
+          {vacante.horas && (
+            <MetaDato icon={<Calendar size={14} aria-hidden />}>{vacante.horas}</MetaDato>
+          )}
+        </div>
+
+        {/* "Text:margin" (#16232) — padding-top 13px; chip padding 3/10 */}
+        <div className="pt-[13px]">
+          <span
+            className="inline-flex rounded-full px-2.5 py-[3px] text-[13.616px] font-bold leading-[20.42px] tracking-[0.04em]"
+            style={{ backgroundColor: chip.bg, color: chip.text }}
+          >
+            {vacante.estado}
           </span>
-        )}
+        </div>
       </div>
-
-      <div className="mt-3.5">
-        <span
-          className="inline-flex rounded-full px-3.5 py-[3px] text-[13.5px] font-bold tracking-[0.54px]"
-          style={{ backgroundColor: chip.bg, color: chip.text }}
-        >
-          {vacante.estado}
-        </span>
-      </div>
-    </button>
+    </motion.button>
   );
 }
 
@@ -115,57 +178,70 @@ export function VacancyList({
   visibleCount,
   onLoadMore,
 }: VacancyListProps) {
+  const reduced = useReducedMotion() ?? false;
   const visibles = vacantes.slice(0, visibleCount);
 
   return (
     <div className="flex flex-col">
-      {/* Cabecera del tablero: Salidas · En vivo + reloj */}
-      <div className="flex items-center justify-between rounded-t-[15px] bg-indigo-latam-soft px-[21px] py-3.5">
-        <span className="flex items-center gap-[5px]">
-          <AirplaneTakeoff size={16} weight="fill" className="text-white" aria-hidden />
-          <span className="text-xs font-normal uppercase tracking-[2.5px] text-white">
+      {/* Cabecera del tablero (#16206) */}
+      <div className="flex items-center justify-between gap-[11.819px] rounded-t-[15.365px] bg-[var(--fig-indigo)] px-[21.275px] py-[14.183px]">
+        <span className="flex items-center gap-[4.728px]">
+          <AirplaneTakeoff size={16.55} weight="fill" className="text-white" aria-hidden />
+          <span className="text-[12px] font-normal uppercase leading-[18.72px] tracking-[0.208em] text-white">
             Salidas
           </span>
           <span
             aria-hidden
-            className="mx-0.5 inline-block h-2 w-2 animate-pulse rounded-full bg-[#fc4a78]"
+            className="inline-block h-[8.27px] w-[8.27px] animate-pulse rounded-full bg-[#fc4a78]"
           />
-          <span className="text-xs font-normal uppercase tracking-[2.5px] text-white">
+          <span className="text-[12px] font-normal uppercase leading-[18.72px] tracking-[0.208em] text-white">
             En vivo
           </span>
         </span>
         <LiveClock />
       </div>
 
-      {/* Tarjetas */}
+      {/* Fichas (#16216) — padding-top 16.547px, gap 11.819px */}
       <div
-        className="mt-4 flex flex-col gap-3 overflow-y-auto pb-1 lg:max-h-[880px] lg:pr-1"
+        className="flex flex-col gap-[11.819px] pt-[16.547px]"
         role="listbox"
         aria-label="Vacantes disponibles"
       >
-        {visibles.map((v, i) => (
-          <VacancyCard
-            key={v.id}
-            vacante={v}
-            index={i}
-            selected={v.id === selectedId}
-            onSelect={onSelect}
-          />
-        ))}
+        <AnimatePresence mode="popLayout" initial={false}>
+          {visibles.map((v, i) => (
+            <VacancyCard
+              key={v.id}
+              vacante={v}
+              index={i}
+              reduced={reduced}
+              selected={v.id === selectedId}
+              onSelect={onSelect}
+            />
+          ))}
+        </AnimatePresence>
         {visibles.length === 0 && (
-          <p className="rounded-2xl border border-line-strong bg-white px-6 py-10 text-center text-[15px] text-ink-soft">
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.3,
+              ease: EASE_ENTER,
+              ...(reduced ? { y: { duration: 0 } } : {}),
+            }}
+            className="rounded-[16px] border border-[var(--fig-indigo-border)] bg-white px-6 py-10 text-center text-[15px] text-[var(--fig-muted)]"
+          >
             No encontramos vacantes con esos filtros. Prueba con otra búsqueda.
-          </p>
+          </motion.p>
         )}
       </div>
 
-      {/* Cargar más */}
+      {/* "Cargar más" (#16369) — padding-top 24px */}
       {visibleCount < vacantes.length && (
-        <div className="mt-6 flex justify-center">
+        <div className="flex justify-center pt-6">
           <button
             type="button"
             onClick={onLoadMore}
-            className="cursor-pointer rounded-full border border-indigo-latam-soft bg-white px-[31px] py-3.5 text-base font-bold text-indigo-latam-soft transition hover:bg-indigo-latam-soft hover:text-white active:scale-95"
+            className="cursor-pointer rounded-full border-[1.182px] border-[rgba(27,0,136,0.16)] bg-white px-[30.73px] py-[14.183px] text-[16px] font-bold leading-[24.96px] text-[var(--fig-indigo)] transition hover:bg-[var(--fig-indigo)] hover:text-white active:scale-95"
           >
             Cargar más
           </button>

@@ -1,17 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion, type Variants } from "framer-motion";
 import {
   AREAS,
   ESTADOS,
   MODALIDADES,
   UBICACIONES,
   VACANTES,
+  VACANTE_PARAM,
   type Vacante,
 } from "@/lib/vacantes/vacantes";
+import { EASE_ENTER } from "@/components/motion";
 import { FilterPill, FiltersBar, type FilterPillConfig } from "./FiltersBar";
 import { VacancyDetail } from "./VacancyDetail";
-import { VacancyList } from "./VacancyList";
+import { PAGE_SIZE, VacancyList } from "./VacancyList";
 import { VacantesHero, type VacantesSearchState } from "./VacantesHero";
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -23,8 +27,6 @@ import { VacantesHero, type VacantesSearchState } from "./VacantesHero";
  * también estrecha el tablero.
  * ──────────────────────────────────────────────────────────────────────────── */
 
-const PAGE_SIZE = 8;
-
 type SortMode = "Relevancia" | "Recientes" | "A – Z";
 
 const SORT_MODES: SortMode[] = ["Relevancia", "Recientes", "A – Z"];
@@ -35,6 +37,29 @@ const ESTADO_PRIORIDAD: Record<Vacante["estado"], number> = {
   "Últimos días": 2,
 };
 
+/* ── Entrada del cuerpo de la página ──────────────────────────────────────
+ * Un solo barrido escalonado (filtros → contador → tablero) al cargar. Nada
+ * de animaciones por scroll aquí: el contenido ya está sobre la línea de
+ * flotación y reaparecer al hacer scroll resultaría molesto. */
+const CONTENEDOR: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } },
+};
+
+const SUBE: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE_ENTER } },
+};
+
+/* Variante para motion reducido. Su `hidden` es idéntico al de SUBE a
+   propósito: es lo que se sirve en SSR y `useReducedMotion` difiere entre
+   servidor y cliente (mismatch de hidratación). El `y` salta a duración 0,
+   así que sólo se percibe el fundido. */
+const FADE: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.3, y: { duration: 0 } } },
+};
+
 function normalize(text: string): string {
   return text
     .toLowerCase()
@@ -43,6 +68,14 @@ function normalize(text: string): string {
 }
 
 export function VacantesView() {
+  const reduced = useReducedMotion();
+  const searchParams = useSearchParams();
+
+  // Enlace profundo desde el home: /vacantes?vacante=<id> abre esa ficha.
+  const deepLinkId = searchParams.get(VACANTE_PARAM);
+  const deepLinkValido =
+    deepLinkId && VACANTES.some((v) => v.id === deepLinkId) ? deepLinkId : null;
+
   const [search, setSearch] = useState<VacantesSearchState>({
     keyword: "",
     lugar: "",
@@ -54,7 +87,32 @@ export function VacantesView() {
   const [estado, setEstado] = useState<string | null>(null);
   const [sort, setSort] = useState<SortMode>("Relevancia");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [selectedId, setSelectedId] = useState<string | null>(VACANTES[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    deepLinkValido ?? VACANTES[0]?.id ?? null,
+  );
+
+  // Si el parámetro cambia sin desmontar la vista (navegación cliente entre dos
+  // enlaces profundos), reajustamos la selección durante el render en vez de en
+  // un efecto: así no hay un frame con la ficha anterior.
+  const [ultimoDeepLink, setUltimoDeepLink] = useState(deepLinkValido);
+  if (deepLinkValido !== ultimoDeepLink) {
+    setUltimoDeepLink(deepLinkValido);
+    if (deepLinkValido) setSelectedId(deepLinkValido);
+  }
+
+  // Llegando desde el tablero del home, bajamos al listado tras el hero.
+  const yaDesplazado = useRef(false);
+  useEffect(() => {
+    if (!deepLinkValido || yaDesplazado.current) return;
+    yaDesplazado.current = true;
+    const id = window.setTimeout(() => {
+      document.getElementById("listado")?.scrollIntoView({
+        behavior: reduced ? "auto" : "smooth",
+        block: "start",
+      });
+    }, 450);
+    return () => window.clearTimeout(id);
+  }, [deepLinkValido, reduced]);
 
   const filtradas = useMemo(() => {
     const kw = normalize(search.keyword.trim());
@@ -134,8 +192,9 @@ export function VacantesView() {
     <div
       className="min-h-screen"
       style={{
+        // Relleno del marco raíz "Vacantes" (#3298:16096), tal cual el Figma.
         background:
-          "radial-gradient(60% 40% at 78% 0%, #f2effe 0%, rgba(242,239,254,0) 60%), linear-gradient(180deg, #ffffff 0%, #faf9ff 14%, #f3f1fd 50%, #f3f1fd 100%)",
+          "radial-gradient(circle at 78% -6%, rgba(242,239,254,1) 0%, rgba(242,239,254,0) 60%), linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(250,249,255,1) 14%, rgba(243,241,253,1) 50%, rgba(243,241,253,1) 100%)",
       }}
     >
       <VacantesHero
@@ -147,25 +206,52 @@ export function VacantesView() {
         onSubmit={scrollToListado}
       />
 
-      <main id="listado" className="mx-auto w-full max-w-[1242px] scroll-mt-6 px-4 pb-24 pt-12 sm:px-6 lg:px-0">
+      <motion.main
+        id="listado"
+        // El cuerpo (#3298:16188) arranca en y=760; el glass termina en 696.68,
+        // así que quedan 63.3px de aire. Columna con gap 28px.
+        className="mx-auto flex w-full max-w-[1242px] scroll-mt-6 flex-col gap-7 px-4 pb-24 pt-10 sm:px-6 lg:px-0 lg:pt-[63.32px]"
+        variants={CONTENEDOR}
+        initial="hidden"
+        animate="show"
+      >
         {/* Píldoras de filtro */}
-        <FiltersBar
-          pills={pills}
-          onChange={handlePillChange}
-          onClear={handleClear}
-          hasActiveFilters={hasActiveFilters}
-        />
+        <motion.div variants={reduced ? FADE : SUBE}>
+          <FiltersBar
+            pills={pills}
+            onChange={handlePillChange}
+            onClear={handleClear}
+            hasActiveFilters={hasActiveFilters}
+          />
+        </motion.div>
 
-        {/* Contador + ordenar por */}
-        <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-[#a2a2a2]/60 pt-6">
-          <h2
-            aria-live="polite"
-            className="text-[19px] font-bold text-indigo-latam-soft [font-family:var(--font-bricolage),sans-serif]"
-          >
-            {filtradas.length} vacante{filtradas.length === 1 ? "" : "s"} con postulación abierta
+        {/* Contador + ordenar por (#3298:16196) — padding-top 22.958px sobre
+            un filete rgba(162,162,162,.45); el texto va en Latam Sans, con el
+            número en índigo y el resto en #171335 (regular). */}
+        <motion.div
+          variants={reduced ? FADE : SUBE}
+          className="flex flex-wrap items-center justify-between gap-5 border-t border-[rgba(162,162,162,0.45)] pt-[22.958px]"
+        >
+          <h2 aria-live="polite" className="text-[19.387px] leading-[29.08px]">
+            {/* El total cambia con los filtros: lo animamos para que se note. */}
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.strong
+                key={filtradas.length}
+                className="inline-block font-bold text-[var(--fig-indigo)]"
+                initial={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
+                transition={{ duration: 0.22, ease: EASE_ENTER }}
+              >
+                {filtradas.length}
+              </motion.strong>
+            </AnimatePresence>{" "}
+            <span className="font-normal text-[var(--fig-ink)]">
+              vacante{filtradas.length === 1 ? "" : "s"} con postulación abierta
+            </span>
           </h2>
           <div className="flex items-center gap-4">
-            <span className="text-[13px] uppercase tracking-[1.83px] text-[#5b567a]">
+            <span className="text-[13px] font-normal uppercase leading-[19.59px] tracking-[0.1407em] text-[var(--fig-muted)]">
               Ordenar por
             </span>
             <FilterPill
@@ -178,10 +264,14 @@ export function VacantesView() {
               onChange={(_, value) => setSort((value as SortMode) ?? "Relevancia")}
             />
           </div>
-        </div>
+        </motion.div>
 
-        {/* Tablero + detalle */}
-        <div className="mt-7 grid grid-cols-1 gap-8 lg:grid-cols-[442px_minmax(0,1fr)] lg:items-start">
+        {/* Tablero + detalle (#3298:16204) — columnas 442.05px y 766px,
+            separadas por 30.73px (472.78 − 442.05 en el Figma). */}
+        <motion.div
+          variants={reduced ? FADE : SUBE}
+          className="grid grid-cols-1 gap-8 lg:grid-cols-[442.05px_minmax(0,1fr)] lg:items-start lg:gap-[30.73px]"
+        >
           <VacancyList
             vacantes={filtradas}
             selectedId={seleccionada?.id ?? null}
@@ -196,8 +286,8 @@ export function VacantesView() {
               Selecciona una vacante para ver el detalle.
             </div>
           )}
-        </div>
-      </main>
+        </motion.div>
+      </motion.main>
     </div>
   );
 }

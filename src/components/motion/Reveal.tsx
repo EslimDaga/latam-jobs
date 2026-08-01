@@ -34,13 +34,20 @@ export function Reveal({
   const axis = from === "left" || from === "right" ? "x" : "y";
   const sign = from === "down" || from === "right" ? -1 : 1;
 
+  // `hidden` es idéntico con y sin motion reducido a propósito: es lo que se
+  // sirve en SSR, y `useReducedMotion` da false en servidor y true en el
+  // primer render del cliente — ramificar aquí rompía la hidratación para
+  // usuarios con motion reducido. La rama vive en la transición: el transform
+  // salta a duración 0 (sin movimiento) y sólo queda el fundido.
   const variants: Variants = {
-    hidden: reduced ? { opacity: 0 } : { opacity: 0, [axis]: offset * sign },
+    hidden: { opacity: 0, [axis]: offset * sign },
     show: {
       opacity: 1,
       x: 0,
       y: 0,
-      transition: { duration: 0.7, ease: EASE_ENTER, delay },
+      transition: reduced
+        ? { duration: 0.35, delay, [axis]: { duration: 0 } }
+        : { duration: 0.7, ease: EASE_ENTER, delay },
     },
   };
 
