@@ -41,6 +41,11 @@
 }
 
 :root {
+  /* Única familia tipográfica del sitio. Sin fallbacks con nombre propio: si
+     Latam Sans no cargara, cae al sans-serif del sistema y no a otra fuente
+     concreta que desalinee el diseño. */
+  --font-latam: "Latam Sans", sans-serif;
+
   --background: #ffffff;
   --foreground: #12103a;
 
@@ -109,15 +114,25 @@
   --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-move: cubic-bezier(0.25, 1, 0.5, 1);
 
-  --font-sans: "Latam Sans", var(--font-manrope), "Segoe UI", sans-serif;
-  --font-mono: var(--font-martian);
-  --font-display: var(--font-bricolage), "Latam Sans", sans-serif;
+  /* Una sola familia en todo el sitio: la tipográfica de marca. Los tres
+     tokens existen para no romper las utilidades de Tailwind que ya se usan
+     (font-sans / font-mono / font-display), pero resuelven a lo mismo. Donde
+     antes el peso lo daba una mono, ahora lo da `tabular-nums`. */
+  --font-sans: var(--font-latam);
+  --font-mono: var(--font-latam);
+  --font-display: var(--font-latam);
+
+  /* Preflight de Tailwind trae su propia pila para <html> y otra monoespaciada
+     para <code>/<pre>/<kbd>/<samp>. Sin esto, cualquier etiqueta de código que
+     se añada mañana entraría en Menlo y volvería a haber dos fuentes. */
+  --default-font-family: var(--font-latam);
+  --default-mono-font-family: var(--font-latam);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Latam Sans", var(--font-manrope), "Segoe UI", sans-serif;
+  font-family: var(--font-latam);
 }
 
 /* ── Parallax ───────────────────────────────────────────────────────────────
@@ -229,7 +244,11 @@ body {
   border-radius: calc(var(--sf-w) * 0.14);
   background: #1b1b21;
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  /* Las celdas del split-flap ya tienen ancho fijo, así que la alineación la
+     daba la caja y no la fuente; `tabular-nums` conserva el paso constante de
+     los dígitos ahora que la familia es proporcional. */
+  font-family: var(--font-latam);
+  font-variant-numeric: tabular-nums;
   font-weight: 400;
   font-size: calc(var(--sf-fh) * 0.56);
   color: #f4f4f5;

@@ -67,8 +67,10 @@ const STEPS: Step[] = [
 
 const BAR_WIDTHS = [3, 2, 4, 2, 3, 5, 2, 3, 2, 4, 3, 2, 5, 2, 3, 4, 2, 3, 2, 4, 3, 2, 5, 2];
 
-const INTER = "var(--font-inter), sans-serif";
-const BARLOW = "var(--font-barlow), sans-serif";
+// El pase de embarque usaba Inter para el cuerpo y Barlow Condensed para los
+// códigos de aeropuerto. Ahora todo es Latam Sans: al no ser condensada, los
+// códigos ocupan más ancho, así que sus cajas se midieron de nuevo abajo.
+const LATAM = "var(--font-latam)";
 
 function LatamLogo() {
   return (
@@ -125,7 +127,7 @@ export function EmbarkationTicket(): React.JSX.Element {
         justifyContent: "center",
         gap: "34px",
         background: "#ffffff",
-        fontFamily: INTER,
+        fontFamily: LATAM,
         padding: "50px 20px",
         boxSizing: "border-box",
       }}
@@ -158,7 +160,7 @@ export function EmbarkationTicket(): React.JSX.Element {
       <Reveal from="up">
         <div
           style={{
-            fontFamily: "'Latam Sans', var(--font-manrope), sans-serif",
+            fontFamily: LATAM,
             textAlign: "center",
             width: "100%",
             maxWidth: "min(940px, 92vw)",
@@ -306,7 +308,7 @@ export function EmbarkationTicket(): React.JSX.Element {
                       style={{
                         width: "58px",
                         flexShrink: 0,
-                        fontFamily: BARLOW,
+                        fontFamily: LATAM,
                         fontWeight: 700,
                         fontSize: "24.78px",
                         letterSpacing: "0.59px",
@@ -402,7 +404,7 @@ export function EmbarkationTicket(): React.JSX.Element {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-                    <span style={{ fontFamily: BARLOW, fontWeight: 800, fontSize: "51.92px", color: "#E8114B", lineHeight: "51.92px" }}>{cur.code}</span>
+                    <span style={{ fontFamily: LATAM, fontWeight: 800, fontSize: "51.92px", color: "#E8114B", lineHeight: "51.92px" }}>{cur.code}</span>
                     <span style={{ fontSize: "12.98px", fontWeight: 700, letterSpacing: "1.77px", color: "#A7A2E0" }}>
                       ETAPA {idx + 1} / {STEPS.length}
                     </span>

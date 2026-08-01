@@ -96,7 +96,7 @@ export function SiteFooter(): React.JSX.Element {
             >
               {COLUMNS.map((col) => (
                 <div key={col.title}>
-                  <h3 className="text-xs font-bold uppercase tracking-[1.2px] text-[#1B0088] [font-family:var(--font-jakarta),sans-serif]">
+                  <h3 className="text-xs font-bold uppercase tracking-[1.2px] text-[#1B0088]">
                     {col.title}
                   </h3>
                   <ul className="mt-5 space-y-3.5">
@@ -104,7 +104,7 @@ export function SiteFooter(): React.JSX.Element {
                       <li key={link.label}>
                         <a
                           href={link.href}
-                          className="text-sm font-normal text-[#1B0088] [font-family:var(--font-inter),sans-serif] transition-colors duration-200 hover:text-red-latam"
+                          className="text-sm font-normal text-[#1B0088] transition-colors duration-200 hover:text-red-latam"
                         >
                           {link.label}
                         </a>
@@ -120,8 +120,8 @@ export function SiteFooter(): React.JSX.Element {
           {/* Fila inferior */}
           <Reveal delay={0.1}>
           <div className="mt-16 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[13px] font-normal text-[#1B0088] [font-family:var(--font-inter),sans-serif]">© 2026 LATAM Airlines Chile</p>
-            <div className="flex items-center gap-2 text-[13px] font-normal text-[#1B0088] [font-family:var(--font-inter),sans-serif]">
+            <p className="text-[13px] font-normal text-[#1B0088]">© 2026 LATAM Airlines Chile</p>
+            <div className="flex items-center gap-2 text-[13px] font-normal text-[#1B0088]">
               <ChileFlag />
               <span>Chile · Español</span>
             </div>
