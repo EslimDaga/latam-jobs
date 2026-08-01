@@ -42,7 +42,7 @@ export function PeopleCulture(): React.JSX.Element {
 
         {/* CTA Button */}
         <a
-          href="#vacantes"
+          href="/vacantes"
           className="group mt-10 inline-flex items-center gap-3 rounded-full bg-white px-8 py-4 text-sm font-semibold text-indigo-latam shadow-lg transition-all duration-200 hover:scale-105 hover:bg-white/90 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           Ver vacantes

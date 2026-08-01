@@ -17,6 +17,7 @@ import {
   useTransform,
 } from "framer-motion";
 import { useLenis } from "lenis/react";
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { HoverLink } from "@/components/motion/HoverLink";
 import { RevealText } from "@/components/motion/RevealText";
@@ -33,8 +34,12 @@ interface JobHeroProps {
  * Constants
  * ──────────────────────────────────────────────────────────────────────────── */
 
+// `Link` animable: los enlaces del menú entran escalonados y "Vacantes" navega
+// a /vacantes en cliente, sin recargar ni repetir el preloader.
+const MotionLink = motion.create(Link);
+
 const NAV_LINKS = [
-  { label: "Vacantes", href: "#vacantes" },
+  { label: "Vacantes", href: "/vacantes" },
   { label: "Beneficios", href: "#beneficios" },
   { label: "Cultura", href: "#cultura" },
   { label: "Nosotros", href: "#nosotros" },
@@ -55,23 +60,24 @@ const REVEAL_DUR = 0.13;
 const REVEAL_STEP = (REVEAL_END - REVEAL_START - REVEAL_DUR) / (PROPOSITO_TOTAL - 1);
 
 /** One word of the purpose statement, its color/opacity driven by scroll. */
+// Sin rama de motion reducido a propósito: el relleno es sólo color/opacidad
+// ligado al scroll del propio usuario (ni traslación ni escala), que es seguro
+// con motion reducido; y ramificar el markup rompía la hidratación, porque
+// `useReducedMotion` da false en SSR y true en el primer render del cliente.
 function ScrollWord({
   progress,
   start,
   to,
-  reduced,
   children,
 }: {
   progress: MotionValue<number>;
   start: number;
   to: string;
-  reduced: boolean;
   children: React.ReactNode;
 }): React.JSX.Element {
   const end = Math.min(start + REVEAL_DUR, 0.99);
   const color = useTransform(progress, [start, end], ["#cbd0dc", to]);
   const opacity = useTransform(progress, [start, end], [0.35, 1]);
-  if (reduced) return <span style={{ color: to }}>{children} </span>;
   return (
     <motion.span style={{ color, opacity }} className="inline">
       {children}{" "}
@@ -237,7 +243,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
             </span>
             <nav className="flex flex-col gap-4">
               {NAV_LINKS.map((link, idx) => (
-                <motion.a
+                <MotionLink
                   key={link.href}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
@@ -247,7 +253,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                   className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight text-white hover:text-red-latam transition-colors duration-200"
                 >
                   {link.label}
-                </motion.a>
+                </MotionLink>
               ))}
             </nav>
           </div>
@@ -277,7 +283,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
             {/* Left: Custom Menu button */}
             <motion.button 
               onClick={() => setMenuOpen(!menuOpen)}
-              className="z-40 flex items-center gap-5 lg:gap-6 bg-transparent border-0 font-medium text-sm [font-family:var(--font-inter),sans-serif] cursor-pointer hover:opacity-85 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 rounded-xl px-2 py-1.5"
+              className="z-40 flex items-center gap-5 lg:gap-6 bg-transparent border-0 font-medium text-sm cursor-pointer hover:opacity-85 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 rounded-xl px-2 py-1.5"
               style={{ color: headerTextColor }}
             >
               {/* Custom Framer Hamburger Icon */}
@@ -359,7 +365,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
             {/* Right: Country selector & CTA */}
             <div className="flex items-center gap-2 sm:gap-3 z-40">
               <motion.button
-                className="hidden md:flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium [font-family:var(--font-inter),sans-serif] hover:bg-white/10 transition cursor-pointer"
+                className="hidden md:flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium hover:bg-white/10 transition cursor-pointer"
                 style={{ 
                   color: headerTextColor, 
                   borderColor: headerBorderColor,
@@ -371,12 +377,12 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                 <CaretDown size={14} />
               </motion.button>
 
-              <a
-                href="#vacantes"
-                className="rounded-full bg-red-latam px-4 py-2 text-sm sm:px-5 sm:text-[15px] font-semibold text-white [font-family:var(--font-jakarta),sans-serif] shadow-md hover:bg-red-latam-deep transition active:scale-95 cursor-pointer text-center animate-pulse-subtle"
+              <Link
+                href="/vacantes"
+                className="rounded-full bg-red-latam px-4 py-2 text-sm sm:px-5 sm:text-[15px] font-semibold text-white shadow-md hover:bg-red-latam-deep transition active:scale-95 cursor-pointer text-center animate-pulse-subtle"
               >
                 Ver vacantes
-              </a>
+              </Link>
             </div>
 
           </div>
@@ -392,7 +398,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-center w-full">
               {/* Left Column: Label + Title */}
               <div className="lg:col-span-8 flex flex-col items-start text-left">
-                <span className="mb-3 block text-xs sm:text-sm font-bold uppercase leading-[22.448px] tracking-[3px] sm:tracking-[4.4896px] text-white [font-family:var(--font-space-mono),monospace] md:mb-5">
+                <span className="mb-3 block text-xs sm:text-sm font-bold uppercase leading-[22.448px] tracking-[3px] sm:tracking-[4.4896px] text-white md:mb-5">
                   Trabaja con nosotros
                 </span>
                 <h1 className="text-[clamp(2.125rem,7.64vw,6.875rem)] font-bold leading-[1.1075] tracking-[-0.0236em] text-white">
@@ -417,7 +423,7 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                 const el = document.getElementById("vacantes");
                 if (el) el.scrollIntoView({ behavior: "smooth" });
               }}
-              className="flex w-full max-w-[898px] flex-col gap-3.5 rounded-[16px] bg-[rgba(242,242,242,0.04)] px-4 py-4 text-white backdrop-blur-[16px] backdrop-saturate-[1.35] [font-family:var(--font-inter),sans-serif] sm:gap-5 sm:px-[21px] sm:py-6 lg:flex-row lg:items-center lg:gap-5"
+              className="flex w-full max-w-[898px] flex-col gap-3.5 rounded-[16px] bg-[rgba(242,242,242,0.04)] px-4 py-4 text-white backdrop-blur-[16px] backdrop-saturate-[1.35] sm:gap-5 sm:px-[21px] sm:py-6 lg:flex-row lg:items-center lg:gap-5"
               style={{
                 // Efecto "Glass" del Figma (Frost 16, Light -45° 80%, Refraction 27):
                 // brillo diagonal desde arriba-izquierda + filete luminoso en los
@@ -531,7 +537,6 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                       progress={progress}
                       start={REVEAL_START + (offset + wi) * REVEAL_STEP}
                       to={line.color}
-                      reduced={!!reduced}
                     >
                       {w}
                     </ScrollWord>

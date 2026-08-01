@@ -42,7 +42,7 @@ export const menus: NavMenu[] = [
         links: [
           { label: "Cabinas y asientos", href: "/pe/es/cabinas" },
           { label: "Equipaje", href: "/pe/es/equipaje" },
-          { label: "Trabaja con nosotros", href: "/pe/es/empleos" },
+          { label: "Trabaja con nosotros", href: "/vacantes" },
         ],
       },
     ],

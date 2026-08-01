@@ -27,7 +27,7 @@ export function FeaturedJobs({ jobs }: FeaturedJobsProps): React.JSX.Element {
             Vacantes destacadas
           </h2>
           <a
-            href="#vacantes"
+            href="/vacantes"
             className="shrink-0 text-sm font-semibold text-red-latam transition-colors hover:text-red-latam-deep"
           >
             Ver todas las vacantes →

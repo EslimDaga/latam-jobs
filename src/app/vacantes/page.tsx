@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { SiteFooter } from "@/components/jobs/SiteFooter";
 import { VacantesView } from "@/components/vacantes/VacantesView";
 
@@ -11,7 +12,11 @@ export const metadata: Metadata = {
 export default function VacantesPage(): React.JSX.Element {
   return (
     <>
-      <VacantesView />
+      {/* VacantesView lee ?vacante= con useSearchParams, que exige un límite de
+          Suspense para no forzar el renderizado dinámico de toda la ruta. */}
+      <Suspense fallback={<div className="min-h-screen bg-white" />}>
+        <VacantesView />
+      </Suspense>
       <SiteFooter />
     </>
   );

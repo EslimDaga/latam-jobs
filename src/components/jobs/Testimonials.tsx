@@ -1,6 +1,7 @@
 "use client";
 
 import { PaperPlaneTilt } from "@phosphor-icons/react";
+import Link from "next/link";
 import { Reveal } from "@/components/motion";
 
 /**
@@ -40,11 +41,11 @@ export function Testimonials(): React.JSX.Element {
           </span>
           <h2
             id="testimonios-title"
-            className="mx-auto text-[clamp(1.75rem,2.86vw,41.212px)] font-bold leading-[0.9719] tracking-[-0.3927px] text-[#1B0088] [font-family:var(--font-inter),sans-serif] md:whitespace-nowrap"
+            className="mx-auto text-[clamp(1.75rem,2.86vw,41.212px)] font-bold leading-[0.9719] tracking-[-0.3927px] text-[#1B0088] md:whitespace-nowrap"
           >
             Hay muchas formas de construir LATAM
           </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-[15.216px] font-normal leading-[22.823px] text-[#5B6172] [font-family:var(--font-inter),sans-serif] lg:max-w-none lg:whitespace-nowrap">
+          <p className="mx-auto mt-5 max-w-2xl text-[15.216px] font-normal leading-[22.823px] text-[#5B6172] lg:max-w-none lg:whitespace-nowrap">
             Descubre dónde puede despegar tu talento y conoce las oportunidades
             disponibles en nuestros distintos equipos.
           </p>
@@ -75,9 +76,9 @@ export function Testimonials(): React.JSX.Element {
 
         {/* CTA */}
         <Reveal className="mt-12 flex justify-center" from="up" delay={0.1}>
-          <a
-            href="#vacantes"
-            className="group inline-flex items-center gap-2.5 rounded-full bg-red-latam px-8 py-4 text-[15.75px] font-medium text-white [font-family:var(--font-inter),sans-serif] shadow-[0_0.75rem_2rem_-0.4rem_rgba(232,17,75,0.5)] transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-red-latam-deep active:scale-[0.98]"
+          <Link
+            href="/vacantes"
+            className="group inline-flex items-center gap-2.5 rounded-full bg-red-latam px-8 py-4 text-[15.75px] font-medium text-white shadow-[0_0.75rem_2rem_-0.4rem_rgba(232,17,75,0.5)] transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-red-latam-deep active:scale-[0.98]"
           >
             Explorar todos los roles
             <PaperPlaneTilt
@@ -85,7 +86,7 @@ export function Testimonials(): React.JSX.Element {
               weight="fill"
               className="transition-transform duration-300 group-hover:translate-x-0.5"
             />
-          </a>
+          </Link>
         </Reveal>
       </div>
     </section>

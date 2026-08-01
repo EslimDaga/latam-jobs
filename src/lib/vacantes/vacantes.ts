@@ -269,3 +269,19 @@ export const MODALIDADES: VacanteModalidad[] = ["Presencial", "Híbrido", "Remot
 export const ESTADOS: VacanteEstado[] = ["Abierto", "Nuevo", "Últimos días"];
 
 export const UBICACIONES: string[] = [...new Set(VACANTES.map((v) => v.ubicacion))];
+
+/** Nombre del parámetro de búsqueda que preselecciona una vacante en /vacantes. */
+export const VACANTE_PARAM = "vacante";
+
+/**
+ * Enlace a la vista de vacantes apuntando a un cargo concreto. Lo usan las
+ * secciones del home (tablero de embarque, testimonios…) para que al pulsar una
+ * fila el usuario aterrice en /vacantes con esa vacante ya abierta. Si el cargo
+ * no existe en el catálogo, cae al listado completo en vez de romper el enlace.
+ */
+export function vacanteHref(titulo?: string): string {
+  if (!titulo) return "/vacantes";
+  const objetivo = titulo.trim().toLowerCase();
+  const match = VACANTES.find((v) => v.titulo.toLowerCase() === objetivo);
+  return match ? `/vacantes?${VACANTE_PARAM}=${match.id}` : "/vacantes";
+}
