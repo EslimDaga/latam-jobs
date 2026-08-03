@@ -77,9 +77,9 @@ export function VacantesView() {
     deepLinkId && VACANTES.some((v) => v.id === deepLinkId) ? deepLinkId : null;
 
   const [search, setSearch] = useState<VacantesSearchState>({
-    keyword: "",
-    lugar: "",
-    modalidad: "",
+    keyword: searchParams.get("keyword") || searchParams.get("q") || "",
+    lugar: searchParams.get("lugar") || searchParams.get("location") || "",
+    modalidad: searchParams.get("modalidad") || "",
   });
   const [area, setArea] = useState<string | null>(null);
   const [ubicacion, setUbicacion] = useState<string | null>(null);

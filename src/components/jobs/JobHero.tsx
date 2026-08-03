@@ -3,11 +3,10 @@
 import {
   AirplaneTakeoff,
   CaretDoubleDownIcon,
+  CaretDown,
   MagnifyingGlass,
   MapPin,
   Briefcase,
-  CaretDown,
-  Globe,
 } from "@phosphor-icons/react";
 import {
   motion,
@@ -17,33 +16,19 @@ import {
   useTransform,
 } from "framer-motion";
 import { useLenis } from "lenis/react";
-import Link from "next/link";
 import { useRef, useState } from "react";
-import { HoverLink } from "@/components/motion/HoverLink";
-import { RevealText } from "@/components/motion/RevealText";
+import { useRouter } from "next/navigation";
+import { SiteHeader } from "@/components/header/SiteHeader";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Types
  * ──────────────────────────────────────────────────────────────────────────── */
 
-interface JobHeroProps {
-  totalJobs?: number;
-}
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Constants
  * ──────────────────────────────────────────────────────────────────────────── */
 
-// `Link` animable: los enlaces del menú entran escalonados y "Vacantes" navega
-// a /vacantes en cliente, sin recargar ni repetir el preloader.
-const MotionLink = motion.create(Link);
-
-const NAV_LINKS = [
-  { label: "Vacantes", href: "/vacantes" },
-  { label: "Beneficios", href: "#beneficios" },
-  { label: "Cultura", href: "#cultura" },
-  { label: "Nosotros", href: "#nosotros" },
-] as const;
 
 /* ── "Nuestro propósito" — scroll-linked word reveal (gray → color) ──────── */
 // Texto y bitono exactos del Figma (nodo 89:2466): índigo #1b0088 para las
@@ -86,8 +71,11 @@ function ScrollWord({
 }
 
 
-export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
-  const [menuOpen, setMenuOpen] = useState(false);
+export function JobHero(): React.JSX.Element {
+  const router = useRouter();
+  const [keyword, setKeyword] = useState("");
+  const [lugar, setLugar] = useState("");
+  const [modalidad, setModalidad] = useState("");
   const reduced = useReducedMotion();
   const trackRef = useRef<HTMLElement>(null);
   const progress = useMotionValue(0);
@@ -108,7 +96,10 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
   const textY = useTransform(progress, [0, 0.16], [0, -50]);
 
   /* ── Cabin overlay transparent window zoom (Starts at 0% scroll progress!) ── */
-  const cabinScale = useTransform(progress, [0, 0.5], [1, 5.0]);
+  // 5.8 y no 5.0: la ventanilla de `cabin-business.webp` mide 11.2% del ancho
+  // (la anterior medía 13%), así que necesita algo más de zoom para tragarse el
+  // viewport en el mismo punto del scroll.
+  const cabinScale = useTransform(progress, [0, 0.5], [1, 5.8]);
   const cabinOpacity = useTransform(progress, [0, 0.35, 0.48], [1, 1, 0]);
 
   /* ── Sky Panorama (scale 1.05x → 1.2x, always visible behind window) ── */
@@ -189,8 +180,8 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
           }}
         >
           <img
-            src="/images/window-full.png"
-            alt="Cabin Window Overlay"
+            src="/images/hero/cabin-business.webp"
+            alt="Cabina Premium Business de LATAM con vista al cielo"
             className="absolute inset-0 h-full w-full object-cover"
           />
         </motion.div>
@@ -228,165 +219,14 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
           }}
         />
 
-        {/* ── Menu Overlay ── */}
-        <motion.div
-          initial={false}
-          animate={menuOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: "-100%" }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 z-30 bg-[#0d091e]/98 px-6 pt-28 pb-10 flex flex-col justify-between sm:px-8 sm:pt-32 sm:pb-12 md:px-20 md:pb-20 text-white backdrop-blur-md"
-          style={{ pointerEvents: menuOpen ? "auto" : "none" }}
-        >
-          {/* Navigation large links */}
-          <div className="flex flex-col gap-6 md:gap-8 mt-10">
-            <span className="text-xs font-bold uppercase tracking-widest text-white/40">
-              Navegación
-            </span>
-            <nav className="flex flex-col gap-4">
-              {NAV_LINKS.map((link, idx) => (
-                <MotionLink
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={menuOpen ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-                  transition={{ delay: idx * 0.08 + 0.1, duration: 0.3 }}
-                  className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight text-white hover:text-red-latam transition-colors duration-200"
-                >
-                  {link.label}
-                </MotionLink>
-              ))}
-            </nav>
-          </div>
-
-          {/* Footer of the menu */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-t border-white/10 pt-8">
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-bold uppercase tracking-widest text-white/40">
-                Contacto
-              </span>
-              <a href="mailto:empleos@latam.com" className="text-lg font-semibold hover:text-red-latam transition-colors">
-                empleos@latam.com
-              </a>
-            </div>
-            
-            <div className="flex flex-col gap-1 text-sm text-white/60">
-              <p>© 2026 LATAM Airlines. Todos los derechos reservados.</p>
-              <p>Construyendo el futuro de la aviación en América Latina.</p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* ── Header / Navigation (LATAM Airlines Official Mock Header) ── */}
-        <header className="absolute inset-x-0 top-0 z-40">
-          <div className="mx-auto flex max-w-[100rem] items-center justify-between gap-3 px-4 py-5 sm:gap-6 sm:px-6 sm:py-7 lg:px-12 relative">
-            
-            {/* Left: Custom Menu button */}
-            <motion.button 
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="z-40 flex items-center gap-5 lg:gap-6 bg-transparent border-0 font-medium text-sm cursor-pointer hover:opacity-85 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 rounded-xl px-2 py-1.5"
-              style={{ color: headerTextColor }}
-            >
-              {/* Custom Framer Hamburger Icon */}
-              <div className="w-[30px] h-[30px] relative flex flex-col justify-between overflow-visible flex-shrink-0">
-                {/* Top line container */}
-                <motion.div 
-                  animate={menuOpen ? { y: 9 } : { y: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="absolute top-[4px] left-0 w-[30px] h-[4px] flex"
-                >
-                  <motion.div 
-                    animate={menuOpen ? { rotate: 45 } : { rotate: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    style={{ transformOrigin: "right center", backgroundColor: headerTextColor }}
-                    className="w-[15px] h-[4px] rounded-l-full"
-                  />
-                  <motion.div 
-                    animate={menuOpen ? { rotate: -45 } : { rotate: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    style={{ transformOrigin: "left center", backgroundColor: headerTextColor }}
-                    className="w-[15px] h-[4px] rounded-r-full"
-                  />
-                </motion.div>
-
-                {/* Middle line */}
-                <motion.div 
-                  animate={menuOpen ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}
-                  style={{ backgroundColor: headerTextColor }}
-                  className="absolute top-[13px] left-0 w-[30px] h-[4px] rounded-full"
-                />
-
-                {/* Bottom line container */}
-                <motion.div 
-                  animate={menuOpen ? { y: -9 } : { y: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="absolute top-[22px] left-0 w-[30px] h-[4px] flex"
-                >
-                  <motion.div 
-                    animate={menuOpen ? { rotate: -45 } : { rotate: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    style={{ transformOrigin: "right center", backgroundColor: headerTextColor }}
-                    className="w-[15px] h-[4px] rounded-l-full"
-                  />
-                  <motion.div 
-                    animate={menuOpen ? { rotate: 45 } : { rotate: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    style={{ transformOrigin: "left center", backgroundColor: headerTextColor }}
-                    className="w-[15px] h-[4px] rounded-r-full"
-                  />
-                </motion.div>
-              </div>
-              <span className="hidden sm:inline select-none min-w-[45px] text-left">
-                {menuOpen ? "Cerrar" : "Menú"}
-              </span>
-            </motion.button>
-
-            {/* Center: LATAM wordmark (Centered perfectly) */}
-            <a
-              href="#hero"
-              aria-label="Empleos LATAM — inicio"
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer z-40 h-5 w-32 sm:h-6 sm:w-40 md:h-7 md:w-48"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <motion.img
-                src="/images/latam-logo.svg"
-                alt="LATAM Airlines"
-                className="absolute inset-0 h-full w-auto mx-auto"
-                style={{ opacity: whiteLogoOpacity }}
-              />
-              <motion.img
-                src="/images/latam-logo-dark.svg"
-                alt="LATAM Airlines"
-                className="absolute inset-0 h-full w-auto mx-auto"
-                style={{ opacity: darkLogoOpacity }}
-              />
-            </a>
-
-            {/* Right: Country selector & CTA */}
-            <div className="flex items-center gap-2 sm:gap-3 z-40">
-              <motion.button
-                className="hidden md:flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium hover:bg-white/10 transition cursor-pointer"
-                style={{ 
-                  color: headerTextColor, 
-                  borderColor: headerBorderColor,
-                  backgroundColor: headerBgColor
-                }}
-              >
-                <Globe size={18} />
-                <span>Chile</span>
-                <CaretDown size={14} />
-              </motion.button>
-
-              <Link
-                href="/vacantes"
-                className="rounded-full bg-red-latam px-4 py-2 text-sm sm:px-5 sm:text-[15px] font-semibold text-white shadow-md hover:bg-red-latam-deep transition active:scale-95 cursor-pointer text-center animate-pulse-subtle"
-              >
-                Ver vacantes
-              </Link>
-            </div>
-
-          </div>
-        </header>
+        {/* ── Cabecera y Menú Unificado (SiteHeader) ── */}
+        <SiteHeader
+          headerTextColor={headerTextColor}
+          headerBorderColor={headerBorderColor}
+          headerBgColor={headerBgColor}
+          whiteLogoOpacity={whiteLogoOpacity}
+          darkLogoOpacity={darkLogoOpacity}
+        />
 
         {/* ── A. Initial Hero Text (Fades out early) ── */}
         <motion.div
@@ -420,8 +260,12 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                const el = document.getElementById("vacantes");
-                if (el) el.scrollIntoView({ behavior: "smooth" });
+                const params = new URLSearchParams();
+                if (keyword.trim()) params.set("keyword", keyword.trim());
+                if (lugar.trim()) params.set("lugar", lugar.trim());
+                if (modalidad.trim()) params.set("modalidad", modalidad.trim());
+                const query = params.toString();
+                router.push(query ? `/vacantes?${query}` : "/vacantes");
               }}
               className="flex w-full max-w-[898px] flex-col gap-3.5 rounded-[16px] bg-[rgba(242,242,242,0.04)] px-4 py-4 text-white backdrop-blur-[16px] backdrop-saturate-[1.35] sm:gap-5 sm:px-[21px] sm:py-6 lg:flex-row lg:items-center lg:gap-5"
               style={{
@@ -445,6 +289,8 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                 </div>
                 <input
                   type="text"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
                   placeholder="Ej: Tripulación, Tecnología"
                   className="w-full border-0 bg-transparent p-0 pl-6 text-xs font-normal text-white placeholder:text-white/50 focus:outline-none focus:ring-0"
                 />
@@ -466,6 +312,8 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                 </div>
                 <input
                   type="text"
+                  value={lugar}
+                  onChange={(e) => setLugar(e.target.value)}
                   placeholder="Ej: Chile, São Paulo"
                   className="w-full border-0 bg-transparent p-0 pl-6 text-xs font-normal text-white placeholder:text-white/50 focus:outline-none focus:ring-0"
                 />
@@ -487,6 +335,8 @@ export function JobHero({ totalJobs = 8 }: JobHeroProps): React.JSX.Element {
                 </div>
                 <input
                   type="text"
+                  value={modalidad}
+                  onChange={(e) => setModalidad(e.target.value)}
                   placeholder="Ej: Presencial, híbrido"
                   className="w-full border-0 bg-transparent p-0 pl-6 text-xs font-normal text-white placeholder:text-white/50 focus:outline-none focus:ring-0"
                 />

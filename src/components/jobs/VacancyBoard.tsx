@@ -1001,7 +1001,7 @@ export function VacancyBoard({ theme = "Claro" }: VacancyBoardProps): React.JSX.
   }, [data]);
 
   return (
-    <section aria-label="Vacantes con embarque abierto" style={{ width: "100%", background: "#ffffff", padding: "clamp(44px, 7vw, 72px) clamp(12px, 3vw, 20px)", display: "flex", justifyContent: "center" }}>
+    <section id="vacantes" aria-label="Vacantes con embarque abierto" style={{ width: "100%", background: "#ffffff", padding: "clamp(44px, 7vw, 72px) clamp(12px, 3vw, 20px)", display: "flex", justifyContent: "center" }}>
       <div style={{ width: "100%", maxWidth: "1400px" }}>
         <style dangerouslySetInnerHTML={{ __html: css }} />
         <Reveal amount={0.12} offset={40}>

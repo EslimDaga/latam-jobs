@@ -4,15 +4,13 @@ import {
   AirplaneTakeoff,
   Briefcase,
   CaretDown,
-  Globe,
-  List,
   MagnifyingGlass,
   MapPin,
 } from "@phosphor-icons/react";
-import Link from "next/link";
 import { useRef } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { EASE_ENTER, usePauseOffscreen } from "@/components/motion";
+import { SiteHeader } from "@/components/header/SiteHeader";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * VacantesHero — cabecera de la vista /vacantes.
@@ -106,13 +104,16 @@ function SearchField({
         style={{ gap: `${gapChevron}px` }}
       >
         <span className="flex items-center gap-[9.839px]">
-          <span className="shrink-0 text-[var(--fig-indigo)]">{icon}</span>
+          {/* Iconos guía en el mismo gris que el rótulo y el chevron. En el
+              Figma iban en índigo, pero el buscador se monta sobre el borde de
+              la foto: ahí el azul cae justo en el cambio de fondo y se ensucia.
+              Con toda la fila en #66718A, el único color del bloque vuelve a
+              ser el CTA rojo, que es lo que debe llamar. */}
+          <span className="shrink-0 text-[var(--fig-field)]">{icon}</span>
           <span className="whitespace-nowrap text-[17.218px] font-medium leading-none text-[var(--fig-field)] font-sans">
             {label}
           </span>
         </span>
-        {/* Los chevrons van en #66718A, como el texto; sólo los iconos guía
-            son índigo (comprobado sobre el render del Figma). */}
         <CaretDown size={19.68} className="shrink-0 text-[var(--fig-field)]" aria-hidden />
       </span>
       <span className="grid pl-[29.517px] text-[14.759px] font-sans">
@@ -190,6 +191,25 @@ export function VacantesHero({ search, onSearchChange, onSubmit }: VacantesHeroP
           />
         </div>
 
+        {/* ── Cielo en movimiento: dos bandas de bruma en paralaje ──────────
+             Van fuera de `.hero__bg-layer` para no heredar su respiración: si
+             compartieran transform, se moverían con la foto y el paralaje se
+             perdería. Entran con un fundido propio, más tardío que el de la
+             foto, para que el cielo "aparezca" ya poblado. El `initial` no
+             ramifica en `reduced` (SSR determinista) y su desplazamiento vive
+             en CSS, tras `prefers-reduced-motion: no-preference`: con motion
+             reducido quedan como bruma quieta. */}
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: reduced ? 0.6 : 1.8, delay: 0.35, ease: EASE_ENTER }}
+        >
+          <div className="hero__clouds hero__clouds--alto" />
+          <div className="hero__clouds hero__clouds--bajo" />
+        </motion.div>
+
         {/* ── Luz ambiente: destello cálido que se desplaza sobre el cielo ──
             Se renderiza siempre (condicionarla a `reduced` desalineaba el
             árbol entre SSR y cliente): su animación ya está tras
@@ -218,55 +238,12 @@ export function VacantesHero({ search, onSearchChange, onSubmit }: VacantesHeroP
           }}
         />
 
-        {/* ── Nav bar (#3298:16103) — padding 16/100, interior 1241 ── */}
-        <motion.nav
-          variants={item}
-          className="relative z-20 border-b border-[rgba(27,17,71,0.1)] px-4 py-4 sm:px-8 lg:px-[100px]"
-        >
-          <div className="mx-auto flex w-full max-w-[1241px] items-center justify-between">
-            {/* Izquierda: "Menú" y el logotipo, separados por 494px en el diseño */}
-            <div className="flex items-center gap-8 md:gap-24 lg:gap-[494px]">
-              <Link
-                href="/"
-                className="flex items-center gap-2 py-2.5 text-[14px] font-medium text-white transition hover:opacity-80 font-sans"
-              >
-                <List size={16} aria-hidden />
-                <span className="hidden sm:inline">Menú</span>
-              </Link>
-
-              <Link href="/" aria-label="Empleos LATAM — inicio" className="shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/images/latam-logo.svg"
-                  alt="LATAM Airlines"
-                  className="h-[26px] w-auto md:h-8"
-                />
-              </Link>
-            </div>
-
-            {/* Derecha (#3298:16126) — gap 14px */}
-            <div className="flex items-center gap-2 sm:gap-[14px]">
-              <button
-                type="button"
-                className="hidden h-[42px] cursor-pointer items-center gap-2 rounded-full border border-[rgba(27,17,71,0.1)] bg-white/10 px-4 py-[7px] text-[14px] font-medium text-white backdrop-blur-sm transition hover:bg-white/20 md:flex font-sans"
-              >
-                <Globe size={14} aria-hidden />
-                <span>Chile</span>
-                <CaretDown size={14} aria-hidden />
-              </button>
-              <a
-                href="#listado"
-                className="flex h-[42px] items-center rounded-full bg-[var(--fig-red-nav)] px-4 text-[14px] font-semibold text-white transition hover:brightness-110 active:scale-95 sm:px-[22px] sm:text-[15px] font-sans"
-              >
-                Ver vacantes
-              </a>
-            </div>
-          </div>
-        </motion.nav>
+        {/* ── Cabecera / Navegación Oficial LATAM Airlines (SiteHeader) ── */}
+        <SiteHeader ctaHref="#listado" ctaLabel="Ver vacantes" />
 
         {/* ── Titular (#3298:16140) — bloque en (99,231); el nav ocupa 74px ── */}
         <div className="relative z-10 mx-auto w-full max-w-[1242px] px-4 sm:px-8 lg:px-0">
-          <div className="flex flex-col gap-2 pt-[68px] sm:pt-[110px] lg:pt-[157px]">
+          <div className="flex flex-col gap-2 pt-[120px] sm:pt-[160px] lg:pt-[220px]">
             {/* "Section" — padding 16px 0 8px, gap 8px */}
             <div className="flex flex-col gap-2 pb-2 pt-4">
               <motion.p

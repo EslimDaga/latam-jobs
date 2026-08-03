@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import {
   motion,
   useMotionValue,
@@ -202,8 +203,10 @@ function CultureCard({
       };
 
   return (
-    <div
-      className="relative h-full w-full"
+    <Link
+      href="/cultura"
+      aria-label={`Conoce nuestra cultura: ${img.alt}`}
+      className="relative block h-full w-full"
       onMouseEnter={() => {
         setIsHovered(true);
         onRaiseChange?.(true);
@@ -269,7 +272,7 @@ function CultureCard({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </Link>
   );
 }
 
@@ -399,12 +402,12 @@ export function FramerLoopGallery(): React.JSX.Element {
             <h2 className="text-[42px] font-bold leading-[40.052px] tracking-[-0.3927px] text-[#1b0088]">
               Sé tú. Volemos más alto.
             </h2>
-            <a
-              href="#cultura"
+            <Link
+              href="/cultura"
               className="inline-flex select-none items-center justify-center rounded-full bg-red-latam px-[17px] py-2.5 text-[15.75px] font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-red-latam-deep active:scale-95"
             >
               Nuestra cultura
-            </a>
+            </Link>
           </motion.div>
         </div>
 
@@ -428,12 +431,12 @@ export function FramerLoopGallery(): React.JSX.Element {
           </div>
 
           <div className="mt-4 flex justify-center">
-            <a
-              href="#cultura"
+            <Link
+              href="/cultura"
               className="rounded-full bg-red-latam px-[17px] py-2.5 text-center text-[15.75px] font-medium text-white shadow-md"
             >
               Nuestra cultura
-            </a>
+            </Link>
           </div>
         </div>
       </div>

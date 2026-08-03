@@ -89,6 +89,13 @@
   --fig-green-bg: #d4f4ec;
   --fig-pill-bd: #e2e8f0;
   --fig-divider: #b8b8b8;
+
+  /* Añadidos por el marco "Cultura" (#3416:11384) del mismo archivo: el rosa
+     que sólo aparece sobre fondo índigo, el gris de las píldoras de país y el
+     blanco roto del titular del hero. */
+  --fig-pink-hot: #ff2f8d;
+  --fig-chip-ink: #2a2450;
+  --fig-cloud: #f3f2f6;
 }
 
 @theme inline {
@@ -191,6 +198,43 @@ body {
     opacity: 0;
     transform: translateY(0.5rem);
   }
+}
+
+/* ── Carril del listado de vacantes ─────────────────────────────────────────
+   Barra fina en índigo translúcido: presente para poder agarrarla, pero sin
+   competir con las fichas. Sólo se pinta al pasar el ratón por la columna. */
+.lista-carril {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 200ms var(--ease-move);
+}
+
+.lista-carril:hover,
+.lista-carril:focus-within {
+  scrollbar-color: rgba(27, 0, 136, 0.28) transparent;
+}
+
+.lista-carril::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lista-carril::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lista-carril::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: transparent;
+  transition: background 200ms var(--ease-move);
+}
+
+.lista-carril:hover::-webkit-scrollbar-thumb,
+.lista-carril:focus-within::-webkit-scrollbar-thumb {
+  background: rgba(27, 0, 136, 0.28);
+}
+
+.lista-carril::-webkit-scrollbar-thumb:hover {
+  background: rgba(27, 0, 136, 0.45);
 }
 
 /* ── Split-flap display ─────────────────────────────────────────────────────
@@ -461,7 +505,39 @@ body {
   animation: marquee-right 45s linear infinite;
 }
 
-/* ── Vacantes Hero: respiración cinematográfica ───────────────────────────
+/* ── Botón de play del hero de /cultura ────────────────────────────────────
+   Un aro que sale del borde del círculo y se desvanece, como la onda de un
+   sonar. Va en ::after para no añadir un nodo sólo decorativo, y el gesto es
+   sólo transform+opacity (capa de compositor). */
+.play-halo::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .play-halo::after {
+    animation: play-halo 3.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  }
+}
+
+@keyframes play-halo {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  70%,
+  100% {
+    transform: scale(1.42);
+    opacity: 0;
+  }
+}
+
+/* ── Heros de /vacantes y /cultura: respiración cinematográfica ────────────
    Zoom muy lento de 100% a 102.5% más desplazamiento diagonal de 8×5 px.
    El nodo .hero__bg-layer ya sobresale −2% por todos lados, así que el
    zoom nunca deja ver el fondo oscuro. La animación va en CSS puro (no
@@ -469,17 +545,94 @@ body {
 
 @media (prefers-reduced-motion: no-preference) {
   .hero__bg-layer {
-    animation: hero-breath 16s ease-in-out infinite alternate;
+    animation: hero-breath 22s ease-in-out infinite alternate;
     will-change: transform;
   }
 }
 
 @keyframes hero-breath {
   from {
-    transform: scale(1) translate3d(0, 0, 0);
+    transform: scale(1.008) translate3d(0, 0, 0);
   }
   to {
-    transform: scale(1.025) translate3d(-8px, -5px, 0);
+    transform: scale(1.045) translate3d(-16px, -9px, 0);
+  }
+}
+
+/* ── Cielo en movimiento ────────────────────────────────────────────────────
+   La foto del ala es fija, así que la sensación de vuelo la ponen dos bandas
+   de bruma que cruzan el encuadre a distinta velocidad: la alta y lejana
+   tarda 96s, la baja y cercana 58s. Ese desfase es todo el paralaje.
+
+   Cada banda mide el doble del marco y su patrón se repite cada mitad
+   (`background-size: 50% 100%` + `repeat-x`), así que desplazarla -50% cierra
+   el bucle sin costura. Sólo se anima `transform`: es trabajo de compositor,
+   no repinta nada. El degradado de máscara las difumina por arriba y por
+   abajo para que nazcan y mueran dentro del cielo, sin bordes rectos. */
+.hero__clouds {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  background-repeat: repeat-x;
+  background-size: 50% 100%;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 34%,
+    #000 64%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 34%,
+    #000 64%,
+    transparent 100%
+  );
+}
+
+/* Banda alta: jirones finos y fríos, muy tenues, cerca del techo del marco. */
+.hero__clouds--alto {
+  top: -4%;
+  height: 48%;
+  opacity: 0.6;
+  background-image:
+    radial-gradient(38% 62% at 14% 60%, rgba(255, 238, 219, 0.2), transparent 70%),
+    radial-gradient(30% 48% at 39% 36%, rgba(255, 255, 255, 0.16), transparent 72%),
+    radial-gradient(46% 72% at 67% 64%, rgba(255, 226, 206, 0.18), transparent 70%),
+    radial-gradient(24% 44% at 89% 32%, rgba(255, 255, 255, 0.13), transparent 74%);
+}
+
+/* Banda baja: masas más anchas y cálidas, teñidas por la luz del horizonte. */
+.hero__clouds--bajo {
+  top: 14%;
+  height: 58%;
+  opacity: 0.75;
+  background-image:
+    radial-gradient(52% 80% at 24% 52%, rgba(255, 216, 196, 0.22), transparent 68%),
+    radial-gradient(40% 62% at 56% 74%, rgba(255, 255, 255, 0.17), transparent 70%),
+    radial-gradient(60% 88% at 85% 42%, rgba(255, 233, 214, 0.19), transparent 66%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero__clouds--alto {
+    animation: hero-clouds 96s linear infinite;
+    will-change: transform;
+  }
+
+  .hero__clouds--bajo {
+    animation: hero-clouds 58s linear infinite;
+    will-change: transform;
+  }
+}
+
+@keyframes hero-clouds {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
@@ -516,7 +669,9 @@ body {
    `usePauseOffscreen` con un IntersectionObserver. Al volver a entrar, el
    bucle retoma en el mismo punto del ciclo, así que no hay salto. */
 [data-motion-idle] .hero__bg-layer,
-[data-motion-idle] .hero__ambient-light {
+[data-motion-idle] .hero__ambient-light,
+[data-motion-idle] .hero__clouds,
+[data-motion-idle] .play-halo::after {
   animation-play-state: paused;
   will-change: auto;
 }

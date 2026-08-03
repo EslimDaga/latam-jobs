@@ -16,18 +16,18 @@ const COLUMNS: FooterColumn[] = [
     title: "Carreras",
     links: [
       { label: "Vacantes", href: "/vacantes" },
-      { label: "Proceso de selección", href: "#proceso" },
-      { label: "Cultura", href: "#cultura" },
-      { label: "Testimonios", href: "#testimonios" },
+      { label: "Proceso de selección", href: "/#proceso" },
+      { label: "Cultura", href: "/cultura" },
+      { label: "Testimonios", href: "/#testimonios" },
     ],
   },
   {
     title: "LATAM",
     links: [
-      { label: "Sobre LATAM", href: "#" },
-      { label: "Sostenibilidad", href: "#" },
-      { label: "Diversidad e inclusión", href: "#" },
-      { label: "Prensa", href: "#" },
+      { label: "Sobre LATAM", href: "/cultura" },
+      { label: "Sostenibilidad", href: "/cultura" },
+      { label: "Diversidad e inclusión", href: "/cultura" },
+      { label: "Prensa", href: "/cultura" },
     ],
   },
   {

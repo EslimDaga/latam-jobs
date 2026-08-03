@@ -118,6 +118,7 @@ export function EmbarkationTicket(): React.JSX.Element {
 
   return (
     <section
+      id="proceso"
       style={{
         minHeight: "100dvh",
         width: "100%",

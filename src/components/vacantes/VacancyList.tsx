@@ -2,7 +2,7 @@
 
 import { AirplaneTakeoff, Briefcase, Calendar, MapPin } from "@phosphor-icons/react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EASE_ENTER } from "@/components/motion";
 import type { Vacante, VacanteEstado } from "@/lib/vacantes/vacantes";
 
@@ -14,8 +14,11 @@ import type { Vacante, VacanteEstado } from "@/lib/vacantes/vacantes";
  *     15.365px, gap 11.819px. "Salidas"/"En vivo" en Latam Sans 12/18.72 con
  *     tracking 0.208em; el punto vivo mide 8.27px y va en #FC4A78.
  *   · Contenedor de fichas (#16216): padding-top 16.547px, gap 11.819px. En el
- *     Figma la caja mide 881px de alto y recorta; aquí crece con el contenido
- *     (sin scroll interno) para que la columna se lea de una sola pasada.
+ *     Figma la caja mide 881px de alto y recorta: de ahí el carril con scroll
+ *     propio. En ≥lg la columna se ancla (sticky) y se limita al alto de la
+ *     ventana, así el listado y la ficha terminan a la vez y el detalle deja de
+ *     quedar flotando sobre un vacío cuando la lista es más larga que él. En
+ *     móvil no hay dos columnas: el listado fluye con la página, sin recorte.
  *   · Ficha (#16217): padding 24/22, radio 16, sombra
  *     0 11.819px 35.458px -23.639px rgba(27,0,136,.5). Seleccionada en
  *     #DFE2F6 con borde #4658DF; en reposo blanca con borde rgba(27,0,136,.1).
@@ -181,8 +184,56 @@ export function VacancyList({
   const reduced = useReducedMotion() ?? false;
   const visibles = vacantes.slice(0, visibleCount);
 
+  /* ── Desvanecido de los bordes del carril ───────────────────────────────
+     La máscara sólo aparece por el lado que tenga contenido oculto: así el
+     recorte se lee como "sigue habiendo lista" en vez de como un corte seco,
+     y cuando no hay scroll (móvil, o pocas fichas) no se difumina nada. */
+  const carrilRef = useRef<HTMLDivElement>(null);
+  const [borde, setBorde] = useState({ arriba: false, abajo: false });
+
+  useEffect(() => {
+    const el = carrilRef.current;
+    if (!el) return;
+
+    const medir = () => {
+      const recorrido = el.scrollHeight - el.clientHeight;
+      setBorde({
+        arriba: el.scrollTop > 4,
+        abajo: recorrido > 4 && el.scrollTop < recorrido - 4,
+      });
+    };
+
+    medir();
+    el.addEventListener("scroll", medir, { passive: true });
+    // El alto del carril depende de la ventana (max-h en vh) y su contenido
+    // cambia al filtrar o al cargar más: hay que remedir en ambos casos.
+    const ro = new ResizeObserver(medir);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", medir);
+      ro.disconnect();
+    };
+  }, [visibles.length]);
+
+  /* Al cambiar filtros u orden el listado es otro: el carril vuelve arriba
+     para no dejar al usuario a mitad de unos resultados que ya no son los
+     suyos. Depende de la identidad del array, que "Cargar más" no altera
+     (sólo crece `visibleCount`), así que paginar no salta al principio. */
+  useEffect(() => {
+    carrilRef.current?.scrollTo({ top: 0 });
+  }, [vacantes]);
+
+  const mascara =
+    borde.arriba || borde.abajo
+      ? `linear-gradient(to bottom, transparent 0px, #000 ${
+          borde.arriba ? "28px" : "0px"
+        }, #000 calc(100% - ${borde.abajo ? "48px" : "0px"}), transparent 100%)`
+      : undefined;
+
   return (
-    <div className="flex flex-col">
+    // En ≥lg la columna se ancla al viewport: la cabecera "Salidas / En vivo"
+    // queda siempre a la vista y sólo se desplazan las fichas.
+    <div className="flex flex-col lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)]">
       {/* Cabecera del tablero (#16206) */}
       <div className="flex items-center justify-between gap-[11.819px] rounded-t-[15.365px] bg-[var(--fig-indigo)] px-[21.275px] py-[14.183px]">
         <span className="flex items-center gap-[4.728px]">
@@ -201,52 +252,67 @@ export function VacancyList({
         <LiveClock />
       </div>
 
-      {/* Fichas (#16216) — padding-top 16.547px, gap 11.819px */}
+      {/* Fichas (#16216) — padding-top 16.547px, gap 11.819px.
+          `data-lenis-prevent` cede la rueda al scroll nativo del carril (si no,
+          Lenis se la queda para la página) y `overscroll-contain` evita que al
+          llegar al final el impulso se encadene y arrastre el documento. El
+          `pr/-mr` saca la barra al canalón de 30.73px entre columnas, para que
+          las fichas conserven los 442.05px del Figma. */}
       <div
-        className="flex flex-col gap-[11.819px] pt-[16.547px]"
-        role="listbox"
-        aria-label="Vacantes disponibles"
+        ref={carrilRef}
+        data-lenis-prevent
+        style={{ maskImage: mascara, WebkitMaskImage: mascara }}
+        className="lista-carril flex flex-col pt-[16.547px] lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain lg:pr-3 lg:-mr-3"
       >
-        <AnimatePresence mode="popLayout" initial={false}>
-          {visibles.map((v, i) => (
-            <VacancyCard
-              key={v.id}
-              vacante={v}
-              index={i}
-              reduced={reduced}
-              selected={v.id === selectedId}
-              onSelect={onSelect}
-            />
-          ))}
-        </AnimatePresence>
-        {visibles.length === 0 && (
-          <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.3,
-              ease: EASE_ENTER,
-              ...(reduced ? { y: { duration: 0 } } : {}),
-            }}
-            className="rounded-[16px] border border-[var(--fig-indigo-border)] bg-white px-6 py-10 text-center text-[15px] text-[var(--fig-muted)]"
-          >
-            No encontramos vacantes con esos filtros. Prueba con otra búsqueda.
-          </motion.p>
+        {/* El `role` vive aquí y no en el carril: así "Cargar más" queda fuera
+            del listbox, que sólo debe contener las fichas. */}
+        <div
+          className="flex flex-col gap-[11.819px]"
+          role="listbox"
+          aria-label="Vacantes disponibles"
+        >
+          <AnimatePresence mode="popLayout" initial={false}>
+            {visibles.map((v, i) => (
+              <VacancyCard
+                key={v.id}
+                vacante={v}
+                index={i}
+                reduced={reduced}
+                selected={v.id === selectedId}
+                onSelect={onSelect}
+              />
+            ))}
+          </AnimatePresence>
+          {visibles.length === 0 && (
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.3,
+                ease: EASE_ENTER,
+                ...(reduced ? { y: { duration: 0 } } : {}),
+              }}
+              className="rounded-[16px] border border-[var(--fig-indigo-border)] bg-white px-6 py-10 text-center text-[15px] text-[var(--fig-muted)]"
+            >
+              No encontramos vacantes con esos filtros. Prueba con otra búsqueda.
+            </motion.p>
+          )}
+        </div>
+
+        {/* "Cargar más" (#16369) — padding-top 24px. Va DENTRO del carril: es
+            el final de la lista, no un pie fijo de la columna. */}
+        {visibleCount < vacantes.length && (
+          <div className="flex justify-center pt-6 pb-1">
+            <button
+              type="button"
+              onClick={onLoadMore}
+              className="cursor-pointer rounded-full border-[1.182px] border-[rgba(27,0,136,0.16)] bg-white px-[30.73px] py-[14.183px] text-[16px] font-bold leading-[24.96px] text-[var(--fig-indigo)] transition hover:bg-[var(--fig-indigo)] hover:text-white active:scale-95"
+            >
+              Cargar más
+            </button>
+          </div>
         )}
       </div>
-
-      {/* "Cargar más" (#16369) — padding-top 24px */}
-      {visibleCount < vacantes.length && (
-        <div className="flex justify-center pt-6">
-          <button
-            type="button"
-            onClick={onLoadMore}
-            className="cursor-pointer rounded-full border-[1.182px] border-[rgba(27,0,136,0.16)] bg-white px-[30.73px] py-[14.183px] text-[16px] font-bold leading-[24.96px] text-[var(--fig-indigo)] transition hover:bg-[var(--fig-indigo)] hover:text-white active:scale-95"
-          >
-            Cargar más
-          </button>
-        </div>
-      )}
     </div>
   );
 }
