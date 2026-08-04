@@ -537,104 +537,10 @@ body {
   }
 }
 
-/* ── Heros de /vacantes y /cultura: respiración cinematográfica ────────────
-   Zoom muy lento de 100% a 102.5% más desplazamiento diagonal de 8×5 px.
-   El nodo .hero__bg-layer ya sobresale −2% por todos lados, así que el
-   zoom nunca deja ver el fondo oscuro. La animación va en CSS puro (no
-   Framer) para que no compita con la entrada de escala que sí es Framer. */
-
-@media (prefers-reduced-motion: no-preference) {
-  .hero__bg-layer {
-    animation: hero-breath 22s ease-in-out infinite alternate;
-    will-change: transform;
-  }
-}
-
-@keyframes hero-breath {
-  from {
-    transform: scale(1.008) translate3d(0, 0, 0);
-  }
-  to {
-    transform: scale(1.045) translate3d(-16px, -9px, 0);
-  }
-}
-
-/* ── Cielo en movimiento ────────────────────────────────────────────────────
-   La foto del ala es fija, así que la sensación de vuelo la ponen dos bandas
-   de bruma que cruzan el encuadre a distinta velocidad: la alta y lejana
-   tarda 96s, la baja y cercana 58s. Ese desfase es todo el paralaje.
-
-   Cada banda mide el doble del marco y su patrón se repite cada mitad
-   (`background-size: 50% 100%` + `repeat-x`), así que desplazarla -50% cierra
-   el bucle sin costura. Sólo se anima `transform`: es trabajo de compositor,
-   no repinta nada. El degradado de máscara las difumina por arriba y por
-   abajo para que nazcan y mueran dentro del cielo, sin bordes rectos. */
-.hero__clouds {
-  position: absolute;
-  left: 0;
-  width: 200%;
-  background-repeat: repeat-x;
-  background-size: 50% 100%;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    #000 34%,
-    #000 64%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    #000 34%,
-    #000 64%,
-    transparent 100%
-  );
-}
-
-/* Banda alta: jirones finos y fríos, muy tenues, cerca del techo del marco. */
-.hero__clouds--alto {
-  top: -4%;
-  height: 48%;
-  opacity: 0.6;
-  background-image:
-    radial-gradient(38% 62% at 14% 60%, rgba(255, 238, 219, 0.2), transparent 70%),
-    radial-gradient(30% 48% at 39% 36%, rgba(255, 255, 255, 0.16), transparent 72%),
-    radial-gradient(46% 72% at 67% 64%, rgba(255, 226, 206, 0.18), transparent 70%),
-    radial-gradient(24% 44% at 89% 32%, rgba(255, 255, 255, 0.13), transparent 74%);
-}
-
-/* Banda baja: masas más anchas y cálidas, teñidas por la luz del horizonte. */
-.hero__clouds--bajo {
-  top: 14%;
-  height: 58%;
-  opacity: 0.75;
-  background-image:
-    radial-gradient(52% 80% at 24% 52%, rgba(255, 216, 196, 0.22), transparent 68%),
-    radial-gradient(40% 62% at 56% 74%, rgba(255, 255, 255, 0.17), transparent 70%),
-    radial-gradient(60% 88% at 85% 42%, rgba(255, 233, 214, 0.19), transparent 66%);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .hero__clouds--alto {
-    animation: hero-clouds 96s linear infinite;
-    will-change: transform;
-  }
-
-  .hero__clouds--bajo {
-    animation: hero-clouds 58s linear infinite;
-    will-change: transform;
-  }
-}
-
-@keyframes hero-clouds {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-50%, 0, 0);
-  }
-}
+/* La respiración cinematográfica (`.hero__bg-layer`) y las dos bandas de bruma
+   en paralaje (`.hero__clouds`) vivían aquí. Las dos daban sensación de vuelo a
+   heros que eran una foto fija; hoy /vacantes y /cultura llevan metraje real en
+   bucle y encima de él sólo ensuciaban la imagen, así que se retiraron. */
 
 /* Luz ambiente: destello cálido (naranja tenue) que se mueve levemente
    sobre el cielo para añadir profundidad sin perder el carácter premium. */
@@ -668,9 +574,7 @@ body {
    capa de compositor del tamaño de la ventana durante todo el scroll. Lo marca
    `usePauseOffscreen` con un IntersectionObserver. Al volver a entrar, el
    bucle retoma en el mismo punto del ciclo, así que no hay salto. */
-[data-motion-idle] .hero__bg-layer,
 [data-motion-idle] .hero__ambient-light,
-[data-motion-idle] .hero__clouds,
 [data-motion-idle] .play-halo::after {
   animation-play-state: paused;
   will-change: auto;

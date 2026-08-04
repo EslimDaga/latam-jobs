@@ -7,7 +7,7 @@ import {
   MagnifyingGlass,
   MapPin,
 } from "@phosphor-icons/react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { EASE_ENTER, usePauseOffscreen } from "@/components/motion";
 import { SiteHeader } from "@/components/header/SiteHeader";
@@ -18,9 +18,8 @@ import { SiteHeader } from "@/components/header/SiteHeader";
  * Clon del nodo "Hero" (#3298:16097) del Figma [RH+] Trabalhe Conosco. Todas
  * las medidas son las del archivo a 1440px de ancho:
  *
- *   · Foto "image 159": rect 1466×1955 en (-26,-682) sobre un marco 1440×614.
- *     El original es 3024×4032 (razón 0.75), así que `object-cover` reproduce
- *     el encuadre con object-position 50% 50.9% (ver cálculo abajo).
+ *   · El marco 1440×614 lo ocupaba la foto "image 159"; hoy es metraje real de
+ *     ala sobre el mar de nubes al atardecer, en bucle mudo (ver abajo).
  *   · "Overlay+Shadow": caja 1440×1024 con sombra interior 21px 91px 125.1px
  *     rgba(6,16,35,.85) — oscurece arriba e izquierda, no abajo.
  *   · "Overlay 2": caja 1441×875 en y=-131 con el radial índigo.
@@ -29,11 +28,22 @@ import { SiteHeader } from "@/components/header/SiteHeader";
  *     es decir montado 28px sobre el borde inferior del hero.
  * ──────────────────────────────────────────────────────────────────────────── */
 
-/* Encuadre de la foto: la franja visible del rect va de y=682 a y=1296 sobre
-   1955 de alto (fracción 0.3489→0.6629). Con object-cover el alto renderizado
-   es 1920 para un marco de 614, así que el desplazamiento es
-   (0.5059·1920 − 307) / (1920 − 614) ≈ 50.9%. */
-const ENCUADRE_FOTO = "50% 50.9%";
+/* ── Bucle de fondo ──────────────────────────────────────────────────────────
+ * El clip es de 1920×1080 y dura 4.3s; el fichero del repo ya viene tratado:
+ *
+ *   · recortado a 1920×1030 para dejar fuera la marca de agua del generador,
+ *     que iba pegada al borde inferior derecho;
+ *   · montado en ping-pong (original + reverso) hasta 8.6s, así el bucle cierra
+ *     sin costura por los dos extremos — el clip original salta al reiniciar y
+ *     un corte seco en un plano de cabina se nota mucho;
+ *   · a 1600px de ancho y sin pista de audio (~0.9 MB).
+ *
+ * El encuadre final es el centro (`object-cover` sin desplazamiento): dentro
+ * quedan los montantes oscuros de la ventanilla a izquierda y derecha, que son
+ * los que enmarcan el titular, y el ala cruzando el tercio inferior.
+ * ────────────────────────────────────────────────────────────────────────── */
+const VIDEO_FONDO = "/videos/vacantes/vacantes-wing-sunset-loop.mp4";
+const POSTER_FONDO = "/images/hero/vacantes-wing-poster.jpg";
 
 const HERO: Variants = {
   hidden: {},
@@ -152,11 +162,62 @@ function Divisor() {
 export function VacantesHero({ search, onSearchChange, onSubmit }: VacantesHeroProps) {
   const reduced = useReducedMotion();
 
-  // Marco del hero: mientras esté fuera de pantalla, la respiración y la luz
-  // ambiente se pausan (ver `[data-motion-idle]` en globals.css).
+  // Marco del hero: mientras esté fuera de pantalla, la luz ambiente se pausa
+  // (ver `[data-motion-idle]` en globals.css).
   const marcoRef = useRef<HTMLDivElement>(null);
   usePauseOffscreen(marcoRef);
   const item = reduced ? HERO_ITEM_REDUCIDO : HERO_ITEM;
+
+  /* ── Reproducción del fondo ───────────────────────────────────────────────
+   * Mismo patrón que /cultura. El <video> no lleva `autoPlay`: lo arranca este
+   * efecto, para que exista un único camino de decisión (visible && !reducido)
+   * en vez de un atributo del HTML de SSR peleándose con `useReducedMotion`,
+   * que en servidor vale `false` y en cliente `true` — eso rompía la
+   * hidratación.
+   *
+   * Pausar fuera de pantalla no sólo ahorra CPU: el vídeo va en streaming y un
+   * hero que ya nadie ve no debe seguir tirando del ancho de banda mientras se
+   * lee el listado de vacantes, que es lo que de verdad importa de esta página.
+   * ────────────────────────────────────────────────────────────────────────── */
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Cinturón y tirantes: sin `muted` en la propiedad (no sólo en el atributo)
+    // el autoplay se cae en Safari.
+    video.muted = true;
+
+    // Con motion reducido el marco se queda en el `poster`, quieto.
+    if (reduced) {
+      video.pause();
+      return;
+    }
+
+    const sincronizar = (visible: boolean) => {
+      if (visible) {
+        // Safari rechaza la promesa si el gestor de energía lo bloquea o si el
+        // usuario aún no ha interactuado; el poster se queda puesto y ya.
+        void video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+    };
+
+    if (typeof IntersectionObserver === "undefined") {
+      sincronizar(true);
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      ([entry]) => sincronizar(entry.isIntersecting),
+      { rootMargin: "150px" },
+    );
+    io.observe(video);
+
+    return () => io.disconnect();
+  }, [reduced]);
 
   return (
     <motion.header className="relative" variants={HERO} initial="hidden" animate="show">
@@ -165,50 +226,40 @@ export function VacantesHero({ search, onSearchChange, onSubmit }: VacantesHeroP
         ref={marcoRef}
         className="relative h-[460px] overflow-hidden bg-[#0c104f] sm:h-[540px] lg:h-[614px]"
       >
-        {/* ── Capa de fondo animada: respiración cinematográfica ─────────────
-             El nodo exterior lleva la clase CSS `hero__bg-layer` que controla
-             la respiración (keyframe continuo). La entrada visual se consigue
-             con una capa hija que arranca opaca y se desvanece, sin tocar el
-             `transform` del padre (que sí necesita la animación CSS libre). */}
-        <div
-          aria-hidden
-          className="hero__bg-layer absolute"
-          style={{
-            inset: "-2%",
-            backgroundImage: "url('/images/hero/vacantes-wing.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: ENCUADRE_FOTO,
-          }}
-        >
-          {/* Scrim de entrada: opaco → transparente, sólo opacidad. El
-              `initial` no ramifica en `reduced` (SSR determinista); un fundido
-              de opacidad es aceptable con motion reducido, sólo más corto. */}
-          <motion.div
-            className="absolute inset-0 bg-[#0c104f]"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 0 }}
-            transition={{ duration: reduced ? 0.5 : 1.4, ease: EASE_ENTER }}
-          />
-        </div>
+        {/* ── Fondo: el vuelo, en bucle ──────────────────────────────────────
+             Ya no lleva la respiración de `.hero__bg-layer` ni las bandas de
+             bruma en paralaje: ambas existían para dar sensación de vuelo a una
+             foto fija, y encima de metraje que de por sí se mueve sólo
+             ensuciaban la imagen.
 
-        {/* ── Cielo en movimiento: dos bandas de bruma en paralaje ──────────
-             Van fuera de `.hero__bg-layer` para no heredar su respiración: si
-             compartieran transform, se moverían con la foto y el paralaje se
-             perdería. Entran con un fundido propio, más tardío que el de la
-             foto, para que el cielo "aparezca" ya poblado. El `initial` no
-             ramifica en `reduced` (SSR determinista) y su desplazamiento vive
-             en CSS, tras `prefers-reduced-motion: no-preference`: con motion
-             reducido quedan como bruma quieta. */}
+             El `poster` es el primer fotograma del propio clip, así que el
+             relevo poster → vídeo es invisible; y es también la red: si el
+             navegador bloquea el autoplay o el visitante pidió menos
+             movimiento, el hero se queda en una foto bien encuadrada. */}
+        <video
+          ref={videoRef}
+          className="absolute inset-0 h-full w-full object-cover"
+          src={VIDEO_FONDO}
+          poster={POSTER_FONDO}
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          aria-hidden
+          tabIndex={-1}
+        />
+
+        {/* Telón de entrada: se retira sobre el primer fotograma para que el
+            vuelo no aparezca de golpe al montar. Sólo opacidad; el `initial` no
+            ramifica en `reduced` (SSR determinista), un fundido es aceptable
+            con motion reducido, sólo más corto. */}
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute inset-0 overflow-hidden"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: reduced ? 0.6 : 1.8, delay: 0.35, ease: EASE_ENTER }}
-        >
-          <div className="hero__clouds hero__clouds--alto" />
-          <div className="hero__clouds hero__clouds--bajo" />
-        </motion.div>
+          className="pointer-events-none absolute inset-0 bg-[#0c104f]"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 0 }}
+          transition={{ duration: reduced ? 0.5 : 1.4, ease: EASE_ENTER }}
+        />
 
         {/* ── Luz ambiente: destello cálido que se desplaza sobre el cielo ──
             Se renderiza siempre (condicionarla a `reduced` desalineaba el
@@ -228,6 +279,28 @@ export function VacantesHero({ search, onSearchChange, onSubmit }: VacantesHeroP
           style={{ boxShadow: "inset 21px 91px 125.1px 0px rgba(6,16,35,0.85)" }}
         />
 
+        {/* ── Velo de lectura ────────────────────────────────────────────────
+            La foto que había antes era de rango corto; el metraje no: el sol
+            del horizonte cae justo detrás del titular y ahí el blanco sobre
+            blanco medía 1.5:1. Este degradado vertical hunde la banda que
+            ocupan el antetítulo, el titular y la bajada (~0–70% del marco) y se
+            va a casi nada sobre el ala, que es lo que debe quedar limpio.
+
+            Las paradas están medidas contra el fotograma compuesto, no a ojo:
+            el peor punto de cada bloque de texto queda por encima de 3:1, que
+            es el mínimo AA para cuerpo grande (titular de 96px y bajada de 20px
+            en negrita). El resto del trabajo lo hace el grado del propio clip,
+            cocido en el fichero para no pagar un `filter` a pantalla completa
+            en cada fotograma. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(6,16,35,0.66) 0%, rgba(6,16,35,0.56) 26%, rgba(6,16,35,0.43) 48%, rgba(6,16,35,0.27) 68%, rgba(6,16,35,0.15) 86%, rgba(6,16,35,0.12) 100%)",
+          }}
+        />
+
         {/* "Overlay 2" — velo radial índigo, arranca 131px por encima del marco. */}
         <div
           aria-hidden
@@ -244,8 +317,18 @@ export function VacantesHero({ search, onSearchChange, onSubmit }: VacantesHeroP
         {/* ── Titular (#3298:16140) — bloque en (99,231); el nav ocupa 74px ── */}
         <div className="relative z-10 mx-auto w-full max-w-[1242px] px-4 sm:px-8 lg:px-0">
           <div className="flex flex-col gap-2 pt-[120px] sm:pt-[160px] lg:pt-[220px]">
-            {/* "Section" — padding 16px 0 8px, gap 8px */}
-            <div className="flex flex-col gap-2 pb-2 pt-4">
+            {/* "Section" — padding 16px 0 8px, gap 8px.
+                La sombra de texto se hereda a los tres bloques: sobre metraje
+                en movimiento el contraste puntual cambia fotograma a fotograma,
+                y este halo corto mantiene el filo de la letra sin tener que
+                oscurecer más el velo (que se comería el atardecer). */}
+            <div
+              className="flex flex-col gap-2 pb-2 pt-4"
+              style={{
+                textShadow:
+                  "0 1px 2px rgba(6,16,35,0.38), 0 2px 24px rgba(6,16,35,0.45)",
+              }}
+            >
               <motion.p
                 variants={item}
                 className="text-[13px] font-black uppercase leading-[22.04px] tracking-[0.2939em] text-[#eceef3] sm:text-[16px]"
