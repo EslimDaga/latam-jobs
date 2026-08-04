@@ -22,6 +22,10 @@ export {
   type PolymorphicTag,
 } from "./motion.types";
 
+// Transiciones de ruta con la View Transitions API (React <ViewTransition>).
+export { PageTransition } from "./PageTransition";
+export { navTransitionTypes } from "./nav-transition";
+
 // Ya existentes en el proyecto, reexportados para tener el motion en un sitio.
 export { SmoothScroll } from "./SmoothScroll";
 export { useScrollProgress } from "./useScrollProgress";

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CulturaView } from "@/components/cultura/CulturaView";
 import { SiteFooter } from "@/components/jobs/SiteFooter";
+import { PageTransition } from "@/components/motion";
 
 export const metadata: Metadata = {
   title: "Nuestra cultura — Empleos LATAM",
@@ -10,9 +11,9 @@ export const metadata: Metadata = {
 
 export default function CulturaPage(): React.JSX.Element {
   return (
-    <>
+    <PageTransition>
       <CulturaView />
       <SiteFooter />
-    </>
+    </PageTransition>
   );
 }

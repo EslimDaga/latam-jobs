@@ -4,10 +4,11 @@ import { VacancyBoard } from "@/components/jobs/VacancyBoard";
 import { EmbarkationTicket } from "@/components/jobs/EmbarkationTicket";
 import { Testimonials } from "@/components/jobs/Testimonials";
 import { SiteFooter } from "@/components/jobs/SiteFooter";
+import { PageTransition } from "@/components/motion";
 
 export default function Home(): React.JSX.Element {
   return (
-    <>
+    <PageTransition>
       <main className="flex-1 bg-white">
         {/* 1. Cinematic Scroll Hero (Cockpit zoom into sky -> fades to white with Nuestro propósito text) */}
         <JobHero />
@@ -27,6 +28,6 @@ export default function Home(): React.JSX.Element {
 
       {/* 6. Pie de página del sitio */}
       <SiteFooter />
-    </>
+    </PageTransition>
   );
 }

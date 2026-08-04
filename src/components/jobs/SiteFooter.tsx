@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Reveal } from "@/components/motion";
 
 /**
@@ -100,16 +102,24 @@ export function SiteFooter(): React.JSX.Element {
                     {col.title}
                   </h3>
                   <ul className="mt-5 space-y-3.5">
-                    {col.links.map((link) => (
-                      <li key={link.label}>
-                        <a
-                          href={link.href}
-                          className="text-sm font-normal text-[#1B0088] transition-colors duration-200 hover:text-red-latam"
-                        >
-                          {link.label}
-                        </a>
-                      </li>
-                    ))}
+                    {col.links.map((link) => {
+                      /* Las rutas internas van por <Link>: una <a> recarga el
+                         documento y se lleva por delante la View Transition
+                         (y el scroll suave). El resto —mailto:, marcadores
+                         sin destino— se queda en <a>. */
+                      const interno = link.href.startsWith("/");
+                      const Tag = interno ? Link : "a";
+                      return (
+                        <li key={link.label}>
+                          <Tag
+                            href={link.href}
+                            className="text-sm font-normal text-[#1B0088] transition-colors duration-200 hover:text-red-latam"
+                          >
+                            {link.label}
+                          </Tag>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               ))}

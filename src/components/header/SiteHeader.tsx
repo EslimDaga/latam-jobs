@@ -3,7 +3,10 @@
 import { Globe, CaretDown } from "@phosphor-icons/react";
 import { motion, type MotionValue, useMotionValue } from "framer-motion";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+
+import { navTransitionTypes } from "@/components/motion";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Types & Constants
@@ -48,6 +51,10 @@ export function SiteHeader({
   darkLogoOpacity,
 }: SiteHeaderProps): React.JSX.Element {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  /* La ruta activa decide la dirección de la View Transition de cada enlace:
+     hacia dentro del sitio desliza a la izquierda, de vuelta a la derecha. */
+  const pathname = usePathname();
 
   /* Valores por defecto (tema claro en fondo oscuro) cuando no se inyectan por scroll */
   const defaultTextColor = useMotionValue("rgba(255, 255, 255, 1)");
@@ -103,6 +110,7 @@ export function SiteHeader({
               <MotionLink
                 key={link.href}
                 href={link.href}
+                transitionTypes={navTransitionTypes(pathname, link.href)}
                 onClick={() => setMenuOpen(false)}
                 initial={{ opacity: 0, x: -20 }}
                 animate={menuOpen ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
@@ -137,7 +145,11 @@ export function SiteHeader({
       </motion.div>
 
       {/* ── Cabecera / Navegación Oficial LATAM Airlines ──────────────── */}
-      <header className={className}>
+      {/* `viewTransitionName` saca la cabecera del recorte de la página para que
+          no se deslice con el contenido: durante una transición de ruta hace
+          falta un punto fijo en pantalla, o se lee como si se moviera la ventana
+          entera en vez del contenido. globals.css le anula la animación. */}
+      <header className={className} style={{ viewTransitionName: "site-header" }}>
         <div className="relative mx-auto flex max-w-[100rem] items-center justify-between gap-3 px-4 py-5 sm:gap-6 sm:px-6 sm:py-7 lg:px-12">
           {/* Izquierda: Botón de Menú animado (Hamburguesa 3 líneas -> X) */}
           <motion.button
@@ -221,6 +233,7 @@ export function SiteHeader({
           {/* Centro: Logotipo LATAM (perfectamente centrado) */}
           <Link
             href="/"
+            transitionTypes={navTransitionTypes(pathname, "/")}
             aria-label="Empleos LATAM — inicio"
             className="absolute left-1/2 top-1/2 z-40 h-5 w-32 -translate-x-1/2 -translate-y-1/2 cursor-pointer sm:h-6 sm:w-40 md:h-7 md:w-48"
           >
@@ -256,6 +269,7 @@ export function SiteHeader({
 
             <Link
               href={ctaHref}
+              transitionTypes={navTransitionTypes(pathname, ctaHref)}
               className="animate-pulse-subtle cursor-pointer rounded-full bg-red-latam px-4 py-2 font-sans text-sm font-semibold text-white shadow-md transition hover:bg-red-latam-deep active:scale-95 sm:px-5 sm:text-[15px]"
             >
               {ctaLabel}

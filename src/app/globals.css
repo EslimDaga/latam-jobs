@@ -579,3 +579,115 @@ body {
   animation-play-state: paused;
   will-change: auto;
 }
+
+/* ── View Transitions entre rutas ───────────────────────────────────────────
+   Las clases (`nav-forward`, `nav-back`, `page-fade`) las asigna
+   <PageTransition> según el `transitionTypes` que lleve cada <Link>; el nombre
+   `site-header` lo pone SiteHeader. Aquí solo se define su movimiento.
+
+   Tiempos asimétricos a propósito: lo viejo se va rápido para dejar de competir
+   por la atención, lo nuevo entra algo más lento y arranca cuando lo viejo ya
+   ha salido. El deslizamiento (más largo) corre por debajo de ambos y es lo que
+   sostiene la sensación de continuidad. */
+::view-transition-group(*) {
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* La raíz no se funde: el envoltorio de página ya anima. Dejar el cross-fade
+   por defecto del navegador encima del deslizamiento fantasmea el contenido a
+   media transición. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* Hacia dentro del sitio: lo viejo sale por la izquierda, lo nuevo entra desde
+   la derecha. 60 px bastan para leer la dirección sin obligar a perseguir nada
+   por la pantalla. */
+::view-transition-old(.nav-forward) {
+  --vt-offset: -60px;
+  animation:
+    150ms ease-in both vt-fade reverse,
+    400ms ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-forward) {
+  --vt-offset: 60px;
+  animation:
+    210ms ease-out 150ms both vt-fade,
+    400ms ease-in-out both vt-slide;
+}
+
+/* De vuelta: la misma coreografía en espejo. */
+::view-transition-old(.nav-back) {
+  --vt-offset: 60px;
+  animation:
+    150ms ease-in both vt-fade reverse,
+    400ms ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-back) {
+  --vt-offset: -60px;
+  animation:
+    210ms ease-out 150ms both vt-fade,
+    400ms ease-in-out both vt-slide;
+}
+
+/* Fundido neutro, sin dirección: navegaciones entre rutas hermanas y las que
+   el navegador origina por su cuenta (botón atrás, gesto de deslizar), que no
+   llevan `transitionTypes`. */
+::view-transition-old(.page-fade) {
+  animation: 150ms ease-in both vt-fade reverse;
+}
+::view-transition-new(.page-fade) {
+  animation: 210ms ease-out 150ms both vt-fade;
+}
+
+/* El desenfoque de un par de píxeles tapa el escalonado de la interpolación
+   mientras las dos capas se cruzan. */
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes vt-slide {
+  from {
+    translate: var(--vt-offset);
+  }
+  to {
+    translate: 0;
+  }
+}
+
+/* La cabecera se queda clavada durante todo el vuelo: es el único anclaje
+   espacial que le queda al usuario para entender que se movió el contenido y no
+   la ventana. `display: none` en la capa vieja evita el parpadeo de ver las dos
+   cabeceras solapadas, y el z-index la mantiene sobre el contenido que desliza. */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* Los pseudoelementos de View Transitions viven en su propio árbol: la regla
+   global de `*` de más arriba no los alcanza y hay que desactivarlos aparte.
+   El deslizamiento horizontal es justo lo que peor sienta con sensibilidad al
+   movimiento, así que se cae entero y el contenido se cambia de golpe, que es
+   el comportamiento nativo del navegador. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
