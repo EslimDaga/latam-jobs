@@ -119,6 +119,7 @@ export function EmbarkationTicket(): React.JSX.Element {
   return (
     <section
       id="proceso"
+      className="et-section"
       style={{
         minHeight: "100dvh",
         width: "100%",
@@ -129,7 +130,9 @@ export function EmbarkationTicket(): React.JSX.Element {
         gap: "34px",
         background: "#ffffff",
         fontFamily: LATAM,
-        padding: "50px 20px",
+        // 20px + los 16px extra por lado que pidió diseño: la sección respira
+        // más contra el borde y el ticket, ya más ancho, no queda pegado.
+        padding: "50px 36px",
         boxSizing: "border-box",
       }}
     >
@@ -138,34 +141,40 @@ export function EmbarkationTicket(): React.JSX.Element {
       <style
         dangerouslySetInnerHTML={{
           __html: `
+            /* Los bloques de Reveal se estiran al ancho de la sección para que
+               el 'max-width:100%' del ticket mida contra el padding de arriba
+               y no contra unidades de viewport. */
+            .et-block { align-self: stretch; width: 100%; }
             @media (max-width: 899px) {
               .et-row { flex-direction: column; }
-              .et-itin { padding: 22px 16px !important; }
+              .et-itin { padding: 26px 20px !important; }
               .et-perf { width: auto !important; height: 1px; }
               .et-perf-line { border-left: 0 !important; border-top: 2px dashed rgba(255,255,255,0.16); }
               .et-notch-a { top: -18px !important; left: -18px !important; bottom: auto !important; }
               .et-notch-b { top: -18px !important; bottom: auto !important; left: auto !important; right: -18px !important; }
-              .et-stub { flex: 1 1 auto !important; padding: 22px 16px 26px !important; }
+              .et-stub { flex: 1 1 auto !important; padding: 26px 20px 30px !important; }
               .et-head { flex-wrap: wrap; row-gap: 8px; }
             }
             @media (max-width: 560px) {
+              /* En móvil los 36px por lado se comen la pantalla: se vuelve a
+                 un margen contenido sin perder el aire que pidió diseño. */
+              .et-section { padding-left: 24px !important; padding-right: 24px !important; }
               .et-itin-label { display: none !important; }
               .et-logo svg { width: 104px; height: auto; }
-              .et-code { width: 46px !important; font-size: 19px !important; }
-              .et-steprow { gap: 10px !important; padding: 0 8px !important; }
+              .et-code { width: 48px !important; font-size: 19px !important; }
+              .et-steprow { gap: 10px !important; padding: 0 8px !important; height: 50px !important; }
               .et-steptitle { font-size: 15px !important; }
             }
           `,
         }}
       />
-      <Reveal from="up">
+      <Reveal from="up" className="et-block">
         <div
           style={{
             fontFamily: LATAM,
             textAlign: "center",
             width: "100%",
-            maxWidth: "min(940px, 92vw)",
-            padding: "0 16px",
+            maxWidth: "min(940px, 100%)",
             margin: "0 auto",
           }}
         >
@@ -211,14 +220,17 @@ export function EmbarkationTicket(): React.JSX.Element {
         </div>
       </Reveal>
 
-      <Reveal from="up" delay={0.12} offset={40}>
+      <Reveal from="up" delay={0.12} offset={40} className="et-block">
       <div
         style={{
           position: "relative",
-          width: "1000px",
-          maxWidth: "92vw",
-          borderRadius: "26px",
-          boxShadow: "0 34px 80px rgba(27,0,136,0.28), 0 0 0 1px rgba(15,0,79,0.06)",
+          // Ancho del pase en el Figma de Wave 2 (frame 3471:11824). El
+          // `max-width` mide contra la sección, que ya lleva su padding.
+          width: "1158px",
+          maxWidth: "100%",
+          margin: "0 auto",
+          borderRadius: "30px",
+          boxShadow: "0 39px 93px rgba(27,0,136,0.28), 0 0 0 1px rgba(15,0,79,0.06)",
           overflow: "hidden",
           background: "#0F004F",
         }}
@@ -229,10 +241,10 @@ export function EmbarkationTicket(): React.JSX.Element {
             className="et-itin"
             style={{
               flex: "1 1 auto",
-              padding: "30px 34px",
+              padding: "34px 40px",
               display: "flex",
               flexDirection: "column",
-              gap: "16px",
+              gap: "18px",
               minWidth: 0,
             }}
           >
@@ -279,10 +291,10 @@ export function EmbarkationTicket(): React.JSX.Element {
                       position: "relative",
                       display: "flex",
                       alignItems: "center",
-                      gap: "16px",
-                      height: "48px",
-                      padding: "0 14px 0 8px",
-                      borderRadius: "12px",
+                      gap: "18px",
+                      height: "54px",
+                      padding: "0 16px 0 8px",
+                      borderRadius: "14px",
                       cursor: "pointer",
                       background: on ? "rgba(255,255,255,0.06)" : "transparent",
                       transition: "background 0.2s ease",
@@ -307,11 +319,11 @@ export function EmbarkationTicket(): React.JSX.Element {
                     <span
                       className="et-code"
                       style={{
-                        width: "58px",
+                        width: "66px",
                         flexShrink: 0,
                         fontFamily: LATAM,
                         fontWeight: 700,
-                        fontSize: "24.78px",
+                        fontSize: "27.2px",
                         letterSpacing: "0.59px",
                         color: on ? "#E8114B" : "#EAE8FA",
                         transition: "color 0.2s",
@@ -323,7 +335,7 @@ export function EmbarkationTicket(): React.JSX.Element {
                       className="et-steptitle"
                       style={{
                         flex: 1,
-                        fontSize: "17.11px",
+                        fontSize: "18.6px",
                         fontWeight: 600,
                         color: on ? "#ffffff" : "#C9C5F0",
                         transition: "color 0.2s",
@@ -359,7 +371,7 @@ export function EmbarkationTicket(): React.JSX.Element {
           </div>
 
           {/* Talón de embarque (detalle) */}
-          <div className="et-stub" style={{ flex: "0 0 300px", padding: "30px 28px", display: "flex", gap: "16px" }}>
+          <div className="et-stub" style={{ flex: "0 0 348px", padding: "34px 32px", display: "flex", gap: "18px" }}>
             <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "20px" }}>
               {/* Grid apilado: ambos estados ocupan la misma celda, así el talón
                   crece hasta el contenido más alto y nunca pisa el código de barras. */}
@@ -379,12 +391,12 @@ export function EmbarkationTicket(): React.JSX.Element {
                 >
                   <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
                     <span style={{ fontSize: "11.8px", fontWeight: 400, letterSpacing: "1.77px", color: "#7F7AC8", textTransform: "uppercase" }}>Ruta</span>
-                    <span style={{ fontSize: "20.06px", fontWeight: 700, color: "#ffffff", lineHeight: "27.081px" }}>Postulación &gt; Embarque LATAM</span>
+                    <span style={{ fontSize: "21.4px", fontWeight: 700, color: "#ffffff", lineHeight: "28.8px" }}>Postulación &gt; Embarque LATAM</span>
                   </div>
                   <div style={{ height: "1px", background: "rgba(255,255,255,0.16)" }} />
                   <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
                     <span style={{ fontSize: "11.8px", fontWeight: 400, letterSpacing: "1.77px", color: "#7F7AC8", textTransform: "uppercase" }}>Destino</span>
-                    <span style={{ fontSize: "20.06px", fontWeight: 700, color: "#ffffff", lineHeight: "27.081px" }}>Tu próximo gran viaje empieza aquí</span>
+                    <span style={{ fontSize: "21.4px", fontWeight: 700, color: "#ffffff", lineHeight: "28.8px" }}>Tu próximo gran viaje empieza aquí</span>
                   </div>
                   <p style={{ margin: "auto 0 0", fontSize: "14.16px", lineHeight: "21.24px", color: "#7F7AC8" }}>
                     Pasa el cursor o toca una etapa del itinerario para ver su detalle.
@@ -405,7 +417,7 @@ export function EmbarkationTicket(): React.JSX.Element {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-                    <span style={{ fontFamily: LATAM, fontWeight: 800, fontSize: "51.92px", color: "#E8114B", lineHeight: "51.92px" }}>{cur.code}</span>
+                    <span style={{ fontFamily: LATAM, fontWeight: 800, fontSize: "57px", color: "#E8114B", lineHeight: "57px" }}>{cur.code}</span>
                     <span style={{ fontSize: "12.98px", fontWeight: 700, letterSpacing: "1.77px", color: "#A7A2E0" }}>
                       ETAPA {idx + 1} / {STEPS.length}
                     </span>
@@ -427,7 +439,7 @@ export function EmbarkationTicket(): React.JSX.Element {
                     </span>
                     <span style={{ fontSize: "18.88px", fontWeight: 700, color: "#ffffff" }}>{cur.title}</span>
                   </div>
-                  <p style={{ margin: 0, fontSize: "15.34px", lineHeight: "24.544px", color: "#D8D5F4" }}>{cur.desc}</p>
+                  <p style={{ margin: 0, fontSize: "16.2px", lineHeight: "25.9px", color: "#D8D5F4" }}>{cur.desc}</p>
                 </div>
               </div>
 

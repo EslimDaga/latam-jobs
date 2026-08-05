@@ -19,11 +19,13 @@ export default function Home(): React.JSX.Element {
         {/* 3. Tablero de embarque: vacantes en vista Lista (split-flap) / Mapa */}
         <VacancyBoard />
 
-        {/* 4. Pase de embarque: proceso de selección en 7 etapas */}
-        <EmbarkationTicket />
-
-        {/* 5. Voces a bordo: testimonios en tarjetas fotográficas en arco */}
+        {/* 4. Voces a bordo: testimonios en tarjetas fotográficas en arco */}
         <Testimonials />
+
+        {/* 5. Pase de embarque: proceso de selección en 7 etapas.
+            Cierra la página justo antes del footer, como en el Figma de Wave 2
+            (frame 3471:10841: Testimonials → Proceso → Footer). */}
+        <EmbarkationTicket />
       </main>
 
       {/* 6. Pie de página del sitio */}

@@ -1,19 +1,6 @@
 "use client";
 
-import {
-  ArrowRight,
-  Binoculars,
-  CaretRight,
-  Compass,
-  Handshake,
-  Leaf,
-  Lightbulb,
-  Rocket,
-  Target,
-  UserFocus,
-  UsersThree,
-  type Icon,
-} from "@phosphor-icons/react";
+import { ArrowRight, CaretRight } from "@phosphor-icons/react";
 import { AnimatePresence, motion, useReducedMotion, type Variants } from "framer-motion";
 import { useState } from "react";
 import { EASE_ENTER, Reveal } from "@/components/motion";
@@ -41,18 +28,29 @@ import { GUIAS_CULTURALES } from "@/lib/cultura/cultura";
  *     alineado con el título, y 14.94/23.16 en blanco al 70%.
  * ──────────────────────────────────────────────────────────────────────────── */
 
-/** Un icono por guía. El Figma trae vectores sueltos sin nombre; se eligen los
- *  equivalentes de Phosphor, que es la familia que ya usa el resto del sitio. */
-const ICONOS: Record<string, Icon> = {
-  turbulencias: Binoculars,
-  cliente: UserFocus,
-  jets: Handshake,
-  excelencia: Target,
-  liderazgo: Compass,
-  adelante: Rocket,
-  cooperar: UsersThree,
-  grande: Lightbulb,
-  sostenibilidad: Leaf,
+/* ── Iconografía ─────────────────────────────────────────────────────────────
+ * Los pictogramas son los del propio Figma (los `Vector` dentro de cada
+ * "Summary"), exportados uno a uno: son iconografía de marca dibujada para
+ * estas nueve guías —el de "Ser JETS" es directamente el lettering de JETS—,
+ * y ningún equivalente de una librería genérica dice lo mismo. Antes había
+ * stand-ins de Phosphor; marca los rechazó en el comentario del archivo
+ * ("Guias culturales con logo").
+ *
+ * Van como fichero y no inline: son blancos sobre la caja roja y no necesitan
+ * heredar color, así que un `<img>` los mantiene fuera del bundle. El de JETS
+ * es PNG porque su vector viene calcado a 13.648 trazados (4 MB); a 27 px un
+ * PNG de 101 px sobra y pesa 5 KB.
+ * ────────────────────────────────────────────────────────────────────────── */
+const ICONOS: Record<string, string> = {
+  turbulencias: "/images/cultura/guias/turbulencias.svg",
+  cliente: "/images/cultura/guias/cliente.svg",
+  jets: "/images/cultura/guias/jets.png",
+  excelencia: "/images/cultura/guias/excelencia.svg",
+  liderazgo: "/images/cultura/guias/liderazgo.svg",
+  adelante: "/images/cultura/guias/adelante.svg",
+  cooperar: "/images/cultura/guias/cooperar.svg",
+  grande: "/images/cultura/guias/grande.svg",
+  sostenibilidad: "/images/cultura/guias/sostenibilidad.svg",
 };
 
 const REJILLA: Variants = {
@@ -132,7 +130,7 @@ export function GuiasCulturales() {
           className="grid grid-cols-1 gap-[14.69px] pt-[44.07px] md:grid-cols-2 lg:grid-cols-3"
         >
           {GUIAS_CULTURALES.map((guia) => {
-            const IconoGuia = ICONOS[guia.id];
+            const icono = ICONOS[guia.id];
             const abierta = abiertas.includes(guia.id);
 
             return (
@@ -156,8 +154,18 @@ export function GuiasCulturales() {
                        de dos líneas no descuadran la fila frente a los de una. */
                     className="flex min-h-[81.84px] w-full cursor-pointer items-center gap-[12.59px] px-[16.79px] py-[14.69px] text-left"
                   >
-                    <span className="flex h-[50.36px] w-[44.07px] shrink-0 items-center justify-center rounded-[8.97px] bg-[var(--fig-red)] text-white">
-                      <IconoGuia size={26.91} weight="regular" aria-hidden />
+                    <span className="flex h-[50.36px] w-[44.07px] shrink-0 items-center justify-center rounded-[8.97px] bg-[var(--fig-red)]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={icono}
+                        alt=""
+                        aria-hidden
+                        width={26.91}
+                        height={26.91}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-[26.91px] w-[26.91px] object-contain"
+                      />
                     </span>
 
                     <span className="min-w-0 flex-1 text-[16.79px] font-bold leading-[21.39px] tracking-[-0.0179em] text-white">

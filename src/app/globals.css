@@ -159,6 +159,58 @@ body {
   will-change: transform, opacity;
 }
 
+/* ── Hero de /cultura ───────────────────────────────────────────────────────
+   Paralaje del hero de referencia (wolverineworldwide.com), donde el metraje
+   se queda rezagado respecto al scroll mientras el titular se retira. Allí la
+   fórmula viaja en el propio HTML como
+   `scale(calc(1.15 - var(--progress)*0.15)) translateY(...)` sobre la variable
+   que escribe su `data-scroll-css-progress`; aquí la variable es `--scroll-p`
+   y la pone useScrollProgress sobre el <header> del hero.
+
+   Las cuentas del metraje están acopladas a propósito: al escalar un 16% desde
+   el centro sobran un 8% por arriba y un 8% por abajo, así que bajarlo justo un
+   8% deja el borde superior a ras del marco en todo el recorrido. Si se toca el
+   `scale`, hay que mover el `translate3d` a la mitad — si no, asoma el fondo.
+
+   Va dentro de `no-preference`: con motion reducido el hero se queda quieto. */
+@media (prefers-reduced-motion: no-preference) {
+  .cultura-hero__media {
+    transform: translate3d(0, calc(var(--scroll-p, 0) * 8%), 0)
+      scale(calc(1 + var(--scroll-p, 0) * 0.16));
+    will-change: transform;
+  }
+
+  .cultura-hero__copy {
+    transform: translate3d(0, calc(var(--scroll-p, 0) * -3rem), 0);
+    /* Pasa de 1 por el factor 1.25: el texto queda apagado antes de que el
+       marco termine de salir, que es como se lee en la referencia. `opacity`
+       satura en 0 sin necesidad de `clamp()`. */
+    opacity: calc(1 - var(--scroll-p, 0) * 1.25);
+    will-change: transform, opacity;
+  }
+}
+
+/* Fuera de pantalla se suelta el `will-change`: si se queda fijo, reserva
+   memoria de compositor para dos capas del tamaño del hero durante todo el
+   scroll de la página. Lo marca usePauseOffscreen sobre el marco. */
+[data-motion-idle] .cultura-hero__media,
+[data-motion-idle] .cultura-hero__copy {
+  will-change: auto;
+}
+
+/* Máscara del titular por palabras. El relleno inferior es el aire que necesita
+   la línea base: con `leading-[1.04]` las colas de "propósito" y "viaje," caen
+   por debajo de la caja de línea y el `overflow:hidden` las cortaría. El margen
+   negativo se lo devuelve al flujo para no separar los renglones. */
+.cultura-hero__mask {
+  display: inline-flex;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-block-end: 0.18em;
+  margin-block-end: -0.18em;
+  margin-inline-end: 0.26em;
+}
+
 /* ── Popovers ───────────────────────────────────────────────────────────────
    `@starting-style` anima la entrada del propio montaje en el DOM, sin estado
    extra en React. El origen va arriba para que el panel brote del disparador
